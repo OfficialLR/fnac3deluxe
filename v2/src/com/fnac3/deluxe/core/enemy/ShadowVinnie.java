@@ -1,5 +1,6 @@
 package com.fnac3.deluxe.core.enemy;
 
+import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.fnac3.deluxe.core.data.Data;
@@ -26,19 +27,13 @@ public class ShadowVinnie {
     public static float timeToFlash;
     public static float patienceTimer;
 
-    //door variables
-    public static boolean doorLock;
-    public static float doorCooldown;
-    public static float doorAnimation;
-    public static boolean peekSpotted;
-    public static boolean leaveRoom;
-
     //attack
     public static boolean attack;
     public static float attackPosition;
     public static float framesToMove;
     public static float attackTime;
     public static int jumps;
+    public static boolean jumping;
     public static int jumpTarget;
     public static float jumpAnimation;
     private static int jumpCase;
@@ -62,11 +57,6 @@ public class ShadowVinnie {
     private static float vinnieLaughTime;
     private static int vinnielaugh;
 
-    public static int knocks;
-    public static boolean knockHard;
-    public static float knockTimer;
-    public static float knockDelay;
-
     public static float hitboxDistance;
     public static float[] hitboxPosition;
 
@@ -79,7 +69,7 @@ public class ShadowVinnie {
     }
 
     public static void update(Random random, Data data, AudioClass audioClass){
-        pause = ShadowRat.room != 0 || ShadowCat.room == 1 || ShadowCat.room == 3 || Player.freeze;
+        pause = Player.freeze;
         if (jumpscareI == 0) {
             vinnieLaughTime -= Gdx.graphics.getDeltaTime();
             if (vinnieLaughTime <= 0){
@@ -109,13 +99,6 @@ public class ShadowVinnie {
             }
 
             switch (room) {
-                case 0:
-                    if (hitboxHit && patienceTimer <= 0.5f) {
-                        doorRetreat(audioClass);
-                    }
-                    doorMechanic(random, audioClass);
-                    knockAtDoor(audioClass);
-                    break;
                 case 1:
                     roomMechanic(data, random, audioClass);
                     break;
@@ -123,7 +106,7 @@ public class ShadowVinnie {
                     bedMechanic(data, audioClass);
                     break;
                 case 3:
-                    crouchMechanic(audioClass);
+                    crouchMechanic();
                     break;
             }
             if (jumpscareI != 0){
@@ -168,9 +151,7 @@ public class ShadowVinnie {
         float lineB = Math.abs(my - hitboxPosition[1]);
 
         if (Math.hypot(lineA, lineB) <= hitboxDistance){
-            if (Player.room == 0 && room == 0 && doorAnimation == 13) {
-                hitboxHit = true;
-            } else if (Player.room == 0 && room == 1 && attack){
+            if (Player.room == 0 && room == 1 && attack){
                 hitboxHit = true;
             } else if (Player.room == 1 && room == 2) {
                 hitboxHit = true;
@@ -186,22 +167,6 @@ public class ShadowVinnie {
         hitboxPosition[1] = -1;
         hitboxDistance = 0;
         switch (room){
-            case 0:
-                if (doorCooldown == 0){
-                    if (side == 0){
-                        hitboxDistance = 65;
-                        Utils.setHitbox(hitboxPosition, 473, 657);
-                    } else if (side == 1){
-                        hitboxDistance = 70;
-                        hitboxPosition[0] = 1531;
-                        hitboxPosition[1] = 710;
-                    } else {
-                        hitboxDistance = 80;
-                        hitboxPosition[0] = 2544;
-                        hitboxPosition[1] = 680;
-                    }
-                }
-                break;
             case 1:
                 if (jumpAnimation != 0) break;
                 if (side == 0){
@@ -401,22 +366,6 @@ public class ShadowVinnie {
             }
 
             switch (room) {
-                case 0:
-                    lookInRoom = true;
-                    if (doorAnimation >= 1) {
-                        texture = "Looking Away/" + sideTexture + " Look Away/LookAway" + (int) (14 - doorAnimation);
-                        if (side == 0) {
-                            x = 418;
-                            y = 322;
-                        } else if (side == 1) {
-                            x = 1409;
-                            y = 380;
-                        } else {
-                            x = 2490;
-                            y = 319;
-                        }
-                    }
-                    break;
                 case 1:
                     lookInRoom = true;
                     String position;
@@ -517,8 +466,8 @@ public class ShadowVinnie {
         batch.draw(ImageHandler.images.get("game/Shadow Vinnie/" + texture), x, y);
     }
 
-    public static void reset(){
-        doorLock = false;
+    public static void reset(AudioClass audioClass){
+        jumping = false;
         jumpscareType = "";
         if (hitboxPosition == null){
             hitboxPosition = new float[]{-1, -1};
@@ -527,158 +476,39 @@ public class ShadowVinnie {
             hitboxPosition[1] = -1;
         }
         vinnieLaughTime = 2;
-        attackPosition = 0;
         jumpCase = 0;
         jumpscareTime = 0.9f;
         tapeWeasel = false;
-        doorCooldown = 6;
-        cooldownTimer = 5;
-        knocks = 0;
-        knockTimer = 0;
-        room = 0;
+        cooldownTimer = 4;
         bedSpotted = false;
         jumpscare = false;
-        side = -1;
-        patienceTimer = 0;
-        attack = false;
-        shaking = false;
-        dontSoundShake = false;
-        twitchingNow = false;
-        leaveRoom = false;
-        doorAnimation = 0;
-        hitboxHit = false;
         jumpscareI = 0;
-        jumps = 0;
         jumpTarget = 0;
         jumpAnimation = 0;
         dodgePlaying = false;
         vinnielaugh = 0;
-    }
 
-    public static void doorMechanic(Random random, AudioClass audioClass){
-        if (leaveRoom && patienceTimer > 0){
-            patienceTimer -= Gdx.graphics.getDeltaTime();
-            if (patienceTimer <= 0){
-                jumpscareI = 1;
-            }
-        }
-        if (doorCooldown > 0 && Game.doorTurn == 1 && !Player.freeze){
-            doorCooldown -= Gdx.graphics.getDeltaTime();
-            if (doorAnimation < 1){
-                doorAnimation = 0;
-            } else {
-                doorAnimation -= Gdx.graphics.getDeltaTime() * 25;
-            }
-            if (doorCooldown <= 0){
-                doorCooldown = 0;
-                doorLock = true;
-                if (cooldownTimer > 0) {
-                    if (!ShadowCat.active || ShadowCat.room == -1) {
-                        side = random.nextInt(3);
-                    } else if (ShadowCat.side == 0){
-                        side = 1 + random.nextInt(2);
-                    } else if (ShadowCat.side == 1){
-                        side = 2 * random.nextInt(2);
-                    } else if (ShadowCat.side == 2){
-                        side = random.nextInt(2);
-                    }
-
-                    if (cooldownTimer > 0.375f) {
-                        knockHard = (int) cooldownTimer <= 3;
-                        if (cooldownTimer <= 0.5f){
-                            knocks = 2;
-                        } else if (knockHard){
-                            knocks = 3;
-                        } else {
-                            knocks = 1;
-                        }
-                        knockDelay = 0.05f + (Math.max(0.065f, 0.05f * cooldownTimer));
-                        doorAnimation = 1;
-                    }
-                } else {
-                    if (Player.side == 0){
-                        side = 1 + random.nextInt(2);
-                    } else if (Player.side == 1){
-                        side = 2 * random.nextInt(2);
-                    } else if (Player.side == 2){
-                        side = random.nextInt(2);
-                    } else {
-                        side = random.nextInt(3);
-                    }
-                }
-            }
+        jumps = 5;
+        room = 1;
+        attackTime = 2;
+        timeToFlash = 0.65f;
+        attackPosition = 0;
+        framesToMove = 0;
+        attack = false;
+        patienceTimer = 0.75f;
+        shaking = false;
+        dontSoundShake = false;
+        twitchingNow = false;
+        hitboxHit = false;
+        if (Math.random() < 0.5){
+            side = 0;
         } else {
-            if (cooldownTimer > 0) {
-                cooldownTimer -= Gdx.graphics.getDeltaTime();
-            }
-
-            if (doorAnimation < 13) {
-                doorAnimation += Gdx.graphics.getDeltaTime() * 25;
-                if (doorAnimation > 13){
-                    doorAnimation = 13;
-                }
-            }
-            if (cooldownTimer <= 0 && Player.blackness == 1 && Player.blacknessTimes == 0){
-                cooldownTimer = 4;
-                room = 1;
-                doorLock = false;
-                if (side == -1){
-                    if (Player.side == 0){
-                        side = 1 + random.nextInt(2);
-                    } else if (Player.side == 1){
-                        side = 2 * random.nextInt(2);
-                    } else if (Player.side == 2){
-                        side = random.nextInt(2);
-                    } else {
-                        side = random.nextInt(3);
-                    }
-                }
-                jumps = 5;
-                framesToMove = 0;
-                attackTime = 2;
-                attackPosition = 0;
-                patienceTimer = 0.75f;
-                Player.blacknessTimes = 3;
-                Player.blacknessMultiplier = 6;
-                timeToFlash = 0.65f;
-                knocks = 0;
-                knockTimer = 0;
-                audioClass.play("walking_in");
-                if (side == ShadowCat.side && ShadowCat.room == 1) jumpscareI = 1;
-            }
+            side = 2;
         }
-    }
-
-    public static void doorRetreat(AudioClass audioClass){
-        audioClass.play("spotted");
-        peekSpotted = false;
-        doorCooldown = 6;
-        leaveRoom = false;
-        if (Game.doorTurn != 1) cooldownTimer = 5;
-        doorLock = false;
-    }
-
-    public static void knockAtDoor(AudioClass audioClass){
-        if (knockTimer == 0) {
-            if (knocks > 0) {
-                knocks--;
-                if (knockHard){
-                    audioClass.play("hard_knock");
-                } else {
-                    audioClass.play("vinnieKnock");
-                    audioClass.setVolume("vinnieKnock", 0.65f);
-                }
-
-                if (knocks > 0){
-                    knockTimer = knockDelay;
-                }
-            }
-        } else {
-            knockTimer -= Gdx.app.getGraphics().getDeltaTime();
-            if (knockTimer < 0){
-                knockTimer = 0;
-            }
-        }
+        audioClass.play("walking_in");
+        Player.blacknessMultiplier = 6;
+        Player.blacknessTimes = 3;
+        Player.blacknessDelay = 0;
     }
 
     public static void roomMechanic(Data data, Random random, AudioClass audioClass) {
@@ -693,41 +523,15 @@ public class ShadowVinnie {
             shaking = false;
             Player.blacknessMultiplier = 1.25f;
             room = 2;
-            if (ShadowRat.active) Game.doorTurn = 0;
             dontSoundShake = false;
             bedPatienceTimer = 4;
-            cooldownTimer = 10 + 0.3f * (20 - ai);
+            cooldownTimer = 20;
             audioClass.play("crawl");
             tapeSpotted = false;
             if (!tapeWeasel && !Player.tapeStolen) {
                 tapePosition = 14f;
                 if (data.hardCassette) timeUntilWeasel = 0.01f;
                 else timeUntilWeasel = 0.25f + random.nextInt(2) + random.nextFloat() + (0.1f * (20 - ai));
-            }
-
-            if (data.challenge4
-                    && !Monstergami.wait
-                    && Monstergami.pause
-                    && Rat.room != 1
-                    && Monstergami.cooldownTimer == 0){
-                Monstergami.pause = false;
-                cooldownTimer -= 2;
-            }
-
-            if (Cat.room == 2){
-                if (Cat.side == 0){
-                    side = 2;
-                } else {
-                    side = 0;
-                }
-            } else if (Rat.room == 2) {
-                if (Rat.side == 0){
-                    side = 2;
-                } else {
-                    side = 0;
-                }
-            } else {
-                side = 2 * random.nextInt(2);
             }
         }
 
@@ -830,6 +634,7 @@ public class ShadowVinnie {
                         Player.snapPosition = false;
                         jumpAnimation = jumpTarget;
                         jumps--;
+                        jumping = true;
                         if (jumpCase == 0) {
                             audioClass.play("vinnieTurnLeft");
                         } else {
@@ -868,10 +673,11 @@ public class ShadowVinnie {
                         } else {
                             audioClass.stop("vinnieTurnRight");
                         }
+                        jumping = false;
                         jumpTarget = 0;
                         jumpAnimation = 0;
                         attackTime = 2;
-                        patienceTimer = 0.6f;
+                        patienceTimer = 2;
                         timeToFlash = 0.65f;
                     }
                 }
@@ -972,7 +778,7 @@ public class ShadowVinnie {
             if (cooldownTimer <= 0 || (lookingAway && Rat.room == 2 && Cat.room == 2 && Monstergami.side == -1)){
                 if (lookingAway && bedSpotted) {
                     audioClass.play("peek");
-                    room = 3;
+                    room = 1;
                     bedSpotted = false;
                     patienceTimer = 2f + 0.2f * (20 - ai);
                     tapeSpotted = false;
@@ -986,7 +792,7 @@ public class ShadowVinnie {
         }
     }
 
-    public static void crouchMechanic(AudioClass audioClass){
+    public static void crouchMechanic(){
         if (shaking) {
             twitchPosition += Gdx.graphics.getDeltaTime() * 30;
             if (twitchPosition >= 2) {
@@ -1002,13 +808,8 @@ public class ShadowVinnie {
             if (shaking) {
                 timeToFlash -= Gdx.graphics.getDeltaTime();
                 if (timeToFlash <= 0){
-                    timeToFlash = 0;
-                    Player.freeze = true;
-                    dontSoundShake = true;
-                    audioClass.play("thunder");
-                    Player.blacknessTimes = 3;
-                    Player.blacknessMultiplier = 6;
-                    Player.blacknessDelay = 0.5f;
+                    shaking = false;
+                    //Write functionality where Vinnie jumps backwards into the room.
                 }
             } else if (!Player.freeze){
                 patienceTimer -= Gdx.graphics.getDeltaTime();
@@ -1016,21 +817,6 @@ public class ShadowVinnie {
                     patienceTimer = 0;
                     jumpscareI = 1;
                 }
-            }
-        } else if (Player.blacknessTimes == 0){
-            if (Player.blacknessMultiplier != 1.25f){
-                Player.blacknessMultiplier = 1.25f;
-            } else if (Player.blacknessDelay == 0){
-                Player.freeze = false;
-                shaking = false;
-                twitchingNow = false;
-                dontSoundShake = false;
-                room = 0;
-                patienceTimer = 1;
-                doorCooldown = 0;
-                cooldownTimer = 5;
-                leaveRoom = true;
-                doorAnimation = 13;
             }
         }
     }

@@ -477,7 +477,7 @@ public class ShadowCat {
                         Player.blacknessDelay = 0.5f;
                         Player.freeze = true;
                     } else {
-                        if (ShadowRat.doorCooldown == 0 || ShadowVinnie.doorCooldown == 0) patienceTimer = 3f;
+                        if (ShadowRat.doorCooldown == 0) patienceTimer = 3f;
                         else if (differenceSide == 2) patienceTimer = 2.15f;
                         else patienceTimer = 1.5f;
                         teleportTime = 7;

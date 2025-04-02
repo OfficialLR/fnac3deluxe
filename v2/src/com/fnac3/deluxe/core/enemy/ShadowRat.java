@@ -33,8 +33,6 @@ public class ShadowRat {
     public static int chanceToSkip;
     public static boolean attack;
     public static float attackTime;
-    public static int teleports;
-    public static int teleportTarget;
     public static boolean bedSpotted;
     public static float patienceTimer;
     public static float bedPatienceTimer;
@@ -357,12 +355,11 @@ public class ShadowRat {
             hitboxPosition[1] = -1;
         }
         tapeWeasel = false;
-        doorCooldown = 6;
+        doorCooldown = 4;
         cooldownTimer = 5;
         knocks = 0;
         knockTimer = 0;
         room = 0;
-        teleports = 0;
         attackTime = 0;
         bedSpotted = false;
         jumpscare = false;
@@ -379,7 +376,7 @@ public class ShadowRat {
     }
 
     public static void doorMechanic(Random random, AudioClass audioClass){
-        if (doorCooldown > 0 && Game.doorTurn == 0 && !Player.freeze){
+        if (doorCooldown > 0 && !Player.freeze){
             doorCooldown -= Gdx.graphics.getDeltaTime();
             if (doorAnimation < 1){
                 doorAnimation = 0;
@@ -390,19 +387,19 @@ public class ShadowRat {
                 doorAnimation -= Gdx.graphics.getDeltaTime() * 25;
             }
             if (doorCooldown <= 0){
+                if (ShadowVinnie.ai != 0 && ShadowVinnie.room == 1 && !ShadowVinnie.jumping){
+                    doorCooldown += Gdx.graphics.getDeltaTime();
+                    return;
+                }
+                if (ShadowVinnie.ai != 0){
+                    if (ShadowVinnie.jumping) cooldownTimer = 2;
+                    else cooldownTimer = 3;
+                }
                 doorCooldown = 0;
                 if (cooldownTimer > 0) {
-                    side = random.nextInt(3);
-
-                    if (!ShadowCat.active || ShadowCat.room != 1) {
-                        side = random.nextInt(3);
-                    } else if (ShadowCat.side == 0){
-                        side = 1 + random.nextInt(2);
-                    } else if (ShadowCat.side == 1){
-                        side = 2 * random.nextInt(2);
-                    } else if (ShadowCat.side == 2){
-                        side = random.nextInt(2);
-                    }
+                    if (ShadowVinnie.room == 1){
+                        side = ShadowVinnie.side;
+                    } else side = random.nextInt(3);
 
                     if (cooldownTimer > 0.375f) {
                         knockHard = (int) cooldownTimer <= 3;
@@ -439,20 +436,19 @@ public class ShadowRat {
                 }
             }
             if (cooldownTimer <= 0 && Player.blackness == 1 && Player.blacknessTimes == 0){
-                cooldownTimer = 5;
                 room = 1;
-                teleportTarget = 1;
                 attackPosition = 0;
                 attackPositionTarget = 0;
                 patienceTimer = 0.75f;
                 Player.blacknessTimes = 3;
                 Player.blacknessMultiplier = 6;
-                attackTime = 3.5f;
-                teleports = 0;
+                attackTime = 6;
                 int multiplier = Game.hourOfGame / 2;
                 if (Game.hourOfGame == 12) multiplier = 0;
                 timeToFlash = (0.65f - (0.1f * multiplier));
                 chanceToSkip = 4;
+                if (ShadowVinnie.ai != 0) cooldownTimer = 0.5f;
+                else cooldownTimer = 3;
                 audioClass.play("walking_in");
                 if (side == ShadowCat.side && ShadowCat.room == 1) jumpscareI = 1;
             }
@@ -462,8 +458,7 @@ public class ShadowRat {
     public static void doorRetreat(AudioClass audioClass){
         audioClass.play("spotted");
         peekSpotted = false;
-        doorCooldown = 6;
-        if (Game.doorTurn != 0) cooldownTimer = 5;
+        doorCooldown = 4;
     }
 
     public static void knockAtDoor(AudioClass audioClass){
@@ -489,16 +484,14 @@ public class ShadowRat {
     }
 
     public static void roomMechanic(Data data, Random random, AudioClass audioClass) {
-        if (cooldownTimer > 0 && !attack && teleports != teleportTarget){
-            if (Monstergami.side == -1) {
-                cooldownTimer -= Gdx.graphics.getDeltaTime();
-                if (cooldownTimer < 0) {
-                    cooldownTimer = 0;
-                }
+        if (cooldownTimer > 0 && !attack && attackTime > 0){
+            cooldownTimer -= Gdx.graphics.getDeltaTime();
+            if (cooldownTimer < 0) {
+                cooldownTimer = 0;
             }
         }
 
-        if (teleports == teleportTarget && !attack && Player.blacknessTimes == 0) {
+        if (attackTime <= 0 && !attack && Player.blacknessTimes == 0) {
             Player.blacknessMultiplier = 1.25f;
             room = 2;
             if (ShadowVinnie.ai != 0) Game.doorTurn = 1;
@@ -520,7 +513,7 @@ public class ShadowRat {
             } else side = 2 * random.nextInt(2);
         }
 
-        if (teleports == 0 && !attack && Player.flashlightAlpha > 0 && !Player.turningAround && Player.room == 0) {
+        if (ShadowVinnie.ai != 0 && attackTime > 0 && !attack && Player.flashlightAlpha > 0 && !Player.turningAround && Player.room == 0) {
             attack = Player.inititiateSnapPosition(side);
             if (attack) Player.lastCharacterAttack = "Shadow";
         }
@@ -534,49 +527,13 @@ public class ShadowRat {
                 patienceTimer += Gdx.graphics.getDeltaTime();
                 if (timeToFlash <= 0 && attackTime <= 0) {
                     Player.snapPosition = false;
-                    if (teleports == teleportTarget) {
-                        attack = false;
-                        dontSoundShake = true;
-                        audioClass.play("thunder");
-                        Player.blacknessTimes = 3;
-                        Player.blacknessMultiplier = 6;
-                        Player.blacknessDelay = 0.5f;
-                        Player.freeze = true;
-                    } else {
-                        attackTime = 3.5f;
-                        teleports++;
-                        patienceTimer = 1.75f;
-                        Player.blacknessTimes = 1;
-                        Player.blacknessMultiplier = 6;
-
-                        int previousSide = side;
-
-                        if (side == 0){
-                            if (ShadowCat.room == 4 && ShadowCat.side == 2) side = 2;
-                            else side = random.nextInt(2) + 1;
-                        } else if (side == 1){
-                            if (ShadowCat.room == 4){
-                                if (ShadowCat.side == 0) side = 0;
-                                else side = 2;
-                            } else side = 2 * random.nextInt(2);
-                        } else {
-                            if (ShadowCat.room == 4 && ShadowCat.side == 0) side = 0;
-                            else side = random.nextInt(2);
-                        }
-
-                        if (previousSide < side) audioClass.play("dodgeRight");
-                        else audioClass.play("dodgeLeft");
-
-                        int difference = previousSide - side;
-                        if (difference == -2 || difference == 2) patienceTimer += 0.75f;
-
-                        int multiplier = Game.hourOfGame / 2;
-                        if (Game.hourOfGame == 12) multiplier = 0;
-                        timeToFlash = (0.65f - (0.05f * multiplier));
-                        chanceToSkip = 5;
-                        attackPosition = 0;
-                        attackPositionTarget = attackPosition;
-                    }
+                    attack = false;
+                    dontSoundShake = true;
+                    audioClass.play("thunder");
+                    Player.blacknessTimes = 3;
+                    Player.blacknessMultiplier = 6;
+                    Player.blacknessDelay = 0.5f;
+                    Player.freeze = true;
                     return;
                 }
             } else if (moveToPosition == 0){
@@ -739,8 +696,8 @@ public class ShadowRat {
                 twitchingNow = false;
                 dontSoundShake = false;
                 room = 0;
-                doorCooldown = 6;
-                cooldownTimer = 5;
+                doorCooldown = 4;
+                cooldownTimer = 8;
                 leaveRoom = true;
                 doorAnimation = 18;
                 audioClass.play("leave");

@@ -65,58 +65,33 @@ public class Cat {
     public static void update(Random random, Data data, AudioClass audioClass){
         pause = Player.freeze;
 
-        if (!catHum){
-            audioClass.play("cat");
-            audioClass.setVolume("cat", 0);
-            audioClass.setPitch("cat", 1);
-            audioClass.loop("cat", true);
-            catHum = true;
-        }
-
         float catVolume = audioClass.getVolume("cat");
-        float catPitch = audioClass.getPitch("cat");
 
-        if (catAttackMode) {
-            if (!catAttackModeLock && (Rat.room == 0 || Rat.room == 3) && (Vinnie.room == 0 || Vinnie.room == 3)){
-                catAttackModeLock = true;
-                bedPatienceTimer = 2;
+        if (catHum && catVolume < 0.15f){
+            if (catVolume == 0) {
+                audioClass.play("cat");
+                audioClass.loop("cat", true);
             }
-
-            if (catAttackModeLock) {
-                if (catVolume < 0.6f) {
-                    audioClass.setVolume("cat", catVolume + Gdx.graphics.getDeltaTime());
-                    if (audioClass.getVolume("cat") > 0.6f) audioClass.setVolume("cat", 0.6f);
-                }
-                audioClass.setPitch("cat", catPitch + Gdx.graphics.getDeltaTime() / 75);
-            }
-        } else if (catVolume < 0.15f){
             audioClass.setVolume("cat", catVolume + Gdx.graphics.getDeltaTime() / 2);
             if (audioClass.getVolume("cat") > 0.15f) audioClass.setVolume("cat", 0.15f);
+        } else if (!catHum && catVolume > 0){
+            audioClass.setVolume("cat", catVolume - Gdx.graphics.getDeltaTime() / 2);
+            if (audioClass.getVolume("cat") <= 0) {
+                audioClass.setVolume("cat", 0);
+                audioClass.stop("cat");
+
+            }
         }
 
         if (jumpscareI == 0) {
-            switch (room) {
-                case 1:
-                    roomMechanic(data, random, audioClass);
-                    break;
-                case 2:
-                    bedMechanic(data, random, audioClass);
-                    break;
-                case 3:
-                    crouchMechanic(random, audioClass);
-                    break;
-                case 4:
-                    farBedMechanic(random, audioClass);
-                    break;
-            }
+            farBedMechanic(random, audioClass);
             if (jumpscareI != 0){
                 audioClass.stopAllSounds();
             }
         } else if (!jumpscare){
             Player.blacknessTimes = 1;
             Player.blacknessMultiplier = 5;
-            if (room == 1) jumpscareTime = 1.5f;
-            else jumpscareTime = 1.35f;
+            jumpscareTime = 1.35f;
             audioClass.play(jumpscareType);
             jumpscare = true;
             jumpscareTimer = 0.0375f;
@@ -131,16 +106,8 @@ public class Cat {
                 if (jumpscareTimer <= 0){
                     jumpscareTimer += 0.0375f;
                     jumpscareI++;
-                    if (room != 1 && jumpscareI > 29) jumpscareI = 29;
-                    else if (jumpscareI > 35) jumpscareI = 35;
+                    if (jumpscareI > 29) jumpscareI = 29;
                 }
-            }
-        }
-
-        if (tapeSpotted && tapePosition >= 0){
-            tapePosition -= Gdx.graphics.getDeltaTime() * 30;
-            if (tapePosition < 0){
-                tapePosition = 0;
             }
         }
 
@@ -154,14 +121,7 @@ public class Cat {
         float lineB = Math.abs(my - hitboxPosition[1]);
 
         if (Math.hypot(lineA, lineB) <= hitboxDistance){
-            if (room == 1 && attack){
-                hitboxHit = true;
-            } else if (room == 3 && timeToFlash > 0){
-                System.out.println("true");
-                hitboxHit = true;
-            } else if (room == 4 && timeToFlash > 0){
-                hitboxHit = true;
-            }
+            hitboxHit = room == 4 && timeToFlash > 0;
         }
     }
 
@@ -170,70 +130,37 @@ public class Cat {
         hitboxPosition[0] = -1;
         hitboxPosition[1] = -1;
         hitboxDistance = 0;
-        switch (room) {
-            case 1:
-                if (attackPosition != attackPositionTarget) break;
-                if (side == 0){
-                    hitboxDistance = 70;
-                    switch (attackPosition){
-                        case 0 -> Utils.setHitbox(hitboxPosition, 366, 741);
-                        case 1 -> Utils.setHitbox(hitboxPosition, 290, 632);
-                        case 2 -> Utils.setHitbox(hitboxPosition, 466, 616);
-                    }
-                } else if (side == 1){
-                    hitboxDistance = 80;
-                    switch (attackPosition){
-                        case 0 -> Utils.setHitbox(hitboxPosition, 1529, 724);
-                        case 1 -> Utils.setHitbox(hitboxPosition, 1341, 583);
-                        case 2 -> Utils.setHitbox(hitboxPosition, 1703, 605);
-                    }
-                } else {
-                    hitboxDistance = 90;
-                    switch (attackPosition){
-                        case 0 -> Utils.setHitbox(hitboxPosition, 2559, 890);
-                        case 1 -> Utils.setHitbox(hitboxPosition, 2395, 714);
-                        case 2 -> Utils.setHitbox(hitboxPosition, 2748, 669);
-                    }
-                }
-                break;
-            case 3:
-                hitboxDistance = 80;
-                if (side == 0) Utils.setHitbox(hitboxPosition, 652, 440);
-                else Utils.setHitbox(hitboxPosition, 2349, 512);
-                break;
-            case 4:
-                if (side == 0) {
-                    hitboxDistance = 75;
-                    if (bedPosition == 23) {
-                        hitboxPosition[0] = 191;
-                        hitboxPosition[1] = 548;
-                    } else if (bedPosition == 33) {
-                        hitboxPosition[0] = 214;
-                        hitboxPosition[1] = 651;
-                    } else if (bedPosition == 44) {
-                        hitboxPosition[0] = 178;
-                        hitboxPosition[1] = 715;
-                    } else if (bedPosition == 57) {
-                        hitboxPosition[0] = 186;
-                        hitboxPosition[1] = 661;
-                    }
-                } else {
-                    hitboxDistance = 80;
-                    if (bedPosition == 23) {
-                        hitboxPosition[0] = 2908;
-                        hitboxPosition[1] = 448;
-                    } else if (bedPosition == 33) {
-                        hitboxPosition[0] = 2853;
-                        hitboxPosition[1] = 523;
-                    } else if (bedPosition == 44) {
-                        hitboxPosition[0] = 2838;
-                        hitboxPosition[1] = 557;
-                    } else if (bedPosition == 57) {
-                        hitboxPosition[0] = 2804;
-                        hitboxPosition[1] = 620;
-                    }
-                }
-                break;
+
+        if (side == 0) {
+            hitboxDistance = 75;
+            if (bedPosition == 23) {
+                hitboxPosition[0] = 191;
+                hitboxPosition[1] = 548;
+            } else if (bedPosition == 33) {
+                hitboxPosition[0] = 214;
+                hitboxPosition[1] = 651;
+            } else if (bedPosition == 44) {
+                hitboxPosition[0] = 178;
+                hitboxPosition[1] = 715;
+            } else if (bedPosition == 57) {
+                hitboxPosition[0] = 186;
+                hitboxPosition[1] = 661;
+            }
+        } else if (side == 2){
+            hitboxDistance = 80;
+            if (bedPosition == 23) {
+                hitboxPosition[0] = 2908;
+                hitboxPosition[1] = 448;
+            } else if (bedPosition == 33) {
+                hitboxPosition[0] = 2853;
+                hitboxPosition[1] = 523;
+            } else if (bedPosition == 44) {
+                hitboxPosition[0] = 2838;
+                hitboxPosition[1] = 557;
+            } else if (bedPosition == 57) {
+                hitboxPosition[0] = 2804;
+                hitboxPosition[1] = 620;
+            }
         }
 
         hitboxDistance = Utils.setHitboxDistance(data, hitboxDistance);
@@ -252,8 +179,6 @@ public class Cat {
 
             if (side == 0) {
                 sideTexture = "Left";
-            } else if (side == 1) {
-                sideTexture = "Middle";
             } else {
                 sideTexture = "Right";
             }
@@ -377,6 +302,7 @@ public class Cat {
             hitboxPosition[1] = -1;
         }
         attack = false;
+        audioClass.setVolume("cat", 0);
         catHum = false;
         catAttackMode = false;
         catAttackModeLock = false;

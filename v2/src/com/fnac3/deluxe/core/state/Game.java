@@ -121,7 +121,7 @@ public class Game {
         Vinnie.reset();
         ShadowRat.reset();
         ShadowCat.reset(audioClass, random);
-        ShadowVinnie.reset();
+        ShadowVinnie.reset(audioClass);
         doorTurn = 0;
         if ((Menu.nightType == 0 && Rat.ai == 0) || (Menu.nightType == 1 && !ShadowRat.active)) doorTurn = 1;
         screenAlpha = 0;
