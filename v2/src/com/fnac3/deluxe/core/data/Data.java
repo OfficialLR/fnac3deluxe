@@ -46,8 +46,8 @@ public class Data {
     //file names
     private static final String externalName = "AppData/Roaming/Five Nights at Candy's 3 Deluxe/Save";
     static final String dirName = System.getProperty("user.home") + "/" + externalName;
-    private static final String fileName = dirName + "/Game_v2.save";
-    private static final String configFileName = dirName + "/Config_v2.save";
+    private static final String fileName = dirName + "/Game_beta_v2.save";
+    private static final String configFileName = dirName + "/Config_beta_v2.save";
     private File configFile;
 
     public Data(){

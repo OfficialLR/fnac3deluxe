@@ -46,11 +46,20 @@ public class Game {
     private static boolean monstergamiPositive;
     private static float monstergamiFrames;
     private static float gameoverAlpha;
-    public static int doorTurn;
 
     public static float screenAlpha;
     public static Music ambience;
     public static Music theaterMusic;
+
+    private static boolean jumpscare;
+    private static float jumpscarePitch;
+    private static float jumpscareFrameDelay;
+    private static float jumpscareFrame;
+    private static float jumpscareFrameTarget;
+    private static float jumpscareTimer;
+    private static String jumpscareCharacter;
+    private static String jumpscareTexture;
+    private static String jumpscareSound;
 
     public static String gameoverReason;
     public static String nightTime;
@@ -114,16 +123,22 @@ public class Game {
         winDuration = 0;
         win = false;
         winAlpha = 0;
-        Player.reset();
+        Player.reset(data);
         Monstergami.reset(audioClass);
         Rat.reset();
         Cat.reset(random, audioClass);
         Vinnie.reset();
+        ShadowVinnie.reset(audioClass);
         ShadowRat.reset();
         ShadowCat.reset(audioClass, random);
-        ShadowVinnie.reset(audioClass);
-        doorTurn = 0;
-        if ((Menu.nightType == 0 && Rat.ai == 0) || (Menu.nightType == 1 && !ShadowRat.active)) doorTurn = 1;
+        Candy.reset(data.challenge4, true);
+        jumpscare = false;
+        jumpscareFrame = 0;
+        jumpscareFrameTarget = 0;
+        jumpscareTimer = 0;
+        jumpscareCharacter = "";
+        jumpscareTexture = "";
+
         screenAlpha = 0;
         firstFrame = true;
         dreamscapeStart = true;
@@ -172,6 +187,8 @@ public class Game {
             Player.tape.stop();
             return;
         }
+
+        if (jumpscare) return;
 
         if (!Player.turningAround && !Player.freeze && (!Player.snapPosition || data.freeScroll || Monstergami.attack || Player.room != 0)) {
             Player.move(mx, my, viewport.getWorldWidth(), viewport.getWorldHeight());
@@ -283,14 +300,14 @@ public class Game {
                 }
             }
         } else {
-            if (ShadowRat.active && ShadowCat.jumpscareI == 0) {
+            if (ShadowRat.active) {
                 ShadowRat.input();
                 if (Player.room == 2 && !Player.turningAround) {
                     ShadowRat.tapeSpotted = true;
                 }
             }
 
-            if (ShadowCat.active && ShadowRat.jumpscareI == 0) {
+            if (ShadowCat.active) {
                 ShadowCat.input();
                 if (Player.room == 2 && !Player.turningAround) {
                     ShadowCat.tapeSpotted = true;
@@ -379,6 +396,46 @@ public class Game {
                 }
             }
         }
+    }
+
+    private static void jumpscareUpdate(AudioClass audioClass){
+        jumpscareTimer -= Gdx.graphics.getDeltaTime();
+        if (jumpscareTimer < 0) jumpscareTimer = 0;
+        if (jumpscareFrame == 0){
+            jumpscareFrame++;
+            audioClass.stopAllSounds();
+            audioClass.play(jumpscareSound);
+            audioClass.setPitch(jumpscareSound, jumpscarePitch);
+        }
+
+        if (jumpscareFrameTarget == -1){
+            jumpscareFrameDelay -= Gdx.graphics.getDeltaTime() * 25;
+            if (jumpscareFrameDelay <= 0){
+                jumpscareFrame = (int) (Math.random() * 6) + 1;
+                jumpscareFrameDelay += Gdx.graphics.getDeltaTime() * 25;
+            }
+        } else {
+            jumpscareFrame += Gdx.graphics.getDeltaTime() * 25;
+            if (jumpscareFrame > jumpscareFrameTarget) jumpscareFrame = jumpscareFrameTarget;
+        }
+    }
+
+    public static void setJumpscare(String jumpscareCharacter, String jumpscareTexture, String jumpscareSound, float jumpscareTimer, float jumpscareFrameTarget, float jumpscarePitch){
+        Player.blacknessTimes = 3;
+        Player.blacknessMultiplier = 10;
+        Player.blacknessDelay = 0;
+        jumpscare = true;
+        Game.jumpscareCharacter = jumpscareCharacter;
+        Game.jumpscareTimer = jumpscareTimer;
+        Game.jumpscareSound = jumpscareSound;
+        Game.jumpscareTexture = jumpscareTexture;
+        Game.jumpscareFrameTarget = jumpscareFrameTarget;
+        Game.jumpscarePitch = jumpscarePitch;
+    }
+
+    public static void jumpscareRender(SpriteBatch batch){
+        Texture texture = ImageHandler.images.get(jumpscareTexture + (int) jumpscareFrame);
+        batch.draw(texture, Player.roomPosition[0] + Player.shakingPosition, Player.roomPosition[1]);
     }
 
     public static void update(StateManager stateManager, Camera camera, Viewport viewport, Data data, AudioClass audioClass) {
@@ -539,14 +596,6 @@ public class Game {
             Player.batterySound = false;
         }
 
-        boolean jumpscare = false;
-
-        if (Menu.nightType == 0 && (Rat.jumpscare || Cat.jumpscare || Vinnie.jumpscare)) {
-            jumpscare = true;
-        } else if (Menu.nightType == 1 && (ShadowRat.jumpscare || ShadowCat.jumpscare || ShadowVinnie.jumpscare)) {
-            jumpscare = true;
-        }
-
         if (data.hardCassette) {
             if ((Player.tape.isPlaying() && !Player.tapeEnd) || jumpscare) {
                 purpleSlownessTimer = 10;
@@ -600,32 +649,34 @@ public class Game {
         }
 
         if (!gameover) {
-            if (Player.foundUnderBed && !Player.foundUnderBedLock) {
-                audioClass.play("bed");
-                Player.foundUnderBedLock = true;
-            } else if (Player.foundUnderBedLock && Player.room != 1) {
-                Player.foundUnderBedLock = false;
-                Player.foundUnderBed = false;
+            if (!jumpscare) {
+                if (Player.foundUnderBed && !Player.foundUnderBedLock) {
+                    audioClass.play("bed");
+                    Player.foundUnderBedLock = true;
+                } else if (Player.foundUnderBedLock && Player.room != 1) {
+                    Player.foundUnderBedLock = false;
+                    Player.foundUnderBed = false;
+                }
             }
 
             boolean attack = false;
 
             if (Menu.nightType == 0) {
-                if (Rat.ai != 0 && (!jumpscare || Rat.jumpscare)) {
+                if (Rat.ai != 0 && !jumpscare) {
                     Rat.update(random, data, audioClass);
                     if (Rat.attack) {
                         attack = true;
                     }
                 }
 
-                if (Vinnie.ai != 0 && (!jumpscare || Vinnie.jumpscare)) {
+                if (Vinnie.ai != 0 && !jumpscare) {
                     Vinnie.update(random, data, audioClass);
                     if (Vinnie.attack) {
                         attack = true;
                     }
                 }
 
-                if (Cat.ai != 0 && (!jumpscare || Cat.jumpscare)){
+                if (Cat.ai != 0 && !jumpscare){
                     Cat.update(random, data, audioClass);
                     if (Cat.attack) {
                         attack = true;
@@ -671,21 +722,21 @@ public class Game {
                 }
 
             } else if (Menu.nightType == 1) {
-                if (ShadowRat.active && ShadowCat.jumpscareI == 0) {
+                if (ShadowRat.active && !jumpscare) {
                     ShadowRat.update(random, data, audioClass);
                     if (ShadowRat.attack) {
                         attack = true;
                     }
                 }
 
-                if (ShadowVinnie.ai != 0 && (!jumpscare || ShadowVinnie.jumpscare)) {
+                if (ShadowVinnie.ai != 0 && !jumpscare) {
                     ShadowVinnie.update(random, data, audioClass);
                     if (ShadowVinnie.attack) {
                         attack = true;
                     }
                 }
 
-                if (ShadowCat.active && ShadowRat.jumpscareI == 0) {
+                if (ShadowCat.active && !jumpscare) {
                     ShadowCat.update(random, data, audioClass);
                     if (ShadowCat.attack) {
                         attack = true;
@@ -693,8 +744,7 @@ public class Game {
                 }
 
                 if (!Player.freeze && ((ShadowRat.shaking && !ShadowRat.twitchingNow)
-                        || (ShadowCat.shaking && !ShadowCat.twitchingNow)
-                        || (ShadowVinnie.shaking && !ShadowVinnie.twitchingNow && ShadowVinnie.room == 3))) {
+                        || (ShadowCat.shaking && !ShadowCat.twitchingNow))) {
                     audioClass.play("twitch");
                     audioClass.loop("twitch", true);
                 }
@@ -707,18 +757,21 @@ public class Game {
                     ShadowCat.twitchingNow = ShadowCat.shaking && !jumpscare;
                 }
 
-                if (ShadowVinnie.room == 3 && ShadowVinnie.timeToFlash > 0) {
-                    ShadowVinnie.twitchingNow = ShadowVinnie.shaking && !jumpscare;
-                }
-
                 if ((!ShadowRat.shaking || ShadowRat.dontSoundShake)
-                        && (!ShadowCat.shaking || ShadowCat.dontSoundShake)
-                        && (!ShadowVinnie.shaking || ShadowVinnie.dontSoundShake)) {
+                        && (!ShadowCat.shaking || ShadowCat.dontSoundShake)) {
                     audioClass.stop("twitch");
                 }
             }
 
+            if (!jumpscare) {
+                Candy.update(audioClass);
+            }
+
             Player.blackness();
+
+            if (jumpscare && Player.blacknessTimes == 0){
+                jumpscareUpdate(audioClass);
+            }
 
             if (!jumpscare) {
 
@@ -757,8 +810,10 @@ public class Game {
                             pitch += 0.000435f * speed;
                         } else if (Vinnie.attack){
                             pitch += 0.000175f * speed;
+                        } else if (ShadowRat.attack) {
+                            pitch += 0.001f * speed;
                         } else {
-                            pitch += 0.00025f * Gdx.graphics.getDeltaTime() * 60;
+                            pitch += 0.00025f * speed;
                         }
 
                         audioClass.setPitch(path, pitch);
@@ -794,45 +849,50 @@ public class Game {
                     theaterMusic.stop();
                 }
 
-                boolean gameoverTrue = false;
-
-                if (Menu.nightType == 0 && (Rat.jumpscareTime == 0 || Cat.jumpscareTime == 0 || Vinnie.jumpscareTime == 0)) {
-                    gameoverTrue = true;
-                    zoomCharacter = 1;
-                    gameoverAlpha = 0;
-                    if (Rat.jumpscareTime == 0) gameoverReason = "Died to Rat";
-                    else if (Cat.jumpscareTime == 0) gameoverReason = "Died to Cat";
-                    else gameoverReason = "Died to Vinnie";
-                } else if (Menu.nightType == 1 && (ShadowRat.jumpscareTime == 0 || ShadowCat.jumpscareTime == 0 || ShadowVinnie.jumpscareTime == 0)) {
-                    gameoverTrue = true;
-                    if (ShadowRat.jumpscareTime == 0) gameoverReason = "Died to Shadow Rat";
-                    else if (ShadowCat.jumpscareTime == 0) gameoverReason = "Died to Shadow Cat";
-                    else gameoverReason = "Died to Shadow Vinnie";
-                }
-
-                if (gameoverTrue) {
-                    gameover = true;
-                    Discord.updateStatus = true;
-                    gameoverScreenAlpha = 1;
+                if (!Player.freeze) {
+                    Player.scared = false;
+                    Player.buttonVisibility = 0;
                     Player.battleOverlay = 0;
                     Player.overlayTransparency = 0;
-                    Player.scared = false;
-                    Player.shakingPosition = 0;
-                    Player.roomPosition[0] = 0;
-                    Player.roomPosition[1] = 0;
-                    audioClass.stopAllSounds();
-                    if (zoomCharacter == 1) {
-                        audioClass.play("gameoverCustomNight");
+                    Player.disableTape();
+                    Player.freeze = true;
+                }
+
+                if (jumpscareTimer > 0) return;
+
+                StringBuilder gameoverBuilder = new StringBuilder("Died to ");
+
+                if (Menu.nightType == 0) {
+                    zoomCharacter = 1;
+                    gameoverAlpha = 0;
+                    switch (jumpscareCharacter) {
+                        case "Rat" -> gameoverBuilder.append("Rat");
+                        case "Cat" -> gameoverBuilder.append("Cat");
+                        case "Vinnie" -> gameoverBuilder.append("Vinnie");
+                        case "Candy" -> gameoverBuilder.append("Candy");
                     }
-                } else {
-                    if (!Player.freeze) {
-                        Player.scared = false;
-                        Player.buttonVisibility = 0;
-                        Player.battleOverlay = 0;
-                        Player.overlayTransparency = 0;
-                        Player.disableTape();
-                        Player.freeze = true;
+                } else if (Menu.nightType == 1) {
+                    switch (jumpscareCharacter){
+                        case "Rat" -> gameoverBuilder.append("Shadow Rat");
+                        case "Cat" -> gameoverBuilder.append("Shadow Cat");
+                        case "Vinnie" -> gameoverBuilder.append("Shadow Vinnie");
+                        case "Candy" -> gameoverBuilder.append("Shadow Candy");
                     }
+                }
+                gameoverReason = gameoverBuilder.toString();
+
+                gameover = true;
+                Discord.updateStatus = true;
+                gameoverScreenAlpha = 1;
+                Player.battleOverlay = 0;
+                Player.overlayTransparency = 0;
+                Player.scared = false;
+                Player.shakingPosition = 0;
+                Player.roomPosition[0] = 0;
+                Player.roomPosition[1] = 0;
+                audioClass.stopAllSounds();
+                if (zoomCharacter == 1) {
+                    audioClass.play("gameoverCustomNight");
                 }
             }
         }
@@ -853,21 +913,17 @@ public class Game {
             case 0 -> {
                 batch.setColor(1, 1, 1, 1);
                 String name = null;
-                if (Rat.jumpscareI != 0) {
-                    name = "game/gameover/rat";
-                    if (zoomCharacter == 0) name += 2;
-                    else name += 1;
-                } else if (Cat.jumpscareI != 0) {
-                    name = "game/gameover/cat";
-                    if (zoomCharacter == 0) name += 2;
-                    else name += 1;
-                } else if (Vinnie.jumpscareI != 0) {
-                    name = "game/gameover/vinnie";
-                    if (zoomCharacter == 0) name += 2;
-                    else name += 1;
+                switch (jumpscareCharacter){
+                    case "Rat" -> name = "Rat";
+                    case "Cat" -> name = "Cat";
+                    case "Vinnie" -> name = "Vinnie";
+                    case "Candy" -> name = "Candy";
                 }
                 if (name != null) {
-                    Texture texture = ImageHandler.images.get(name);
+                    if (zoomCharacter == 0) name += 2;
+                    else name += 1;
+
+                    Texture texture = ImageHandler.images.get("game/gameover/" + name);
 
                     float width = texture.getWidth() * 8;
                     float height = texture.getHeight() * 8;
@@ -885,9 +941,16 @@ public class Game {
             }
             case 1 -> {
                 batch.setColor(0.5f, 0.5f, 0.5f, 1);
-                if (ShadowRat.jumpscareI != 0) batch.draw(ImageHandler.images.get("game/gameover/shadowRat"), 0, 0);
-                else if (ShadowCat.jumpscareI != 0) batch.draw(ImageHandler.images.get("game/gameover/shadowCat"), 0, 0);
-                else if (ShadowVinnie.jumpscareI != 0) batch.draw(ImageHandler.images.get("game/gameover/shadowVinnie"), 0, 0);
+                String name = null;
+                switch (jumpscareCharacter){
+                    case "Rat" -> name = "shadowRat";
+                    case "Cat" -> name = "shadowCat";
+                    case "Vinnie" -> name = "shadowVinnie";
+                    case "Candy" -> name = "shadowCandy";
+                }
+                if (name != null) {
+                    batch.draw(ImageHandler.images.get("game/gameover/" + name), 0, 0);
+                }
             }
             case 2 -> {
                 batch.setColor(1, 1, 1, 1);
@@ -986,16 +1049,10 @@ public class Game {
 
         Texture texture = null;
         String room = null;
-        boolean jumpscare = false;
-        if (Menu.nightType == 0){
-            jumpscare = Rat.jumpscare || Cat.jumpscare || Vinnie.jumpscare;
-        } else if (Menu.nightType == 1){
-            jumpscare = ShadowRat.jumpscare || ShadowCat.jumpscare || ShadowVinnie.jumpscare;
-        }
 
         batch.setColor(1, 1, 1, 1);
 
-        if (!jumpscare) {
+        if (!jumpscare || Player.blacknessTimes > 0) {
             if (Player.turningAround) {
                 room = switch (Player.room) {
                     case 0 -> "game/room/Moving/Turn Around/Moving" + (int) Player.turningPosition;
@@ -1022,59 +1079,59 @@ public class Game {
                         break;
                 }
             }
-        }
 
-        if (roomBuffer == null){
-            roomBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 768, true);
-        }
+            if (roomBuffer == null){
+                roomBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 768, true);
+            }
 
-        roomBuffer.begin();
+            roomBuffer.begin();
 
-        if (!jumpscare) {
             batch.draw(ImageHandler.images.get(room), 0, 0);
-        }
 
-        if (Menu.nightType == 0) {
-            if (Rat.ai != 0 && !Rat.jumpscare) {
-                Rat.render(batch);
-            }
+            if (Candy.side == 2) Candy.render(batch);
 
-            if (Vinnie.ai != 0 && !Vinnie.jumpscare){
-                Vinnie.render(batch);
-            }
+            if (Menu.nightType == 0) {
+                if (Rat.ai != 0 && !Rat.jumpscare) {
+                    Rat.render(batch);
+                }
 
-            if (Monstergami.active && !Monstergami.jumpscare) {
-                Monstergami.render(batch);
-            }
+                if (Vinnie.ai != 0 && !Vinnie.jumpscare){
+                    Vinnie.render(batch);
+                }
 
-            if (Cat.ai != 0 && !Cat.jumpscare) {
-                Cat.render(batch);
-            }
-        } else if (Menu.nightType == 1) {
-            if (ShadowRat.active && ShadowCat.jumpscareI == 0) {
-                ShadowRat.render(batch);
-            }
+                if (Monstergami.active && !Monstergami.jumpscare) {
+                    Monstergami.render(batch);
+                }
 
-            if (ShadowVinnie.ai != 0 && ShadowVinnie.jumpscareI == 0) {
-                ShadowVinnie.render(batch);
-            }
+                if (Cat.ai != 0 && !Cat.jumpscare) {
+                    Cat.render(batch);
+                }
+            } else if (Menu.nightType == 1) {
+                if (ShadowRat.active) {
+                    ShadowRat.render(batch);
+                }
 
-            if (ShadowCat.active && ShadowRat.jumpscareI == 0) {
-                if (!ShadowCat.render(batch) && !Player.turningAround && Player.room == 0){
+                if (ShadowVinnie.ai != 0) {
+                    ShadowVinnie.render(batch);
+                }
+
+                if (ShadowCat.active) {
+                    if (!ShadowCat.render(batch) && !Player.turningAround && Player.room == 0){
+                        batch.draw(ImageHandler.images.get("game/room/FullRoomBed"), 0, 0);
+                    }
+                } else if (Player.room == 0 && !Player.turningAround){
                     batch.draw(ImageHandler.images.get("game/room/FullRoomBed"), 0, 0);
                 }
-            } else if (!ShadowCat.active && Player.room == 0 && !Player.turningAround){
-                batch.draw(ImageHandler.images.get("game/room/FullRoomBed"), 0, 0);
+            } else if (Menu.nightType == 2){
+                if (Monstergami.active && !Monstergami.jumpscare) {
+                    Monstergami.render(batch);
+                }
             }
-        } else if (Menu.nightType == 2){
-            if (Monstergami.active && !Monstergami.jumpscare) {
-                Monstergami.render(batch);
-            }
-        }
 
-        batch.flush();
+            if (Candy.side == 0) Candy.render(batch);
 
-        if (!jumpscare) {
+            batch.flush();
+
             if (Player.room != 2 && !Player.turningAround) {
                 Player.flashlightRender(batch, fbo);
             } else if (!Player.turningAround) {
@@ -1114,43 +1171,17 @@ public class Game {
                     batch.setColor(1, 1, 1, 1);
                 }
             }
+
+            batch.flush();
+            roomBuffer.end(viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+            batch.end();
+
+            Gdx.gl.glClearColor(0, 0, 0, 1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
+            batch.enableBlending();
+            batch.begin();
         }
-
-        if (Menu.nightType == 0) {
-            if (Rat.ai != 0 && Rat.jumpscare) {
-                Rat.render(batch);
-            }
-
-            if (Vinnie.ai != 0 && Vinnie.jumpscare){
-                Vinnie.render(batch);
-            }
-
-            if (Cat.ai != 0 && Cat.jumpscare) {
-                Cat.render(batch);
-            }
-        } else if (Menu.nightType == 1) {
-            if (ShadowRat.active && ShadowRat.jumpscare) {
-                ShadowRat.render(batch);
-            }
-
-            if (ShadowCat.active && ShadowCat.jumpscare) {
-                ShadowCat.render(batch);
-            }
-
-            if (ShadowVinnie.ai != 0 && ShadowVinnie.jumpscare) {
-                ShadowVinnie.render(batch);
-            }
-        }
-
-        batch.flush();
-        roomBuffer.end(viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
-        batch.end();
-
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
-        batch.enableBlending();
-        batch.begin();
 
         if (screenBuffer == null){
             screenBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 768, true);
@@ -1193,6 +1224,10 @@ public class Game {
         batch.enableBlending();
         batch.begin();
         batch.setBlendFunction(srcFunc, dstFunc);
+
+        if (jumpscare && Player.blacknessTimes == 0){
+            jumpscareRender(batch);
+        }
 
         batch.setColor(0, 0, 0, 1 - Player.blackness);
         texture = FNaC3Deluxe.shapeBuffer.getColorBufferTexture();
@@ -1290,8 +1325,6 @@ public class Game {
                     } else if (Vinnie.room == 1) {
                         rect_value = Math.min(Vinnie.patienceHealthTimer, 2) / 2;
                     }
-                } else if (Menu.nightType == 1){
-
                 }
                 batch.draw(texture, position + width, offsety + 110, (width * 2) * rect_value, 20);
             }

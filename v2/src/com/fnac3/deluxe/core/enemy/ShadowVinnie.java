@@ -1,6 +1,5 @@
 package com.fnac3.deluxe.core.enemy;
 
-import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.fnac3.deluxe.core.data.Data;
@@ -21,8 +20,6 @@ public class ShadowVinnie {
     public static float cooldownTimer;
     public static float twitchPosition;
     public static boolean shaking;
-    public static boolean dontSoundShake;
-    public static boolean twitchingNow;
     public static boolean dodgePlaying;
     public static float timeToFlash;
     public static float patienceTimer;
@@ -46,12 +43,6 @@ public class ShadowVinnie {
     public static boolean tapeWeasel;
     public static float tapePosition;
 
-    //jumpscares
-    public static boolean jumpscare;
-    public static String jumpscareType;
-    public static float jumpscareTimer;
-    public static float jumpscareTime;
-    public static int jumpscareI;
     public static boolean pause;
 
     private static float vinnieLaughTime;
@@ -62,76 +53,103 @@ public class ShadowVinnie {
 
     public static boolean hitboxHit;
 
+    public static void reset(AudioClass audioClass){
+        jumping = false;
+        if (hitboxPosition == null){
+            hitboxPosition = new float[]{-1, -1};
+        } else {
+            hitboxPosition[0] = -1;
+            hitboxPosition[1] = -1;
+        }
+        vinnieLaughTime = 2;
+        jumpCase = 0;
+        tapeWeasel = false;
+        cooldownTimer = 5;
+        bedSpotted = false;
+        jumpTarget = 0;
+        jumpAnimation = 0;
+        dodgePlaying = false;
+        vinnielaugh = 0;
+
+        if (ai != 0) {
+            jumps = 5;
+            room = 1;
+            attackTime = 2;
+            timeToFlash = 0.65f;
+            attackPosition = 0;
+            framesToMove = 0;
+            attack = false;
+            patienceTimer = 0.75f;
+            shaking = false;
+            hitboxHit = false;
+            if (Math.random() < 0.5) {
+                side = 0;
+            } else {
+                side = 2;
+            }
+            audioClass.play("walking_in");
+            Player.blacknessMultiplier = 6;
+            Player.blacknessTimes = 3;
+            Player.blacknessDelay = 0;
+        } else {
+            room = 0;
+        }
+    }
+
+    private static void setJumpscare(){
+        Game.setJumpscare("Vinnie",
+                "game/Shadow Vinnie/Jumpscare/Jumpscare",
+                "shadowJumpscare",
+                0.9f,
+                -1,
+                1);
+    }
+
     public static void input(){
-        if (jumpscareI == 0 && !Player.turningAround && Player.flashlightAlpha > 0) {
+        if (!Player.turningAround && Player.flashlightAlpha > 0) {
             hitboxCollided();
         }
     }
 
     public static void update(Random random, Data data, AudioClass audioClass){
         pause = Player.freeze;
-        if (jumpscareI == 0) {
-            vinnieLaughTime -= Gdx.graphics.getDeltaTime();
-            if (vinnieLaughTime <= 0){
-                vinnieLaughTime += 12;
-                if (vinnielaugh == 0){
-                    vinnielaugh = 1 + random.nextInt(4);
-                } else if (vinnielaugh == 1){
-                    vinnielaugh = 2 + random.nextInt(3);
-                } else if (vinnielaugh == 2){
-                    if (random.nextInt(2) == 0){
-                        vinnielaugh = 1;
-                    } else {
-                        vinnielaugh = 3 + random.nextInt(2);
-                    }
-                } else if (vinnielaugh == 3){
-                    if (random.nextInt(2) == 0){
-                        vinnielaugh = 1 + random.nextInt(2);
-                    } else {
-                        vinnielaugh = 4;
-                    }
+        vinnieLaughTime -= Gdx.graphics.getDeltaTime();
+        if (vinnieLaughTime <= 0){
+            vinnieLaughTime += 12;
+            if (vinnielaugh == 0){
+                vinnielaugh = 1 + random.nextInt(4);
+            } else if (vinnielaugh == 1){
+                vinnielaugh = 2 + random.nextInt(3);
+            } else if (vinnielaugh == 2){
+                if (random.nextInt(2) == 0){
+                    vinnielaugh = 1;
                 } else {
-                    vinnielaugh = 1 + random.nextInt(3);
+                    vinnielaugh = 3 + random.nextInt(2);
                 }
-
-                audioClass.play("laugh" + vinnielaugh);
-                audioClass.setVolume("laugh" + vinnielaugh, 0.75f);
-            }
-
-            switch (room) {
-                case 1:
-                    roomMechanic(data, random, audioClass);
-                    break;
-                case 2:
-                    bedMechanic(data, audioClass);
-                    break;
-                case 3:
-                    crouchMechanic();
-                    break;
-            }
-            if (jumpscareI != 0){
-                audioClass.stopAllSounds();
-            }
-        } else if (!jumpscare){
-            jumpscare = true;
-            jumpscareTimer = 0.05f;
-            Player.blacknessTimes = 1;
-            Player.blacknessMultiplier = 12;
-            audioClass.stopAllSounds();
-            audioClass.play("shadowJumpscare");
-        } else if (jumpscareTime > 0){
-            jumpscareTime -= Gdx.graphics.getDeltaTime();
-            if (jumpscareTime < 0) {
-                jumpscareTime = 0;
-                audioClass.stop("shadowJumpscare");
-            }
-            if (jumpscareTimer > 0){
-                jumpscareTimer -= Gdx.graphics.getDeltaTime();
-                if (jumpscareTimer <= 0){
-                    jumpscareTimer += 0.05f;
-                    jumpscareI = 1 + random.nextInt(6);
+            } else if (vinnielaugh == 3){
+                if (random.nextInt(2) == 0){
+                    vinnielaugh = 1 + random.nextInt(2);
+                } else {
+                    vinnielaugh = 4;
                 }
+            } else {
+                vinnielaugh = 1 + random.nextInt(3);
             }
+
+            audioClass.play("laugh" + vinnielaugh);
+            audioClass.setVolume("laugh" + vinnielaugh, 0.75f);
+        }
+
+        switch (room) {
+            case 1:
+                roomMechanic(data, random, audioClass);
+                break;
+            case 2:
+                bedMechanic(data, audioClass);
+                break;
+            case 3:
+                crouchMechanic();
+                break;
         }
 
         if (tapeSpotted && tapePosition >= 0){
@@ -352,163 +370,111 @@ public class ShadowVinnie {
         float x = 0;
         float y = 0;
 
-        if (!jumpscare) {
-            boolean lookInRoom = false;
-            boolean lookUnderBed = false;
-            boolean lookAtTape = false;
+        boolean lookInRoom = false;
+        boolean lookUnderBed = false;
+        boolean lookAtTape = false;
 
-            if (side == 0) {
-                sideTexture = "Left";
-            } else if (side == 1) {
-                sideTexture = "Middle";
-            } else {
-                sideTexture = "Right";
-            }
-
-            switch (room) {
-                case 1:
-                    lookInRoom = true;
-                    String position;
-
-                    int jumpI = (int) jumpAnimation;
-                    if (jumpI != 0) {
-                        if ((jumpTarget == 21 && side == 0) || (jumpTarget == 19 && side == 1)) {
-                            jumpI = jumpTarget - jumpI + 1;
-                        }
-                    }
-
-                    if (jumpI == 0) {
-                        position = String.valueOf((int) attackPosition);
-                        texture = "Battle/" + sideTexture + "/" + position;
-                    } else {
-                        if (jumpTarget == 21) {
-                            sideTexture = "Left";
-                        } else if (jumpTarget == 19){
-                            sideTexture = "Right";
-                        }
-                        texture = "Battle/Jump/" + sideTexture + "/" + jumpI;
-                    }
-
-                    if (jumpI != 0) {
-                        if (jumpTarget == 21){
-                            float multiplier = (float) jumpI / 21;
-                            float cosMultiplier = (float) (-Math.cos(Math.toRadians(180 * multiplier)) + 1) / 2;
-                            float distance = 1089 * cosMultiplier;
-                            x = 29 + distance;
-                            y = 209;
-                        } else {
-                            float multiplier = (float) jumpI / 19;
-                            float cosMultiplier = (float) (-Math.cos(Math.toRadians(180 * multiplier)) + 1) / 2;
-                            float distance = 1105 * cosMultiplier;
-                            x = 1044 + distance;
-                            y = 170;
-                        }
-                    } else {
-                        if (side == 0) {
-                            x = 104;
-                            y = 276;
-                        } else if (side == 1) {
-                            x = 1119;
-                            y = 200;
-                        } else {
-                            x = 2175;
-                            y = 174;
-                        }
-                    }
-                    break;
-                case 2:
-                    if (Player.room == 1 && Monstergami.side != 3) {
-                        lookUnderBed = true;
-                        if (side == 0) {
-                            texture = "Under Bed/Bed1";
-                            y = 169;
-                        } else {
-                            texture = "Under Bed/Bed2";
-                            x = 1204;
-                            y = 180;
-                        }
-                    } else if (Player.room == 2 && tapePosition >= 1) {
-                        lookAtTape = true;
-                        x = 190;
-                        y = 455;
-                        texture = "Tape/Leaving" + (int) (15 - tapePosition);
-                    }
-                    break;
-                case 3:
-                    lookInRoom = true;
-                    if (side == 0) {
-                        texture = "Under Bed/Left/Left" + ((int) twitchPosition + 1);
-                        x = 506;
-                        y = 236;
-                    } else {
-                        texture = "Under Bed/Right/Right" + ((int) twitchPosition + 1);
-                        x = 2142;
-                        y = 184;
-                    }
-            }
-            boolean passed = lookInRoom && !Player.turningAround && Player.room == 0;
-            if (!passed) {
-                passed = lookUnderBed && !Player.turningAround;
-            }
-
-            if (!passed) {
-                passed = lookAtTape && !Player.turningAround;
-            }
-
-            if (!passed) return;
+        if (side == 0) {
+            sideTexture = "Left";
+        } else if (side == 1) {
+            sideTexture = "Middle";
         } else {
-            texture = "Jumpscare/Jumpscare" + jumpscareI;
-            x = Player.roomPosition[0] + Player.shakingPosition;
-            y = Player.roomPosition[1];
+            sideTexture = "Right";
         }
-        if (texture == null) return;
+
+        switch (room) {
+            case 1:
+                lookInRoom = true;
+                String position;
+
+                int jumpI = (int) jumpAnimation;
+                if (jumpI != 0) {
+                    if ((jumpTarget == 21 && side == 0) || (jumpTarget == 19 && side == 1)) {
+                        jumpI = jumpTarget - jumpI + 1;
+                    }
+                }
+
+                if (jumpI == 0) {
+                    position = String.valueOf((int) attackPosition);
+                    texture = "Battle/" + sideTexture + "/" + position;
+                } else {
+                    if (jumpTarget == 21) {
+                        sideTexture = "Left";
+                    } else if (jumpTarget == 19){
+                        sideTexture = "Right";
+                    }
+                    texture = "Battle/Jump/" + sideTexture + "/" + jumpI;
+                }
+
+                if (jumpI != 0) {
+                    if (jumpTarget == 21){
+                        float multiplier = (float) jumpI / 21;
+                        float cosMultiplier = (float) (-Math.cos(Math.toRadians(180 * multiplier)) + 1) / 2;
+                        float distance = 1089 * cosMultiplier;
+                        x = 29 + distance;
+                        y = 209;
+                    } else {
+                        float multiplier = (float) jumpI / 19;
+                        float cosMultiplier = (float) (-Math.cos(Math.toRadians(180 * multiplier)) + 1) / 2;
+                        float distance = 1105 * cosMultiplier;
+                        x = 1044 + distance;
+                        y = 170;
+                    }
+                } else {
+                    if (side == 0) {
+                        x = 104;
+                        y = 276;
+                    } else if (side == 1) {
+                        x = 1119;
+                        y = 200;
+                    } else {
+                        x = 2175;
+                        y = 174;
+                    }
+                }
+                break;
+            case 2:
+                if (Player.room == 1 && Monstergami.side != 3) {
+                    lookUnderBed = true;
+                    if (side == 0) {
+                        texture = "Under Bed/Bed1";
+                        y = 169;
+                    } else {
+                        texture = "Under Bed/Bed2";
+                        x = 1204;
+                        y = 180;
+                    }
+                } else if (Player.room == 2 && tapePosition >= 1) {
+                    lookAtTape = true;
+                    x = 190;
+                    y = 455;
+                    texture = "Tape/Leaving" + (int) (15 - tapePosition);
+                }
+                break;
+            case 3:
+                lookInRoom = true;
+                if (side == 0) {
+                    texture = "Under Bed/Left/Left" + ((int) twitchPosition + 1);
+                    x = 506;
+                    y = 236;
+                } else {
+                    texture = "Under Bed/Right/Right" + ((int) twitchPosition + 1);
+                    x = 2142;
+                    y = 184;
+                }
+        }
+        boolean passed = lookInRoom && !Player.turningAround && Player.room == 0;
+        if (!passed) {
+            passed = lookUnderBed && !Player.turningAround;
+        }
+
+        if (!passed) {
+            passed = lookAtTape && !Player.turningAround;
+        }
+
+        if (!passed) return;
         batch.setColor(1, 1, 1, 1);
         batch.draw(ImageHandler.images.get("game/Shadow Vinnie/" + texture), x, y);
-    }
-
-    public static void reset(AudioClass audioClass){
-        jumping = false;
-        jumpscareType = "";
-        if (hitboxPosition == null){
-            hitboxPosition = new float[]{-1, -1};
-        } else {
-            hitboxPosition[0] = -1;
-            hitboxPosition[1] = -1;
-        }
-        vinnieLaughTime = 2;
-        jumpCase = 0;
-        jumpscareTime = 0.9f;
-        tapeWeasel = false;
-        cooldownTimer = 4;
-        bedSpotted = false;
-        jumpscare = false;
-        jumpscareI = 0;
-        jumpTarget = 0;
-        jumpAnimation = 0;
-        dodgePlaying = false;
-        vinnielaugh = 0;
-
-        jumps = 5;
-        room = 1;
-        attackTime = 2;
-        timeToFlash = 0.65f;
-        attackPosition = 0;
-        framesToMove = 0;
-        attack = false;
-        patienceTimer = 0.75f;
-        shaking = false;
-        dontSoundShake = false;
-        twitchingNow = false;
-        hitboxHit = false;
-        if (Math.random() < 0.5){
-            side = 0;
-        } else {
-            side = 2;
-        }
-        audioClass.play("walking_in");
-        Player.blacknessMultiplier = 6;
-        Player.blacknessTimes = 3;
-        Player.blacknessDelay = 0;
     }
 
     public static void roomMechanic(Data data, Random random, AudioClass audioClass) {
@@ -523,9 +489,11 @@ public class ShadowVinnie {
             shaking = false;
             Player.blacknessMultiplier = 1.25f;
             room = 2;
-            dontSoundShake = false;
-            bedPatienceTimer = 4;
-            cooldownTimer = 20;
+            bedPatienceTimer = 2;
+            cooldownTimer = 32;
+            side = (int) (2 * Math.random()) * 2;
+            audioClass.play("ShadowVinnieCooldown");
+            audioClass.setVolume("ShadowVinnieCooldown", 0.25f);
             audioClass.play("crawl");
             tapeSpotted = false;
             if (!tapeWeasel && !Player.tapeStolen) {
@@ -571,7 +539,6 @@ public class ShadowVinnie {
                         if (jumps == 0) {
                             Player.snapPosition = false;
                             attack = false;
-                            dontSoundShake = true;
                             audioClass.play("thunder");
                             Player.blacknessTimes = 3;
                             Player.blacknessMultiplier = 6;
@@ -585,7 +552,7 @@ public class ShadowVinnie {
                                 jumpTarget = 19;
                                 jumpCase = 0;
                             } else {
-                                if (random.nextInt(2) == 0) {
+                                if ((ShadowCat.room != 4 && random.nextInt(2) == 0) || ShadowCat.side == 0) {
                                     jumpTarget = 21;
                                     jumpCase = 0;
                                 } else {
@@ -593,7 +560,7 @@ public class ShadowVinnie {
                                     jumpCase = 1;
                                 }
                             }
-                            patienceTimer = 0.6f;
+                            patienceTimer = 0.65f;
 
                             if (attackPosition > 24) {
                                 framesToMove = 48 - attackPosition;
@@ -618,7 +585,7 @@ public class ShadowVinnie {
                         }
 
                         timeToFlash = 0.2f + 0.05f * random.nextInt(3);
-                        patienceTimer = 0.6f;
+                        patienceTimer = 0.65f;
                         framesToMove = 8 + (1 + random.nextInt(48));
                         if (random.nextInt(2) == 1) {
                             framesToMove = -framesToMove;
@@ -678,6 +645,7 @@ public class ShadowVinnie {
                         jumpAnimation = 0;
                         attackTime = 2;
                         patienceTimer = 2;
+                        if (ShadowCat.room == 4) patienceTimer++;
                         timeToFlash = 0.65f;
                     }
                 }
@@ -685,9 +653,6 @@ public class ShadowVinnie {
 
             if (framesToMove != 0) {
                 if (framesToMove > 0) {
-//                if (Game.hourOfGame != 12){
-//                    multiplier *= 1 + (Game.hourOfGame * 0.0625f);
-//                }
                     framesToMove -= Gdx.graphics.getDeltaTime() * multiplier;
                     attackPosition += Gdx.graphics.getDeltaTime() * multiplier;
                     if (attackPosition >= 48){
@@ -737,7 +702,7 @@ public class ShadowVinnie {
         }
 
         if (cooldownTimer == 0 || patienceTimer == 0){
-            jumpscareI = 1;
+            setJumpscare();
         }
     }
 
@@ -769,26 +734,26 @@ public class ShadowVinnie {
                 bedPatienceTimer -= Gdx.graphics.getDeltaTime();
                 if (bedPatienceTimer <= 0){
                     bedPatienceTimer = 0;
-                    jumpscareI = 1;
+                    setJumpscare();
                 }
             }
-
             boolean lookingAway = (Player.side == 0 && side == 2) || (Player.side == 2 && side == 0);
 
-            if (cooldownTimer <= 0 || (lookingAway && Rat.room == 2 && Cat.room == 2 && Monstergami.side == -1)){
-                if (lookingAway && bedSpotted) {
-                    audioClass.play("peek");
-                    room = 1;
-                    bedSpotted = false;
-                    patienceTimer = 2f + 0.2f * (20 - ai);
-                    tapeSpotted = false;
-                    timeToFlash = 2.75f;
-                    Player.blacknessMultiplier = 6;
-                    attackPosition = 0;
-                } else {
-                    jumpscareI = 1;
-                }
+            if (cooldownTimer > 0) return;
+            if (lookingAway && bedPatienceTimer < 2) {
+                audioClass.play("peek");
+                room = 1;
+                jumps = 5;
+                attackTime = 2;
+                attackPosition = 24;
+                bedSpotted = false;
+                cooldownTimer = 2;
+                patienceTimer = 2f + 0.2f * (20 - ai);
+                tapeSpotted = false;
+                timeToFlash = 0.65f;
+                return;
             }
+            setJumpscare();
         }
     }
 
@@ -813,10 +778,9 @@ public class ShadowVinnie {
                 }
             } else if (!Player.freeze){
                 patienceTimer -= Gdx.graphics.getDeltaTime();
-                if (patienceTimer <= 0){
-                    patienceTimer = 0;
-                    jumpscareI = 1;
-                }
+                if (patienceTimer > 0) return;
+                patienceTimer = 0;
+                setJumpscare();
             }
         }
     }

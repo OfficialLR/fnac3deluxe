@@ -268,7 +268,7 @@ public class Menu {
         } else if (hitboxDebug){
             textModifier(TextString.hitboxText);
             textCase = 3;
-        } else if (expandedPointer){
+        } else if (false && expandedPointer){
             textModifier(TextString.expandedPointerText);
             textCase = 4;
         } else if (challenge1){
@@ -281,7 +281,7 @@ public class Menu {
             textModifier(TextString.faultyFlashlight);
             textCase = 7;
         } else if (challenge4){
-            if (nightType == 0) textModifier(TextString.monstergami);
+            if (nightType == 0) textModifier(TextString.candyText);
             else textModifier(TextString.twitchyCatText);
             textCase = 8;
         } else if (allChallenges){
@@ -395,7 +395,7 @@ public class Menu {
 
         arrowHovered = mouseOver(mx, my, 260, 712, 280, 740);
         if (leftPressed){
-            if (arrowHovered) {
+            if (arrowHovered && false) {
                 arrowHovered = false;
                 modeSwitch = true;
                 nightType++;
@@ -583,6 +583,10 @@ public class Menu {
         if (data.menuMusic) volume += time * 6;
         else volume -= time * 6;
         volume = volume < 0 ? 0 : volume > 1 ? 1 : volume;
+
+        if (!loaded){
+            System.out.println(loaded);
+        }
 
         if (loaded) {
             if (data.oldMenu){
@@ -839,7 +843,7 @@ public class Menu {
             previousEnemyCase = enemyCase;
 
             data.allChallenges = data.pointer > 0 && data.hardCassette
-                    && data.faultyFlashlight && data.challenge4;
+                    && data.faultyFlashlight;
         } else {
             if (stateManager.getState() == StateManager.State.MENU){
                 if (!loading) {
@@ -892,6 +896,7 @@ public class Menu {
                     loading = true;
                     audioClass.stopAllSounds();
                 } else if (ImageHandler.doneLoading){
+                    previousNightType = 1;
                     loading = false;
                     loaded = true;
                     staticScreen = 0;
@@ -1106,7 +1111,7 @@ public class Menu {
         yPos -= 36;
         menuFontLabel.draw(batch, "Hard Cassette", xPosLabel, yPos);
         yPos -= 36;
-        menuFontLabel.draw(batch, "Faulty Flashlight", xPosLabel, yPos);
+        menuFontLabel.draw(batch, "Limited Battery", xPosLabel, yPos);
         yPos -= 36;
         menuFontLabel.draw(batch, nightType == 0 ? "Monster Candy" : nightType == 1 ? "Shadow Candy" : "Shadow Challenge", xPosLabel, yPos);
         yPos -= 36;
@@ -1130,7 +1135,6 @@ public class Menu {
         yPos -= 36;
         challengeRender(batch, data.freeScroll, freeScroll, xPos, yPos, r, b, alpha);
         yPos -= 36;
-//        challengeRender(batch, data.expandedPointer, expandedPointer, xPos, yPos, r, b, alpha);
 
         //challenge boxes
         yPos -= 82;
@@ -1241,21 +1245,21 @@ public class Menu {
                 star.size);
 
         //change night
-        texture = ImageHandler.images.get("menu/nightArrow");
-        if (arrowHovered) batch.setColor(1, 1, 1, 1);
-        else batch.setColor(r, 0, b, 1);
-        batch.draw(texture, 260, 712);
+//        texture = ImageHandler.images.get("menu/nightArrow");
+//        if (arrowHovered) batch.setColor(1, 1, 1, 1);
+//        else batch.setColor(r, 0, b, 1);
+//        batch.draw(texture, 260, 712);
 
         //game mode
-        if (nightType == 0){
-            if (rightArrow) batch.setColor(1, 1, 1, (1 - oldMenuAlpha));
-            else batch.setColor(r, 0, b, (1 - oldMenuAlpha));
-            batch.draw(texture, rightArrowPosition, 54);
-
-            if (leftArrow) batch.setColor(1, 1, 1, (1 - oldMenuAlpha));
-            else batch.setColor(r, 0, b, (1 - oldMenuAlpha));
-            batch.draw(texture, leftArrowPosition + 24, 54, -24, 28);
-        }
+//        if (nightType == 0){
+//            if (rightArrow) batch.setColor(1, 1, 1, (1 - oldMenuAlpha));
+//            else batch.setColor(r, 0, b, (1 - oldMenuAlpha));
+//            batch.draw(texture, rightArrowPosition, 54);
+//
+//            if (leftArrow) batch.setColor(1, 1, 1, (1 - oldMenuAlpha));
+//            else batch.setColor(r, 0, b, (1 - oldMenuAlpha));
+//            batch.draw(texture, leftArrowPosition + 24, 54, -24, 28);
+//        }
 
         //icons
         texture = ImageHandler.images.get("menu/info");

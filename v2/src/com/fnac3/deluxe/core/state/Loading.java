@@ -51,13 +51,6 @@ public class Loading {
                 titleLayout.reset();
             }
 
-            Menu.previousNightType = nightType;
-            if (((nightType == 0 && data.RatAI == 0 && data.CatAI == 0 && data.VinnieAI == 0)
-                    || (nightType == 1 && !data.ShadowRatAI && !data.ShadowCatAI))
-                    && data.challenge4){
-                Menu.nightType = 2;
-            }
-
             titleLayout.setText(loadingLabel, Menu.modeName);
 
             firstFrame = true;
@@ -75,10 +68,10 @@ public class Loading {
             } else if (nightType == 1) {
                 ShadowRat.active = data.ShadowRatAI;
                 ShadowCat.active = data.ShadowCatAI;
-                ShadowCat.twitchyCat = data.challenge4;
+//                ShadowCat.twitchyCat = data.challenge4;
                 ShadowVinnie.ai = data.ShadowVinnieAI ? 20 : 0;
             }
-            Monstergami.active = data.challenge4 && nightType != 1;
+//            Monstergami.active = data.challenge4 && nightType != 1;
 
             ImageHandler.addImages(data, stateManager);
             for (String s: SoundFiles.gameSounds){

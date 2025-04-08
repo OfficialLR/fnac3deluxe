@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.fnac3.deluxe.core.data.Data;
 import com.fnac3.deluxe.core.input.Player;
+import com.fnac3.deluxe.core.state.Game;
 import com.fnac3.deluxe.core.util.AudioClass;
 import com.fnac3.deluxe.core.util.ImageHandler;
 import com.fnac3.deluxe.core.util.Utils;
@@ -13,19 +14,17 @@ import java.util.Random;
 public class ShadowCat {
 
     private static String catBreath;
+    private static boolean battleMode;
     public static boolean twitchyCat;
-    public static boolean wait;
+    public static boolean dontSoundShake;
     public static boolean active;
     public static boolean skipped;
-    public static boolean catAttackMode;
-    public static boolean catAttackModeLock;
     public static int room;
     public static int side = -1;
     public static float cooldownTimer;
     public static int attackPosition;
     public static float twitchPosition;
     public static boolean shaking;
-    public static boolean dontSoundShake;
     public static boolean twitchingNow;
     public static int attackPositionTarget;
     public static float moveToPosition;
@@ -36,15 +35,12 @@ public class ShadowCat {
     public static int teleportTarget;
     public static boolean bedSpotted;
     public static float patienceTimer;
+    public static float patienceHealthTimer;
     public static float bedPatienceTimer;
     public static boolean tapeSpotted;
     public static float timeUntilWeasel;
     public static boolean tapeWeasel;
     public static float tapePosition;
-    public static boolean jumpscare;
-    public static float jumpscareTimer;
-    public static float jumpscareTime;
-    public static int jumpscareI;
     public static boolean pause;
     public static float bedPosition;
     public static int bedTarget;
@@ -56,76 +52,133 @@ public class ShadowCat {
 
     public static boolean hitboxHit;
 
+    public static void reset(AudioClass audioClass, Random random) {
+        bedTarget = 21;
+        dontSoundShake = false;
+        skipped = false;
+        catHum = false;
+        if (hitboxPosition == null) {
+            hitboxPosition = new float[]{-1, -1};
+        } else {
+            hitboxPosition[0] = -1;
+            hitboxPosition[1] = -1;
+        }
+        tapeWeasel = false;
+        middleAttackMoves = 0;
+        bedSpotted = false;
+        attack = false;
+        shaking = false;
+        twitchingNow = false;
+        hitboxHit = false;
+        attackPosition = 0;
+        attackPositionTarget = 0;
+        moveToPosition = 0;
+        room = 0;
+
+        if (active) {
+            battleMode = !ShadowRat.active && ShadowVinnie.ai == 0;
+            if (battleMode) {
+                bedPatienceTimer = 2;
+                side = 2 * random.nextInt(2);
+                cooldownTimer = 8;
+                room = 2;
+                attack = false;
+                audioClass.play("crawl");
+            } else {
+                cooldownTimer = 20;
+            }
+        }
+    }
+
+    private static void setJumpscare(){
+        Game.setJumpscare("Cat",
+                "game/Shadow Cat/New/Jumpscare/Jumpscare",
+                "shadowJumpscare",
+                0.95f,
+                -1,
+                0.95f);
+    }
+
     public static void input(){
-        if (jumpscareI == 0 && !Player.turningAround && Player.flashlightAlpha > 0) {
+        if (!Player.turningAround && Player.flashlightAlpha > 0) {
             hitboxCollided();
         }
     }
 
     public static void update(Random random, Data data, AudioClass audioClass){
-        pause = ShadowRat.room == 1 || ShadowVinnie.room == 1 || Player.freeze;
-
-        if (!catHum){
-            audioClass.play("cat");
-            audioClass.setVolume("cat", 0);
-            audioClass.setPitch("cat", 1);
-            audioClass.loop("cat", true);
-            catHum = true;
-        }
+        pause = Player.freeze;
 
         float catVolume = audioClass.getVolume("cat");
         float catPitch = audioClass.getPitch("cat");
 
-        if (!catAttackMode) {
-            catAttackModeLock = (!ShadowRat.active || ShadowRat.room == 2 || ShadowRat.room == 3)
-                    && (ShadowVinnie.ai == 0 || ShadowVinnie.room == 2 || ShadowVinnie.room == 3);
-
-            if (catVolume < 0.15f) {
-                audioClass.setVolume("cat", catVolume + Gdx.graphics.getDeltaTime() / 2);
-                if (audioClass.getVolume("cat") > 0.15f) audioClass.setVolume("cat", 0.15f);
+        if (!catHum){
+            if (room == 0) {
+                if (catVolume > 0) {
+                    catVolume -= Gdx.graphics.getDeltaTime();
+                    if (catVolume <= 0) audioClass.stop("cat");
+                }
+            } else {
+                audioClass.play("cat");
+                audioClass.setVolume("cat", 0);
+                catVolume = audioClass.getVolume("cat");
+                audioClass.loop("cat", true);
+                catHum = true;
             }
-        } else {
-            if (catVolume < 0.6f) {
-                audioClass.setVolume("cat", catVolume + Gdx.graphics.getDeltaTime());
-                if (audioClass.getVolume("cat") > 0.6f) audioClass.setVolume("cat", 0.6f);
-            }
-            if (room != 3) audioClass.setPitch("cat", catPitch + Gdx.graphics.getDeltaTime() / 75);
-            else audioClass.setPitch("cat", catPitch - Gdx.graphics.getDeltaTime() / 10);
         }
 
-        if (jumpscareI == 0) {
-            switch (room) {
-                case 1:
-                    roomMechanic(data, random, audioClass);
-                    break;
-                case 2:
-                    bedMechanic(data, random, audioClass);
-                    break;
+        boolean attacking = attack || (room == 2 && cooldownTimer <= 8);
+
+        if (attacking) {
+            if (catVolume < 0.6f) {
+                catVolume += Gdx.graphics.getDeltaTime() / 2;
+                if (catVolume > 0.6f) catVolume = 0.6f;
             }
-            if (jumpscareI != 0){
-                audioClass.stopAllSounds();
+            if (room == 3) catPitch -= Gdx.graphics.getDeltaTime() / 10;
+            else catPitch += Gdx.graphics.getDeltaTime() / 75;
+        } else {
+            if (catVolume < 0.25f){
+                catVolume += Gdx.graphics.getDeltaTime();
+                if (catVolume > 0.25f) catVolume = 0.25f;
             }
-        } else if (!jumpscare){
-            jumpscare = true;
-            jumpscareTimer = 0.05f;
-            Player.blacknessTimes = 1;
-            Player.blacknessMultiplier = 12;
-            audioClass.stopAllSounds();
-            audioClass.play("shadowJumpscare");
-            audioClass.setPitch("shadowJumpscare", 0.95f);
-        } else if (jumpscareTime > 0){
-            jumpscareTime -= Gdx.graphics.getDeltaTime();
-            if (jumpscareTime < 0) {
-                jumpscareTime = 0;
-                audioClass.stop("shadowJumpscare");
-            }
-            if (jumpscareTimer > 0){
-                jumpscareTimer -= Gdx.graphics.getDeltaTime();
-                if (jumpscareTimer <= 0){
-                    jumpscareTimer += 0.05f;
-                    jumpscareI = 1 + random.nextInt(6);
+        }
+
+        audioClass.setVolume("cat", catVolume);
+        audioClass.setPitch("cat", catPitch);
+
+
+        switch (room) {
+            case 0:
+                cooldownTimer -= Gdx.graphics.getDeltaTime();
+                if (cooldownTimer <= 0) {
+                    cooldownTimer = 15;
+                    room = 4;
+                    if (Candy.side != -1){
+                        if (Candy.side == 0) side = 2;
+                        else side = 0;
+                    } else side = 2 * random.nextInt(2);
+                    if (side == 0){
+                        catBreath = "catLeft";
+                    } else {
+                        catBreath = "catRight";
+                    }
+                    audioClass.play(catBreath);
+                    audioClass.loop(catBreath, true);
+                    audioClass.setVolume(catBreath, 0);
+                    bedPosition = bedTarget - 0.01f;
                 }
-            }
+                break;
+            case 1:
+                roomMechanic(random, audioClass);
+                break;
+            case 2:
+                bedMechanic(data, audioClass);
+                break;
+            case 3:
+                crouchMechanic(data, random, audioClass);
+                break;
+            case 4:
+                farBedMechanic(random, audioClass);
+                break;
         }
 
         if (tapeSpotted && tapePosition >= 0){
@@ -149,7 +202,7 @@ public class ShadowCat {
                 hitboxHit = true;
             } else if (room == 3 && timeToFlash > 0 && moveToPosition == 0){
                 hitboxHit = true;
-            } else if (room == 4 && bedPosition == 0 && ShadowVinnie.room != 1 && ShadowRat.room != 1){
+            } else if (room == 4 && bedPosition == 0){
                 hitboxHit = true;
             }
         }
@@ -246,198 +299,165 @@ public class ShadowCat {
         float x = 0;
         float y = 0;
 
-        if (!jumpscare) {
-            boolean lookInRoom = false;
-            boolean lookUnderBed = false;
-            boolean lookAtTape = false;
+        boolean lookInRoom = false;
+        boolean lookUnderBed = false;
+        boolean lookAtTape = false;
 
-            if (side == 0) {
-                sideTexture = "Left";
-            } else if (side == 1) {
-                sideTexture = "Middle";
-            } else {
-                sideTexture = "Right";
-            }
-
-            switch (room) {
-                case 1:
-                    lookInRoom = true;
-                    String position = null;
-                    if (attackPosition == attackPositionTarget) {
-                        position = switch (attackPosition) {
-                            case 0 -> "Up";
-                            case 1 -> "Left";
-                            case 2 -> "Right";
-                            case 3 -> "Down";
-                            default -> null;
-                        };
-                        position += ((int) twitchPosition + 1);
-                    } else {
-                        int move = (int) moveToPosition;
-                        if (attackPosition == 0 && attackPositionTarget == 1) {
-                            position = "MoveDownLeft" + (3 - move);
-                        } else if (attackPosition == 1 && attackPositionTarget == 0) {
-                            position = "MoveDownLeft" + move;
-                        } else if (attackPosition == 1 && attackPositionTarget == 2) {
-                            position = "MoveLeftRight" + (3 - move);
-                        } else if (attackPosition == 2 && attackPositionTarget == 1) {
-                            position = "MoveLeftRight" + move;
-                        } else if (attackPosition == 2 && attackPositionTarget == 0) {
-                            position = "MoveDownRight" + (3 - move);
-                        } else if (attackPosition == 0 && attackPositionTarget == 2) {
-                            position = "MoveDownRight" + move;
-                        } else if (attackPosition == 3 && attackPositionTarget == 1) {
-                            position = "MoveUpLeft" + move;
-                        } else if (attackPosition == 1 && attackPositionTarget == 3) {
-                            position = "MoveUpLeft" + (3 - move);
-                        } else if (attackPosition == 2 && attackPositionTarget == 3) {
-                            position = "MoveUpRight" + move;
-                        } else if (attackPosition == 3 && attackPositionTarget == 2) {
-                            position = "MoveUpRight" + (3 - move);
-                        }
-                    }
-                    texture = "Battle/" + sideTexture + "/" + position;
-                    if (side == 0){
-                        x = 154;
-                        y = 276;
-                    } else if (side == 1) {
-                        x = 1202;
-                        y = 55;
-                    } else if (side == 2) {
-                        x = 2216;
-                        y = 122;
-                    }
-                    break;
-                case 2:
-                    if (Player.room == 1 && Monstergami.side != 3) {
-                        lookUnderBed = true;
-                        y = 167;
-                        if (side == 0) {
-                            texture = "Under Bed/Bed1";
-                        } else {
-                            texture = "Under Bed/Bed2";
-                            x = 1094;
-                        }
-                    } else if (Player.room == 2 && tapePosition >= 1) {
-                        lookAtTape = true;
-                        x = 95;
-                        y = 373;
-                        texture = "Tape/Leaving" + (int) (13 - tapePosition);
-                    }
-                    break;
-                case 3:
-                    position = null;
-                    if (attackPosition == attackPositionTarget) {
-                        position = switch (attackPosition) {
-                            case 0 -> "Up";
-                            case 1 -> "Left";
-                            case 2 -> "Right";
-                            default -> null;
-                        };
-                        position += ((int) twitchPosition + 1);
-                    } else {
-                        int move = (int) moveToPosition;
-                        if (attackPosition == 0 && attackPositionTarget == 1) {
-                            position = "MoveDownLeft" + (3 - move);
-                        } else if (attackPosition == 1 && attackPositionTarget == 0) {
-                            position = "MoveDownLeft" + move;
-                        } else if (attackPosition == 1 && attackPositionTarget == 2) {
-                            position = "MoveLeftRight" + (3 - move);
-                        } else if (attackPosition == 2 && attackPositionTarget == 1) {
-                            position = "MoveLeftRight" + move;
-                        } else if (attackPosition == 2 && attackPositionTarget == 0) {
-                            position = "MoveDownRight" + (3 - move);
-                        } else if (attackPosition == 0 && attackPositionTarget == 2) {
-                            position = "MoveDownRight" + move;
-                        }
-                    }
-                    lookInRoom = true;
-                    texture = "Battle/Second Middle/" + position;
-                    x = 815;
-                    break;
-            }
-            if (texture == null) return false;
-            boolean passed = lookInRoom && !Player.turningAround && Player.room == 0;
-            if (!passed) {
-                passed = lookUnderBed && !Player.turningAround;
-            }
-
-            if (!passed) {
-                passed = lookAtTape && !Player.turningAround;
-            }
-
-            if (!passed) return false;
+        if (side == 0) {
+            sideTexture = "Left";
+        } else if (side == 1) {
+            sideTexture = "Middle";
         } else {
-            texture = "Jumpscare/Jumpscare" + jumpscareI;
-            x = Player.roomPosition[0] + Player.shakingPosition;
-            y = Player.roomPosition[1];
+            sideTexture = "Right";
         }
+
+        switch (room) {
+            case 1:
+                lookInRoom = true;
+                String position = null;
+                if (attackPosition == attackPositionTarget) {
+                    position = switch (attackPosition) {
+                        case 0 -> "Up";
+                        case 1 -> "Left";
+                        case 2 -> "Right";
+                        case 3 -> "Down";
+                        default -> null;
+                    };
+                    position += ((int) twitchPosition + 1);
+                } else {
+                    int move = (int) moveToPosition;
+                    if (attackPosition == 0 && attackPositionTarget == 1) {
+                        position = "MoveDownLeft" + (3 - move);
+                    } else if (attackPosition == 1 && attackPositionTarget == 0) {
+                        position = "MoveDownLeft" + move;
+                    } else if (attackPosition == 1 && attackPositionTarget == 2) {
+                        position = "MoveLeftRight" + (3 - move);
+                    } else if (attackPosition == 2 && attackPositionTarget == 1) {
+                        position = "MoveLeftRight" + move;
+                    } else if (attackPosition == 2 && attackPositionTarget == 0) {
+                        position = "MoveDownRight" + (3 - move);
+                    } else if (attackPosition == 0 && attackPositionTarget == 2) {
+                        position = "MoveDownRight" + move;
+                    } else if (attackPosition == 3 && attackPositionTarget == 1) {
+                        position = "MoveUpLeft" + move;
+                    } else if (attackPosition == 1 && attackPositionTarget == 3) {
+                        position = "MoveUpLeft" + (3 - move);
+                    } else if (attackPosition == 2 && attackPositionTarget == 3) {
+                        position = "MoveUpRight" + move;
+                    } else if (attackPosition == 3 && attackPositionTarget == 2) {
+                        position = "MoveUpRight" + (3 - move);
+                    }
+                }
+                texture = "Battle/" + sideTexture + "/" + position;
+                if (side == 0){
+                    x = 154;
+                    y = 276;
+                } else if (side == 1) {
+                    x = 1202;
+                    y = 55;
+                } else if (side == 2) {
+                    x = 2216;
+                    y = 122;
+                }
+                break;
+            case 2:
+                if (Player.room == 1 && Monstergami.side != 3) {
+                    lookUnderBed = true;
+                    y = 167;
+                    if (side == 0) {
+                        texture = "Under Bed/Bed1";
+                    } else {
+                        texture = "Under Bed/Bed2";
+                        x = 1094;
+                    }
+                } else if (Player.room == 2 && tapePosition >= 1) {
+                    lookAtTape = true;
+                    x = 95;
+                    y = 373;
+                    texture = "Tape/Leaving" + (int) (13 - tapePosition);
+                }
+                break;
+            case 3:
+                position = null;
+                if (attackPosition == attackPositionTarget) {
+                    position = switch (attackPosition) {
+                        case 0 -> "Up";
+                        case 1 -> "Left";
+                        case 2 -> "Right";
+                        default -> null;
+                    };
+                    position += ((int) twitchPosition + 1);
+                } else {
+                    int move = (int) moveToPosition;
+                    if (attackPosition == 0 && attackPositionTarget == 1) {
+                        position = "MoveDownLeft" + (3 - move);
+                    } else if (attackPosition == 1 && attackPositionTarget == 0) {
+                        position = "MoveDownLeft" + move;
+                    } else if (attackPosition == 1 && attackPositionTarget == 2) {
+                        position = "MoveLeftRight" + (3 - move);
+                    } else if (attackPosition == 2 && attackPositionTarget == 1) {
+                        position = "MoveLeftRight" + move;
+                    } else if (attackPosition == 2 && attackPositionTarget == 0) {
+                        position = "MoveDownRight" + (3 - move);
+                    } else if (attackPosition == 0 && attackPositionTarget == 2) {
+                        position = "MoveDownRight" + move;
+                    }
+                }
+                lookInRoom = true;
+                texture = "Battle/Second Middle/" + position;
+                x = 815;
+                break;
+            case 4:
+                lookInRoom = true;
+                String condition;
+                if (bedPosition >= 1){
+                    condition = "Retreat" + (int) bedPosition;
+                } else {
+                    condition = "Shaking" + ((int) twitchPosition + 1);
+                }
+                if (side == 0){
+                    texture = "Retreat/Retreat Left/" + condition;
+                    y = 303;
+                } else if (side == 2){
+                    texture = "Retreat/Retreat Right/" + condition;
+                    x = 2536;
+                    y = 214;
+                }
+                break;
+        }
+        if (texture == null) return false;
+        boolean passed = lookInRoom && !Player.turningAround && Player.room == 0;
+        if (!passed) {
+            passed = lookUnderBed && !Player.turningAround;
+        }
+
+        if (!passed) {
+            passed = lookAtTape && !Player.turningAround;
+        }
+
+        if (!passed) return false;
 
         batch.setColor(1, 1, 1, 1);
-        batch.draw(ImageHandler.images.get("game/Shadow Cat/New/" + texture), x, y);
 
-        if ((room == 1 || room == 3) && !jumpscare){
+        boolean renderForward = room != 4 || side != 0;
+
+        if (renderForward) {
+            batch.draw(ImageHandler.images.get("game/Shadow Cat/New/" + texture), x, y);
+        }
+
+        if (room == 1 || room == 3 || room == 4){
             batch.draw(ImageHandler.images.get("game/room/FullRoomBed"), 0, 0);
         }
+
+        if (!renderForward) {
+            batch.draw(ImageHandler.images.get("game/Shadow Cat/New/" + texture), x, y);
+        }
+
         return true;
     }
 
-    public static void reset(AudioClass audioClass, Random random) {
-        skipped = false;
-        catHum = false;
-        catAttackMode = true;
-        catAttackModeLock = true;
-        if (hitboxPosition == null) {
-            hitboxPosition = new float[]{-1, -1};
-        } else {
-            hitboxPosition[0] = -1;
-            hitboxPosition[1] = -1;
-        }
-        tapeWeasel = false;
-        middleAttackMoves = 0;
-        bedPatienceTimer = 4;
-        bedSpotted = false;
-        jumpscare = false;
-        attack = false;
-        shaking = false;
-        twitchingNow = false;
-        hitboxHit = false;
-        jumpscareI = 0;
-        jumpscareTime = 0.95f;
-        attackPosition = 0;
-        attackPositionTarget = 0;
-        moveToPosition = 0;
-        room = 2;
-
-        if (active) {
-            side = 2 * random.nextInt(2);
-            cooldownTimer = 8;
-            attack = false;
-            audioClass.play("crawl");
-        }
-    }
-
-    public static void roomMechanic(Data data, Random random, AudioClass audioClass) {
+    public static void roomMechanic(Random random, AudioClass audioClass) {
         shaking = hitboxHit;
-
-        if (teleports == teleportTarget && !attack && Player.blacknessTimes == 0) {
-            Player.blacknessMultiplier = 1.25f;
-            room = 2;
-            dontSoundShake = false;
-            shaking = false;
-            bedPatienceTimer = 4;
-            cooldownTimer = 20;
-            catHum = false;
-            catAttackMode = false;
-            audioClass.play("crawl");
-            tapeSpotted = false;
-            if (!tapeWeasel) {
-                tapePosition = 12f;
-                if (data.hardCassette) timeUntilWeasel = 0.01f;
-                else timeUntilWeasel = 0.25f + random.nextInt(2) + random.nextFloat();
-            }
-            side = 2 * random.nextInt(2);
-        }
 
         if (attack) {
             if (Player.snapPosition && teleportTime > 0) {
@@ -449,40 +469,38 @@ public class ShadowCat {
 
             if (shaking) {
                 timeToFlash -= Gdx.graphics.getDeltaTime();
-                patienceTimer += Gdx.graphics.getDeltaTime();
+                patienceHealthTimer += Gdx.graphics.getDeltaTime() / 2;
                 if (timeToFlash <= 0 && teleportTime == 0) {
                     Player.snapPosition = false;
                     shaking = false;
                     Player.blacknessTimes = 1;
                     Player.blacknessMultiplier = 6;
+                    patienceTimer = 1.75f;
 
                     int previousSide = side;
 
-                    side = random.nextInt(2);
-                    if (previousSide == 0) side++;
-                    else if (previousSide == 1) side *= 2;
-
-                    int differenceSide = Math.abs(side - previousSide);
+                    if (side == 0 || side == 2) side = 1;
+                    else side = 2 * random.nextInt(2);
 
                     if (previousSide < side) audioClass.play("dodgeRight");
                     else audioClass.play("dodgeLeft");
 
+                    int difference = previousSide - side;
+                    if (difference == -2 || difference == 2) patienceTimer += 0.75f;
+
+
                     if (teleports == teleportTarget) {
-                        attack = false;
-                        dontSoundShake = true;
-                        audioClass.stop("cat");
-                        audioClass.play("thunder");
-                        Player.blacknessTimes = 3;
-                        Player.blacknessMultiplier = 6;
-                        Player.blacknessDelay = 0.5f;
-                        Player.freeze = true;
+                        room = 3;
+                        if (!twitchyCat) timeToFlash = 2.75f;
+                        else {
+                            timeToFlash = 0.65f;
+                            middleAttackMoves = 8;
+                        }
+                        attackPosition = 0;
                     } else {
-                        if (ShadowRat.doorCooldown == 0) patienceTimer = 3f;
-                        else if (differenceSide == 2) patienceTimer = 2.15f;
-                        else patienceTimer = 1.5f;
                         teleportTime = 7;
                         teleports++;
-                        timeToFlash = 0.4f;
+                        timeToFlash = 0.5f;
                         attackPosition = 1 + random.nextInt(2);
                     }
                     attackPositionTarget = attackPosition;
@@ -490,9 +508,9 @@ public class ShadowCat {
                 }
             } else if (moveToPosition == 0){
                 patienceTimer -= Gdx.graphics.getDeltaTime();
-                if (patienceTimer < 0){
+                if (patienceTimer <= 0){
                     patienceTimer = 0;
-                    jumpscareI = 1;
+                    setJumpscare();
                 }
             }
 
@@ -501,12 +519,12 @@ public class ShadowCat {
                     Player.snapPosition = true;
                     Player.snapToSide = side;
                 }
-                patienceTimer = 0.5f;
+                patienceTimer = 0.65f;
                 if (random.nextInt(5) == 2 && !skipped){
                     timeToFlash = 0;
                     skipped = true;
                 } else {
-                    timeToFlash = 0.26f - random.nextInt(2) * 0.13f;
+                    timeToFlash = 0.08f + 0.08f * random.nextInt(4);
                     skipped = false;
                 }
                 moveToPosition = 3;
@@ -544,9 +562,9 @@ public class ShadowCat {
         } else {
             if (cooldownTimer > 0 && teleports != teleportTarget){
                 cooldownTimer -= Gdx.graphics.getDeltaTime();
-                if (cooldownTimer < 0){
+                if (cooldownTimer <= 0){
                     cooldownTimer = 0;
-                    jumpscareI = 1;
+                    setJumpscare();
                 }
             }
 
@@ -566,15 +584,10 @@ public class ShadowCat {
         }
     }
 
-    public static void bedMechanic(Data data, Random random, AudioClass audioClass){
+    public static void bedMechanic(Data data, AudioClass audioClass){
         if (cooldownTimer > 0 && !Player.freeze) {
-            if (catAttackModeLock) {
+            if (Monstergami.side == -1) {
                 cooldownTimer -= Gdx.graphics.getDeltaTime();
-                if (!catAttackMode && cooldownTimer <= 8) catAttackMode = true;
-                if (cooldownTimer <= 0){
-                    if (Player.room == 1) cooldownTimer += Gdx.graphics.getDeltaTime();
-                    else cooldownTimer = 0;
-                }
             }
 
             if (!tapeSpotted && timeUntilWeasel > 0){
@@ -597,37 +610,36 @@ public class ShadowCat {
                 }
             }
 
-            if (Player.room == 1 && !Player.turningAround && bedPatienceTimer > 0) {
+            if (bedPatienceTimer > 0 && bedSpotted) {
                 bedPatienceTimer -= Gdx.graphics.getDeltaTime();
                 if (bedPatienceTimer < 0) {
                     bedPatienceTimer = 0;
                 }
             }
 
-            if (bedPatienceTimer == 0) {
-                jumpscareI = 1;
+            if (Player.room == 1 && !Player.turningAround && bedPatienceTimer == 0) {
+                setJumpscare();
             }
 
-            if (cooldownTimer <= 0) {
-                if ((ShadowVinnie.room == 0 && ShadowRat.room == 0) && ((Player.side == 0 && side == 2) || (Player.side == 2 && side == 0))) {
-                    audioClass.play("peek");
-                    tapeSpotted = false;
-                    room = 1;
-                    teleportTarget = 1;
-                    timeToFlash = 0.4f;
-                    Player.lastCharacterAttack = "Shadow";
-                    bedSpotted = false;
-                    cooldownTimer = 2f;
-                    patienceTimer = 2f;
-                    teleports = 0;
-                    teleportTime = 5.5f;
-                    Player.blacknessMultiplier = 6;
-                    attackPosition = 3;
-                    attackPositionTarget = 3;
-                } else {
-                    jumpscareI = 1;
-                }
+            if (cooldownTimer > 0) return;
+            if ((Player.side == 0 && side == 2) || (Player.side == 2 && side == 0)) {
+                audioClass.play("peek");
+                tapeSpotted = false;
+                room = 1;
+                teleportTarget = 2;
+                timeToFlash = 0.5f;
+                Player.lastCharacterAttack = "Shadow";
+                bedSpotted = false;
+                cooldownTimer = 2f;
+                patienceTimer = 2f;
+                teleports = 0;
+                teleportTime = 7;
+                Player.blacknessMultiplier = 6;
+                attackPosition = 3;
+                attackPositionTarget = 3;
+                return;
             }
+            setJumpscare();
         }
     }
 
@@ -637,12 +649,13 @@ public class ShadowCat {
 
             if (shaking) {
                 timeToFlash -= Gdx.graphics.getDeltaTime();
+                patienceHealthTimer += Gdx.graphics.getDeltaTime() / 2;
                 if (timeToFlash <= 0 && moveToPosition == 0){
                     if (middleAttackMoves == 0) {
                         timeToFlash = 0;
                         Player.freeze = true;
-                        dontSoundShake = true;
                         audioClass.stop("cat");
+                        dontSoundShake = true;
                         audioClass.play("thunder");
                         Player.blacknessTimes = 3;
                         Player.blacknessDelay = 0.5f;
@@ -651,9 +664,9 @@ public class ShadowCat {
             } else if (moveToPosition == 0){
                 if (!Player.freeze) {
                     patienceTimer -= Gdx.graphics.getDeltaTime();
-                    if (patienceTimer < 0) {
+                    if (patienceTimer <= 0) {
                         patienceTimer = 0;
-                        jumpscareI = 1;
+                        setJumpscare();
                     }
                 }
             }
@@ -663,11 +676,11 @@ public class ShadowCat {
                     timeToFlash = 0;
                     skipped = true;
                 } else {
-                    timeToFlash = 0.26f - random.nextInt(2) * 0.13f;
+                    timeToFlash = 0.15f + 0.15f * random.nextInt(2);
                     middleAttackMoves--;
                     skipped = false;
                 }
-                patienceTimer = 0.6f;
+                patienceTimer = 0.65f;
                 moveToPosition = 3;
 
                 if (attackPosition == 0) {
@@ -683,7 +696,7 @@ public class ShadowCat {
                 if (moveToPosition == 3) {
                     audioClass.play("dodge");
                 }
-                moveToPosition -= Gdx.graphics.getDeltaTime() * 25;
+                moveToPosition -= Gdx.graphics.getDeltaTime() * 22;
                 if (moveToPosition < 1 && attackPosition != attackPositionTarget) {
                     attackPosition = attackPositionTarget;
                 }
@@ -708,11 +721,13 @@ public class ShadowCat {
                 Player.blacknessMultiplier = 1.25f;
                 attack = false;
                 catHum = false;
-                dontSoundShake = false;
                 room = 2;
-                catAttackMode = false;
-                cooldownTimer = 20;
-                bedPatienceTimer = 4;
+                dontSoundShake = false;
+                if (data.challenge4 && Monstergami.cooldownTimer == 0){
+                    Monstergami.pause = false;
+                }
+                cooldownTimer = 16;
+                bedPatienceTimer = 2;
                 audioClass.play("crawl");
                 shaking = false;
                 twitchingNow = false;
@@ -725,6 +740,55 @@ public class ShadowCat {
                 }
             } else if (Player.blacknessDelay == 0) {
                 Player.freeze = false;
+            }
+        }
+    }
+
+    public static void farBedMechanic(Random random, AudioClass audioClass){
+        audioClass.setVolume(catBreath, ((bedTarget - bedPosition) / bedTarget) * 0.75f);
+        float flashTimerTarget = 1.25f;
+        if (twitchyCat) flashTimerTarget++;
+
+        if (timeToFlash == flashTimerTarget){
+            bedPosition += Gdx.graphics.getDeltaTime() * 45;
+            if (bedPosition >= bedTarget || Player.room == 1){
+                bedPosition = bedTarget;
+                audioClass.stop(catBreath);
+                timeToFlash = 0;
+
+                room = 0;
+                cooldownTimer = 20;
+                catHum = false;
+            }
+        } else if (cooldownTimer > 0){
+            shaking = hitboxHit;
+
+            if (bedPosition > 0){
+                bedPosition -= Gdx.graphics.getDeltaTime() * 45;
+                if (bedPosition <= 0) bedPosition = 0;
+            } else if (shaking){
+                twitchPosition += Gdx.graphics.getDeltaTime() * 30;
+                if (twitchPosition >= 2) {
+                    twitchPosition = 0;
+                }
+
+                timeToFlash += Gdx.graphics.getDeltaTime();
+                if (timeToFlash >= flashTimerTarget){
+                    bedPosition = 1;
+                    timeToFlash = flashTimerTarget;
+                    shaking = false;
+                    twitchingNow = false;
+                }
+            } else {
+                timeToFlash -= Gdx.graphics.getDeltaTime();
+                if (timeToFlash < 0) timeToFlash = 0;
+
+                twitchPosition = 0;
+                if (!pause) cooldownTimer -= Gdx.graphics.getDeltaTime();
+
+                if (cooldownTimer > 0) return;
+                cooldownTimer = 0;
+                setJumpscare();
             }
         }
     }

@@ -68,7 +68,7 @@ public class Player {
     public static Music tape;
     public static float tapePosition;
 
-    public static void reset(){
+    public static void reset(Data data) {
         tapeStolen = false;
         lastCharacterAttack = "";
         tapeEnd = false;
@@ -79,9 +79,14 @@ public class Player {
         snapPosition = false;
         batteryAvailable = false;
         flashlightStolen = false;
-        flashlightTimer = 45;
-        flashlightAlphaVisibility = 1;
-        flashlightAlpha = 1;
+        flashlightTimer = 0;
+        if (data.faultyFlashlight){
+            flashlightAlphaVisibility = 0;
+            flickerTimer = 0;
+        } else {
+            flashlightAlphaVisibility = 1;
+            flashlightAlpha = 1;
+        }
         flickerMultiplier = 0.25f;
         flashlightShake = false;
         flashlightPosition[0] = 1024;
@@ -180,7 +185,7 @@ public class Player {
                     (int) my) / 10_000;
 
             if (pixel == -1677) {
-                flashlightTimer = 45;
+                flashlightTimer = 50;
                 batteryAvailable = false;
                 batterySound = true;
             }
@@ -202,7 +207,7 @@ public class Player {
                 }
             }
 
-            if (flashlightTimer <= 35 && !batteryAvailable) {
+            if (flashlightTimer <= 40 && !batteryAvailable) {
                 batteryAvailable = true;
             }
 

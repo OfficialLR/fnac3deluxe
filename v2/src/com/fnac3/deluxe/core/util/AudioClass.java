@@ -62,7 +62,7 @@ public class AudioClass {
     }
 
     public float getVolume(String path){
-        if (!volume.containsKey(path)) return 0;
+        if (!volume.containsKey(path)) return 1;
         return volume.get(path);
     }
 
@@ -73,7 +73,7 @@ public class AudioClass {
     }
 
     public float getPitch(String path){
-        if (!pitch.containsKey(path)) return 0;
+        if (!pitch.containsKey(path)) return 1;
         return pitch.get(path);
     }
 

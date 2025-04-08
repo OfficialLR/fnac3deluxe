@@ -2,7 +2,7 @@ package com.fnac3.deluxe.core.data;
 
 public class TextString {
 
-    private static final String version = "v2.0.0";
+    private static final String version = "Beta v2.0.1";
 
     public static String ratText = "Rat will appear from the doors. After he comes in, he will "
             + "wait to begin his attack. After his attack, he will go under the bed and you must "
@@ -20,27 +20,29 @@ public class TextString {
             + "then go back up the bed and face the opposite side of him. He will eventually peek "
             + "out of the bed, and you must shine his face to make him go away.";
 
-    public static String shadowRatText = "Shadow Rat will appear from the doors. Once he gets in, "
-            + "he will wait to begin his attack. He will teleport to any side of the room during the "
-            + "attack and his aggression gets worse as the night goes on. After his attack, he will go under "
-            + "the bed and you must find him under the bed, then go back up the bed and face the opposite side "
-            + "of him. He will eventually peek out of the bed, and you must shine his face to make him go away.";
+    public static String shadowRatText = "Rat will appear from the doors. Flash him to make him go away. "
+            + "If he gets in while Vinnie is attacking, he'll kill you. Otherwise, he'll get in and do his attack "
+            + "with more speed and moves. If Vinnie is under the bed, he'll leave. Otherwise, he'll go under the bed "
+            + "before he leaves.";
 
-    public static String shadowCatText = "Shadow Cat will be in your room immediately under the bed. He will "
-            + "eventually begin his attack. After his attack, he will be up close in the middle side. Flash him to "
-            + "make him go under the bed. If Shadow Rat is in the room, Shadow Cat will eventually come up on either "
-            + "side of the bed. After dealing with Shadow Rat, flash him to send him back under the bed.";
+    public static String shadowCatText = "Cat will be on either side of the bed. "
+            + "Once he appears, you have 15 seconds until he kills you. Flashing him pauses his timer. Flashing him "
+            + "fully will make him retreat.";
 
-    public static String shadowVinnieText = "Shadow Vinnie is AN ASSHOLE!!!";
+    public static String shadowVinnieText = "Vinnie will enter your room immediately. "
+            + "He will start attacking jumping around as well. He does NOT twitch, but he can still be flashed. "
+            + "When under the bed, he will do a cooldown before coming back up. You must look under the bed, or "
+            + "he'll kill you to prevent guessing.";
+
+    public static String candyText = "Candy will appear from either side of the bed. Flash him before he kills you.";
 
     public static String twitchyCatText = "Shadow Cat will twitch more and do another attack up close before going "
             + "under the bed.";
 
-    public static String laserPointerText = "The flashlight decreases by 50% and the hitbox sizes "
-            + "decrease by 60%.";
+    public static String laserPointerText = "The flashlight and hitbox size decreases.";
 
     public static String hardCassetteText = "The cassette must be played to keep awake and slowly progress throughout "
-            + "the night. Monsters can mess up your cassette automatically, making the night time go backwards.";
+            + "the night. Monsters will mess up your cassette automatically, tampering with the night's progression.";
 
     public static String monstergami = "Monstergami will eventually appear in the room. His aggression gets worse "
             + "throughout the night. If you flash him enough but you were slow, he will go under the bed to do another "

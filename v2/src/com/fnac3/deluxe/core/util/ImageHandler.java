@@ -113,6 +113,14 @@ public class ImageHandler {
                 case 1 -> deepscape(data);
                 case 2 -> monstergamiLoad();
             }
+            if (data.challenge4){
+                String type = Menu.nightType == 0 ? "Monster" : "Shadow";
+                String prefix = "game/Candy/" + type + "/";
+                for (int i = 1; i <= 59; i++){
+                    add(prefix + "Retreat/Left/" + i);
+                    add(prefix + "Retreat/Right/" + i);
+                }
+            }
         } else if (stateManager.getState() == StateManager.State.MENU){
             menuLoad();
         }
@@ -238,54 +246,52 @@ public class ImageHandler {
 
         prefix = "game/Shadow Cat/New/";
         if (ShadowCat.active){
-            String[] sidesList = new String[]{"Left", "Middle", "Right"};
-            for (String side: sidesList) {
-                add(prefix + "Battle/" + side + "/Left1");
-                add(prefix + "Battle/" + side + "/Left2");
-                add(prefix + "Battle/" + side + "/Right1");
-                add(prefix + "Battle/" + side + "/Right2");
-                add(prefix + "Battle/" + side + "/Up1");
-                add(prefix + "Battle/" + side + "/Up2");
-                add(prefix + "Battle/" + side + "/Down1");
-                add(prefix + "Battle/" + side + "/Down2");
-                add(prefix + "Battle/" + side + "/MoveDownLeft1");
-                add(prefix + "Battle/" + side + "/MoveDownLeft2");
-                add(prefix + "Battle/" + side + "/MoveDownRight1");
-                add(prefix + "Battle/" + side + "/MoveDownRight2");
-                add(prefix + "Battle/" + side + "/MoveLeftRight1");
-                add(prefix + "Battle/" + side + "/MoveLeftRight2");
-                add(prefix + "Battle/" + side + "/MoveUpLeft1");
-                add(prefix + "Battle/" + side + "/MoveUpLeft2");
-                add(prefix + "Battle/" + side + "/MoveUpRight1");
-                add(prefix + "Battle/" + side + "/MoveUpRight2");
+            if (ShadowVinnie.ai != 0 || ShadowRat.active){
+                for (int i = 1; i <= 2; i++){
+                    add(prefix + "Retreat/Retreat Left/Shaking" + i);
+                    add(prefix + "Retreat/Retreat Right/Shaking" + i);
+                }
+
+                for (int i = 1; i <= 20; i++) {
+                    add(prefix + "Retreat/Retreat Left/Retreat" + i);
+                    add(prefix + "Retreat/Retreat Right/Retreat" + i);
+                }
+            } else {
+                String[] sidesList = new String[]{"Left", "Middle", "Right"};
+                for (String side: sidesList) {
+                    add(prefix + "Battle/" + side + "/Left1");
+                    add(prefix + "Battle/" + side + "/Left2");
+                    add(prefix + "Battle/" + side + "/Right1");
+                    add(prefix + "Battle/" + side + "/Right2");
+                    add(prefix + "Battle/" + side + "/Up1");
+                    add(prefix + "Battle/" + side + "/Up2");
+                    add(prefix + "Battle/" + side + "/Down1");
+                    add(prefix + "Battle/" + side + "/Down2");
+                    add(prefix + "Battle/" + side + "/MoveDownLeft1");
+                    add(prefix + "Battle/" + side + "/MoveDownLeft2");
+                    add(prefix + "Battle/" + side + "/MoveDownRight1");
+                    add(prefix + "Battle/" + side + "/MoveDownRight2");
+                    add(prefix + "Battle/" + side + "/MoveLeftRight1");
+                    add(prefix + "Battle/" + side + "/MoveLeftRight2");
+                    add(prefix + "Battle/" + side + "/MoveUpLeft1");
+                    add(prefix + "Battle/" + side + "/MoveUpLeft2");
+                    add(prefix + "Battle/" + side + "/MoveUpRight1");
+                    add(prefix + "Battle/" + side + "/MoveUpRight2");
+                }
+                for (int i = 1; i <= 2; i++) {
+                    add(prefix + "Battle/Second Middle/Left" + i);
+                    add(prefix + "Battle/Second Middle/Right" + i);
+                    add(prefix + "Battle/Second Middle/Up" + i);
+                    add(prefix + "Battle/Second Middle/MoveDownLeft" + i);
+                    add(prefix + "Battle/Second Middle/MoveDownRight" + i);
+                    add(prefix + "Battle/Second Middle/MoveLeftRight" + i);
+                    add(prefix + "Under Bed/Bed" + i);
+                }
+                tapeAssetsLoad(prefix, 12);
             }
-
-
-            for (int i = 1; i <= 2; i++) {
-                add(prefix + "Battle/Second Middle/Left" + i);
-                add(prefix + "Battle/Second Middle/Right" + i);
-                add(prefix + "Battle/Second Middle/Up" + i);
-                add(prefix + "Battle/Second Middle/MoveDownLeft" + i);
-                add(prefix + "Battle/Second Middle/MoveDownRight" + i);
-                add(prefix + "Battle/Second Middle/MoveLeftRight" + i);
-                add(prefix + "Under Bed/Bed" + i);
-            }
-
             for (int i = 1; i <= 6; i++) {
                 add(prefix + "Jumpscare/Jumpscare" + i);
             }
-
-            add(prefix + "Retreat/Retreat Left/Shaking1");
-            add(prefix + "Retreat/Retreat Left/Shaking2");
-            add(prefix + "Retreat/Retreat Right/Shaking1");
-            add(prefix + "Retreat/Retreat Right/Shaking2");
-
-            for (int i = 1; i <= 20; i++) {
-                add(prefix + "Retreat/Retreat Left/Retreat" + i);
-                add(prefix + "Retreat/Retreat Right/Retreat" + i);
-            }
-
-            tapeAssetsLoad(prefix, 12);
             add("game/gameover/shadowCat");
         }
         if (ShadowVinnie.ai != 0){
@@ -308,13 +314,11 @@ public class ImageHandler {
                 add(prefix + "Jumpscare/Jumpscare" + i);
             }
 
-            bedAssetsLoad(prefix);
-            tapeAssetsLoad(prefix, 14);
-            for (int i = 1; i <= 13; i++) {
-                add(prefix + "Looking Away/Left Look Away/LookAway" + i);
-                add(prefix + "Looking Away/Middle Look Away/LookAway" + i);
-                add(prefix + "Looking Away/Right Look Away/LookAway" + i);
+            for (int i = 1; i <= 2; i++) {
+                add(prefix + "Under Bed/Bed" + i);
             }
+
+            tapeAssetsLoad(prefix, 14);
 
             add("game/gameover/shadowVinnie");
         }

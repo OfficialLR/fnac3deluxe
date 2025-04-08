@@ -776,7 +776,6 @@ public class Vinnie {
         audioClass.play("spotted");
         peekSpotted = false;
         doorCooldown = (float) (5 + 0.3 * (20 - ai));
-        if (Game.doorTurn != 1) cooldownTimer = 5;
         doorLock = false;
     }
 
@@ -815,7 +814,6 @@ public class Vinnie {
             shaking = false;
             Player.blacknessMultiplier = 1.25f;
             room = 2;
-            if (Rat.ai != 0) Game.doorTurn = 0;
             dontSoundShake = false;
             bedPatienceTimer = 1.25f + 0.1f * (20 - ai);
             cooldownTimer = 10 + 0.3f * (20 - ai);
@@ -987,7 +985,7 @@ public class Vinnie {
                         jumpTarget = 0;
                         jumpAnimation = 0;
                         attackTime = 3;
-                        if (side == 1 && Cat.side == Player.side) patienceTimer = 3;
+                        if (Cat.room == 4) patienceTimer = 3;
                         else patienceTimer = 1f;
                         patienceHealthTimer = 2f;
                         timeToFlash = 0.65f + (0.0125f * (20 - ai));

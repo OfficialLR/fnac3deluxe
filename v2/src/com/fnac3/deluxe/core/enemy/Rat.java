@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.fnac3.deluxe.core.data.Data;
 import com.fnac3.deluxe.core.input.Player;
-import com.fnac3.deluxe.core.state.Game;
 import com.fnac3.deluxe.core.util.AudioClass;
 import com.fnac3.deluxe.core.util.ImageHandler;
 import com.fnac3.deluxe.core.util.Utils;
@@ -499,7 +498,6 @@ public class Rat {
         audioClass.play("spotted");
         peekSpotted = false;
         doorCooldown = (float) (4 + 0.3 * (20 - ai));
-        if (Game.doorTurn != 0) cooldownTimer = 5;
         doorLock = false;
     }
 
@@ -536,7 +534,6 @@ public class Rat {
         if (attackTime == 0 && !attack && Player.blacknessTimes == 0) {
             Player.blacknessMultiplier = 1.25f;
             room = 2;
-            if (Vinnie.ai != 0) Game.doorTurn = 1;
             dontSoundShake = false;
             shaking = false;
             bedPatienceTimer = 5;
