@@ -78,14 +78,14 @@ public class ShadowCat {
         if (active) {
             battleMode = !ShadowRat.active && ShadowVinnie.ai == 0;
             if (battleMode) {
-                bedPatienceTimer = 2;
+                bedPatienceTimer = 1.5f;
                 side = 2 * random.nextInt(2);
                 cooldownTimer = 8;
                 room = 2;
                 attack = false;
                 audioClass.play("crawl");
             } else {
-                cooldownTimer = 20;
+                cooldownTimer = 8;
             }
         }
     }
@@ -150,7 +150,7 @@ public class ShadowCat {
             case 0:
                 cooldownTimer -= Gdx.graphics.getDeltaTime();
                 if (cooldownTimer <= 0) {
-                    cooldownTimer = 15;
+                    cooldownTimer = 24;
                     room = 4;
                     if (Candy.side != -1){
                         if (Candy.side == 0) side = 2;
@@ -622,7 +622,8 @@ public class ShadowCat {
             }
 
             if (cooldownTimer > 0) return;
-            if ((Player.side == 0 && side == 2) || (Player.side == 2 && side == 0)) {
+            boolean lookingAway = (Player.side == 0 && side == 2) || (Player.side == 2 && side == 0);
+            if (lookingAway && bedPatienceTimer < 1.5f) {
                 audioClass.play("peek");
                 tapeSpotted = false;
                 room = 1;
@@ -727,7 +728,7 @@ public class ShadowCat {
                     Monstergami.pause = false;
                 }
                 cooldownTimer = 16;
-                bedPatienceTimer = 2;
+                bedPatienceTimer = 1.5f;
                 audioClass.play("crawl");
                 shaking = false;
                 twitchingNow = false;
@@ -757,7 +758,7 @@ public class ShadowCat {
                 timeToFlash = 0;
 
                 room = 0;
-                cooldownTimer = 20;
+                cooldownTimer = 8;
                 catHum = false;
             }
         } else if (cooldownTimer > 0){

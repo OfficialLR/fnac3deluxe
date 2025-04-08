@@ -31,14 +31,14 @@ public class SoundFiles {
             "walking_in",
             "win",
             "flashlight",
-            "monstergami",
-            "monstergamiAmbience",
-            "monstergamiJumpscare",
+//            "monstergami",
+//            "monstergamiAmbience",
+//            "monstergamiJumpscare",
+//            "scaryImpact",
             "shadowJumpscare",
-            "ShadowVinnieCooldown",
+            "ShadowVinnieCooldown2",
             "OldCandyLeft",
             "OldCandyRight",
-            "sideJumpscare",
             "bedJumpscare",
             "roomJumpscare",
             "vinnieKnock",
@@ -46,7 +46,6 @@ public class SoundFiles {
             "vinnieDodge",
             "vinnieTurnLeft",
             "vinnieTurnRight",
-            "vinnieSideJumpscare",
             "vinnieBedJumpscare",
             "vinnieRoomJumpscare",
             "lookbed1",
@@ -57,8 +56,6 @@ public class SoundFiles {
             "tapeTaken",
             "tapeRewind",
             "tapeStop",
-            "tapeTaken",
-            "tapeWeasel",
-            "scaryImpact"
+            "tapeWeasel"
     };
 }

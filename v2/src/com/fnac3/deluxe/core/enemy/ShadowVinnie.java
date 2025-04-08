@@ -489,11 +489,11 @@ public class ShadowVinnie {
             shaking = false;
             Player.blacknessMultiplier = 1.25f;
             room = 2;
-            bedPatienceTimer = 2;
+            bedPatienceTimer = 1.5f;
             cooldownTimer = 32;
             side = (int) (2 * Math.random()) * 2;
-            audioClass.play("ShadowVinnieCooldown");
-            audioClass.setVolume("ShadowVinnieCooldown", 0.25f);
+            audioClass.play("ShadowVinnieCooldown2");
+            audioClass.setVolume("ShadowVinnieCooldown2", 0.25f);
             audioClass.play("crawl");
             tapeSpotted = false;
             if (!tapeWeasel && !Player.tapeStolen) {
@@ -740,7 +740,7 @@ public class ShadowVinnie {
             boolean lookingAway = (Player.side == 0 && side == 2) || (Player.side == 2 && side == 0);
 
             if (cooldownTimer > 0) return;
-            if (lookingAway && bedPatienceTimer < 2) {
+            if (lookingAway && bedPatienceTimer < 1.5f) {
                 audioClass.play("peek");
                 room = 1;
                 jumps = 5;

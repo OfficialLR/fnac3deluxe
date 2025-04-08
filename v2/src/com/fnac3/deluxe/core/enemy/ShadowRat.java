@@ -462,7 +462,7 @@ public class ShadowRat {
             room = 2;
             dontSoundShake = false;
             shaking = false;
-            bedPatienceTimer = 2;
+            bedPatienceTimer = 1.5f;
             cooldownTimer = 10;
             audioClass.play("crawl");
             tapeSpotted = false;
@@ -602,7 +602,7 @@ public class ShadowRat {
             if (cooldownTimer > 0) return;
             boolean lookingAway = (Player.side == 0 && side == 2) || (Player.side == 2 && side == 0);
 
-            if (lookingAway && bedPatienceTimer < 2) {
+            if (lookingAway && bedPatienceTimer < 1.5f) {
                 cooldownTimer = 1.75f;
                 audioClass.play("peek");
                 room = 3;

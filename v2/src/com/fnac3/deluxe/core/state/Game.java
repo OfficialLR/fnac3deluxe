@@ -858,41 +858,42 @@ public class Game {
                     Player.freeze = true;
                 }
 
-                if (jumpscareTimer > 0) return;
+                if (jumpscareTimer <= 0) {
 
-                StringBuilder gameoverBuilder = new StringBuilder("Died to ");
+                    StringBuilder gameoverBuilder = new StringBuilder("Died to ");
 
-                if (Menu.nightType == 0) {
-                    zoomCharacter = 1;
-                    gameoverAlpha = 0;
-                    switch (jumpscareCharacter) {
-                        case "Rat" -> gameoverBuilder.append("Rat");
-                        case "Cat" -> gameoverBuilder.append("Cat");
-                        case "Vinnie" -> gameoverBuilder.append("Vinnie");
-                        case "Candy" -> gameoverBuilder.append("Candy");
+                    if (Menu.nightType == 0) {
+                        zoomCharacter = 1;
+                        gameoverAlpha = 0;
+                        switch (jumpscareCharacter) {
+                            case "Rat" -> gameoverBuilder.append("Rat");
+                            case "Cat" -> gameoverBuilder.append("Cat");
+                            case "Vinnie" -> gameoverBuilder.append("Vinnie");
+                            case "Candy" -> gameoverBuilder.append("Candy");
+                        }
+                    } else if (Menu.nightType == 1) {
+                        switch (jumpscareCharacter) {
+                            case "Rat" -> gameoverBuilder.append("Shadow Rat");
+                            case "Cat" -> gameoverBuilder.append("Shadow Cat");
+                            case "Vinnie" -> gameoverBuilder.append("Shadow Vinnie");
+                            case "Candy" -> gameoverBuilder.append("Shadow Candy");
+                        }
                     }
-                } else if (Menu.nightType == 1) {
-                    switch (jumpscareCharacter){
-                        case "Rat" -> gameoverBuilder.append("Shadow Rat");
-                        case "Cat" -> gameoverBuilder.append("Shadow Cat");
-                        case "Vinnie" -> gameoverBuilder.append("Shadow Vinnie");
-                        case "Candy" -> gameoverBuilder.append("Shadow Candy");
-                    }
-                }
-                gameoverReason = gameoverBuilder.toString();
+                    gameoverReason = gameoverBuilder.toString();
 
-                gameover = true;
-                Discord.updateStatus = true;
-                gameoverScreenAlpha = 1;
-                Player.battleOverlay = 0;
-                Player.overlayTransparency = 0;
-                Player.scared = false;
-                Player.shakingPosition = 0;
-                Player.roomPosition[0] = 0;
-                Player.roomPosition[1] = 0;
-                audioClass.stopAllSounds();
-                if (zoomCharacter == 1) {
-                    audioClass.play("gameoverCustomNight");
+                    gameover = true;
+                    Discord.updateStatus = true;
+                    gameoverScreenAlpha = 1;
+                    Player.battleOverlay = 0;
+                    Player.overlayTransparency = 0;
+                    Player.scared = false;
+                    Player.shakingPosition = 0;
+                    Player.roomPosition[0] = 0;
+                    Player.roomPosition[1] = 0;
+                    audioClass.stopAllSounds();
+                    if (zoomCharacter == 1) {
+                        audioClass.play("gameoverCustomNight");
+                    }
                 }
             }
         }
