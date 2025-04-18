@@ -3,7 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/v2_jar</output-path>
     <root id="root">
       <element id="archive" name="v2.jar">
-        <element id="module-output" name="v2" />
+        <element id="module-output" name="but_better" />
       </element>
     </root>
   </artifact>
