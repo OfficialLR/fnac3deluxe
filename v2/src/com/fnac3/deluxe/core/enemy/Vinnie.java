@@ -72,7 +72,6 @@ public class Vinnie {
     }
 
     public static void update(Random random, Data data, AudioClass audioClass){
-        pause = Rat.room != 0 || Cat.room == 1 || Cat.room == 3 || Monstergami.side != -1 || Player.freeze;
         if (jumpscareI == 0) {
             vinnieLaughTime -= Gdx.graphics.getDeltaTime();
             if (vinnieLaughTime <= 0){
@@ -697,15 +696,6 @@ public class Vinnie {
                 doorCooldown = 0;
                 doorLock = true;
                 if (cooldownTimer > 0) {
-                    if (Rat.ai == 0 || Rat.side == -1) {
-                        side = random.nextInt(3);
-                    } else if (Rat.side == 0){
-                        side = 1 + random.nextInt(2);
-                    } else if (Rat.side == 1){
-                        side = 2 * random.nextInt(2);
-                    } else if (Rat.side == 2){
-                        side = random.nextInt(2);
-                    }
 
                     if (cooldownTimer > 0.375f) {
                         knockHard = (int) cooldownTimer <= 3;
@@ -825,23 +815,8 @@ public class Vinnie {
                 else timeUntilWeasel = 0.25f + random.nextInt(2) + random.nextFloat() + (0.1f * (20 - ai));
             }
 
-            if (data.challenge4
-                    && !Monstergami.wait
-                    && Monstergami.pause
-                    && Rat.room != 1
-                    && Monstergami.cooldownTimer == 0){
-                Monstergami.pause = false;
-                cooldownTimer -= 2;
-            }
-
             if (Cat.room == 2){
                 if (Cat.side == 0){
-                    side = 2;
-                } else {
-                    side = 0;
-                }
-            } else if (Rat.room == 2) {
-                if (Rat.side == 0){
                     side = 2;
                 } else {
                     side = 0;
@@ -1065,9 +1040,6 @@ public class Vinnie {
 
     public static void bedMechanic(Data data, AudioClass audioClass){
         if (cooldownTimer > 0 && !Player.freeze){
-            if (Monstergami.side == -1 && Cat.room != 1 && Rat.room != 1) {
-                cooldownTimer -= Gdx.graphics.getDeltaTime();
-            }
 
             if (!tapeSpotted && timeUntilWeasel > 0){
                 timeUntilWeasel -= Gdx.graphics.getDeltaTime();
@@ -1102,7 +1074,7 @@ public class Vinnie {
 
             boolean lookingAway = (Player.side == 0 && side == 2) || (Player.side == 2 && side == 0);
 
-            if (cooldownTimer <= 0 || (lookingAway && Rat.room == 2 && Cat.room == 2 && Monstergami.side == -1)){
+            if (cooldownTimer <= 0 || (lookingAway && Cat.room == 2 && Monstergami.side == -1)){
                 if (lookingAway && bedSpotted) {
                     audioClass.play("peek");
                     room = 3;

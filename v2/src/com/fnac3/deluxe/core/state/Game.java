@@ -17,6 +17,7 @@ import com.fnac3.deluxe.core.FNaC3Deluxe;
 import com.fnac3.deluxe.core.data.Data;
 import com.fnac3.deluxe.core.discord.Discord;
 import com.fnac3.deluxe.core.enemy.*;
+import com.fnac3.deluxe.core.functions.Knock;
 import com.fnac3.deluxe.core.input.Player;
 import com.fnac3.deluxe.core.util.AudioClass;
 import com.fnac3.deluxe.core.util.ImageHandler;
@@ -55,7 +56,7 @@ public class Game {
     private static float jumpscarePitch;
     private static float jumpscareFrameDelay;
     private static float jumpscareFrame;
-    private static float jumpscareFrameTarget;
+    private static int jumpscareFrameTarget;
     private static float jumpscareTimer;
     private static String jumpscareCharacter;
     private static String jumpscareTexture;
@@ -89,6 +90,10 @@ public class Game {
     public static Pixmap bedButtonPixmap;
     public static Pixmap tapeBackButtonPixmap;
     public static Pixmap bedBackButtonPixmap;
+
+    public static final Knock knock = new Knock();
+
+    public static final Rat rat = new Rat();
 
     private static final TextureRegion roomRegion = new TextureRegion();
 
@@ -125,11 +130,13 @@ public class Game {
         winAlpha = 0;
         Player.reset(data);
         Monstergami.reset(audioClass);
-        Rat.reset();
+
+        rat.reset(data, 0, -1, Menu.nightType, 4);
+
         Cat.reset(random, audioClass);
         Vinnie.reset();
         ShadowVinnie.reset(audioClass);
-        ShadowRat.reset();
+
         ShadowCat.reset(audioClass, random);
         Candy.reset(data.challenge4, true);
         jumpscare = false;
@@ -169,7 +176,7 @@ public class Game {
         }
     }
 
-    public static void input(StateManager stateManager, Viewport viewport, Vector3 v3, Data data){
+    public static void input(StateManager stateManager, AudioClass audioClass, Viewport viewport, Vector3 v3, Data data){
         float mx = v3.x - Player.roomPosition[0] - Player.shakingPosition;
         float my = v3.y - Player.roomPosition[1];
 
@@ -197,10 +204,8 @@ public class Game {
         }
 
         if (Player.room != 2 && (Player.scared
-                || (Menu.nightType == 0 && (Rat.shaking || (Cat.shaking && Cat.room != 4) || Vinnie.shaking))
-                || (Menu.nightType == 1 && (ShadowRat.shaking || ShadowCat.shaking || ShadowVinnie.shaking))
-                || Monstergami.shaking)){
-            Player.roomShake();
+                || audioClass.isPlaying("twitch"))){
+             Player.roomShake();
         } else {
             Player.shakingPosition = 0;
         }
@@ -235,10 +240,6 @@ public class Game {
 
         Player.buttons(mx, my);
 
-        if (Player.room == 1 && !Player.turningAround){
-            Player.foundUnderBed = Player.mouseOverEnemyInBed();
-        }
-
         if (Player.room == 2 && !Player.turningAround && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)){
             if (!Player.tapePlay && Player.tapeCondition("Play", !Player.tapeRewind && !Player.tapeStolen, mx, my)){
                 Player.tapePlay = true;
@@ -254,9 +255,8 @@ public class Game {
                 if (Player.tapePlay) {
                     Player.playPosition = 3;
                     Player.tapePlay = false;
-                    Rat.tapeWeasel = false;
+
                     Cat.tapeWeasel = false;
-                    ShadowRat.tapeWeasel = false;
                     ShadowCat.tapeWeasel = false;
                     Vinnie.tapeWeasel = false;
                     ShadowVinnie.tapeWeasel = false;
@@ -279,13 +279,6 @@ public class Game {
         }
 
         if (Menu.nightType == 0){
-            if (Rat.ai != 0) {
-                Rat.input();
-                if (Player.room == 2 && !Player.turningAround) {
-                    Rat.tapeSpotted = true;
-                }
-            }
-
             if (Cat.ai != 0) {
                 Cat.input();
                 if (Player.room == 2 && !Player.turningAround) {
@@ -300,13 +293,6 @@ public class Game {
                 }
             }
         } else {
-            if (ShadowRat.active) {
-                ShadowRat.input();
-                if (Player.room == 2 && !Player.turningAround) {
-                    ShadowRat.tapeSpotted = true;
-                }
-            }
-
             if (ShadowCat.active) {
                 ShadowCat.input();
                 if (Player.room == 2 && !Player.turningAround) {
@@ -420,7 +406,7 @@ public class Game {
         }
     }
 
-    public static void setJumpscare(String jumpscareCharacter, String jumpscareTexture, String jumpscareSound, float jumpscareTimer, float jumpscareFrameTarget, float jumpscarePitch){
+    public static void setJumpscare(String jumpscareCharacter, String jumpscareTexture, String jumpscareSound, float jumpscareTimer, int jumpscareFrameTarget, float jumpscarePitch){
         Player.blacknessTimes = 3;
         Player.blacknessMultiplier = 10;
         Player.blacknessDelay = 0;
@@ -547,8 +533,7 @@ public class Game {
             time += add;
         }
 
-        boolean tapeWeasel = Vinnie.tapeWeasel || Cat.tapeWeasel || Rat.tapeWeasel
-                || ShadowRat.tapeWeasel || ShadowCat.tapeWeasel || ShadowVinnie.tapeWeasel;
+        boolean tapeWeasel = Vinnie.tapeWeasel || Cat.tapeWeasel || ShadowCat.tapeWeasel || ShadowVinnie.tapeWeasel;
         if (data.hardCassette && tapeWeasel) time -= add;
         if (time < 0) time = 0;
 
@@ -575,7 +560,7 @@ public class Game {
                         !data.flashDebug && !data.hitboxDebug);
             } else if (Menu.nightType == 1){
                 data.writeWin("The Deepscape",
-                        ShadowRat.active && ShadowCat.active && ShadowVinnie.ai != 0
+                        rat.isActive() && ShadowCat.active && ShadowVinnie.ai != 0
                                     && !data.flashDebug && !data.hitboxDebug);
             }
             audioClass.stopAllSounds();
@@ -661,13 +646,14 @@ public class Game {
 
             boolean attack = false;
 
-            if (Menu.nightType == 0) {
-                if (Rat.ai != 0 && !jumpscare) {
-                    Rat.update(random, data, audioClass);
-                    if (Rat.attack) {
-                        attack = true;
-                    }
+            if (!jumpscare) {
+                rat.update(data, audioClass);
+                if (rat.isAttack()) {
+                    attack = true;
                 }
+            }
+
+            if (Menu.nightType == 0) {
 
                 if (Vinnie.ai != 0 && !jumpscare) {
                     Vinnie.update(random, data, audioClass);
@@ -681,19 +667,6 @@ public class Game {
                     if (Cat.attack) {
                         attack = true;
                     }
-                }
-
-                if (Monstergami.side == -1) {
-                    if (!Player.freeze && ((Rat.shaking && !Rat.twitchingNow)
-                            || (Cat.room != 4 && Cat.shaking && !Cat.twitchingNow)
-                            || (Vinnie.shaking && !Vinnie.twitchingNow))) {
-                        audioClass.play("twitch");
-                        audioClass.loop("twitch", true);
-                    }
-                }
-
-                if ((Rat.room == 1 && Rat.attack) || (Rat.room == 3 && Rat.timeToFlash > 0)) {
-                    Rat.twitchingNow = Rat.shaking && !jumpscare;
                 }
 
                 if ((Cat.room == 1 && Cat.attack) || (Cat.room == 3 && Cat.timeToFlash > 0)) {
@@ -715,19 +688,7 @@ public class Game {
                     Vinnie.twitchingNow = Vinnie.shaking && !jumpscare;
                 }
 
-                if ((!Rat.shaking || Rat.dontSoundShake)
-                        && (Cat.room == 4 || !Cat.shaking || Cat.dontSoundShake)
-                        && (!Vinnie.shaking || Vinnie.dontSoundShake)) {
-                    audioClass.stop("twitch");
-                }
-
             } else if (Menu.nightType == 1) {
-                if (ShadowRat.active && !jumpscare) {
-                    ShadowRat.update(random, data, audioClass);
-                    if (ShadowRat.attack) {
-                        attack = true;
-                    }
-                }
 
                 if (ShadowVinnie.ai != 0 && !jumpscare) {
                     ShadowVinnie.update(random, data, audioClass);
@@ -743,29 +704,33 @@ public class Game {
                     }
                 }
 
-                if (!Player.freeze && ((ShadowRat.shaking && !ShadowRat.twitchingNow)
-                        || (ShadowCat.shaking && !ShadowCat.twitchingNow))) {
+                if (!Player.freeze && (ShadowCat.shaking && !ShadowCat.twitchingNow)) {
                     audioClass.play("twitch");
                     audioClass.loop("twitch", true);
                 }
 
-                if ((ShadowRat.room == 1 && ShadowRat.attack) || (ShadowRat.room == 3 && ShadowRat.timeToFlash > 0)) {
-                    ShadowRat.twitchingNow = ShadowRat.shaking && !jumpscare;
-                }
-
                 if ((ShadowCat.room == 1 && ShadowCat.attack) || (ShadowCat.room == 3 && ShadowCat.timeToFlash > 0) || (ShadowCat.room == 4 && (int) ShadowCat.bedPosition == 0)) {
                     ShadowCat.twitchingNow = ShadowCat.shaking && !jumpscare;
-                }
-
-                if ((!ShadowRat.shaking || ShadowRat.dontSoundShake)
-                        && (!ShadowCat.shaking || ShadowCat.dontSoundShake)) {
-                    audioClass.stop("twitch");
                 }
             }
 
             if (!jumpscare) {
                 Candy.update(audioClass);
             }
+
+            if (!Player.freeze
+                    && rat.isHovered() && rat.getState() != 0){
+                if (!audioClass.isPlaying("twitch")){
+                    audioClass.play("twitch");
+                    audioClass.loop("twitch", true);
+                }
+            } else {
+                if (audioClass.isPlaying("twitch")){
+                    audioClass.stop("twitch");
+                }
+            }
+
+            knock.update(audioClass);
 
             Player.blackness();
 
@@ -810,7 +775,7 @@ public class Game {
                             pitch += 0.000435f * speed;
                         } else if (Vinnie.attack){
                             pitch += 0.000175f * speed;
-                        } else if (ShadowRat.attack) {
+                        } else if (rat.isAttack() && rat.getType() == 1) {
                             pitch += 0.001f * speed;
                         } else {
                             pitch += 0.00025f * speed;
@@ -915,10 +880,10 @@ public class Game {
                 batch.setColor(1, 1, 1, 1);
                 String name = null;
                 switch (jumpscareCharacter){
-                    case "Rat" -> name = "Rat";
-                    case "Cat" -> name = "Cat";
-                    case "Vinnie" -> name = "Vinnie";
-                    case "Candy" -> name = "Candy";
+                    case "Rat" -> name = "rat";
+                    case "Cat" -> name = "cat";
+                    case "Vinnie" -> name = "vinnie";
+                    case "Candy" -> name = "candy";
                 }
                 if (name != null) {
                     if (zoomCharacter == 0) name += 2;
@@ -1091,11 +1056,9 @@ public class Game {
 
             if (Candy.side == 2) Candy.render(batch);
 
-            if (Menu.nightType == 0) {
-                if (Rat.ai != 0 && !Rat.jumpscare) {
-                    Rat.render(batch);
-                }
+            EnemyRenderer.backRender(batch);
 
+            if (Menu.nightType == 0) {
                 if (Vinnie.ai != 0 && !Vinnie.jumpscare){
                     Vinnie.render(batch);
                 }
@@ -1108,10 +1071,6 @@ public class Game {
                     Cat.render(batch);
                 }
             } else if (Menu.nightType == 1) {
-                if (ShadowRat.active) {
-                    ShadowRat.render(batch);
-                }
-
                 if (ShadowVinnie.ai != 0) {
                     ShadowVinnie.render(batch);
                 }
@@ -1318,27 +1277,20 @@ public class Game {
 
                 float rect_value = 0;
 
-                if (Menu.nightType == 0){
-                    if (Rat.room == 1) {
-                        rect_value = Math.min(Rat.patienceHealthTimer, 2) / 2;
-                    } else if (Cat.room == 1) {
-                        rect_value = Math.min(Cat.patienceHealthTimer, 2) / 2;
-                    } else if (Vinnie.room == 1) {
-                        rect_value = Math.min(Vinnie.patienceHealthTimer, 2) / 2;
-                    }
-                }
-                batch.draw(texture, position + width, offsety + 110, (width * 2) * rect_value, 20);
+                if (rat.getState() == 1) rect_value = Math.min(rat.getTimer1(), 0.75f) / 0.75f;
+
+                batch.draw(texture, position + width, offsety + 110, width * 2 * rect_value, 20);
             }
 
             if (data.hitboxDebug && !Player.turningAround && !Player.freeze) {
                 batch.setColor(1, 0, 1, 0.25f);
 
+                hitboxRender(batch, rat.getHitboxSize(), rat.getHitbox()[0], rat.getHitbox()[1]);
+
                 if (Menu.nightType == 0 && Player.room == 0){
-                    hitboxRender(batch, Rat.hitboxDistance, Rat.hitboxPosition[0], Rat.hitboxPosition[1]);
                     hitboxRender(batch, Cat.hitboxDistance, Cat.hitboxPosition[0], Cat.hitboxPosition[1]);
                     hitboxRender(batch, Vinnie.hitboxDistance, Vinnie.hitboxPosition[0], Vinnie.hitboxPosition[1]);
                 } else if (Menu.nightType == 1 && Player.room == 0){
-                    hitboxRender(batch, ShadowRat.hitboxDistance, ShadowRat.hitboxPosition[0], ShadowRat.hitboxPosition[1]);
                     hitboxRender(batch, ShadowCat.hitboxDistance, ShadowCat.hitboxPosition[0], ShadowCat.hitboxPosition[1]);
                     hitboxRender(batch, ShadowVinnie.hitboxDistance, ShadowVinnie.hitboxPosition[0], ShadowVinnie.hitboxPosition[1]);
                 }

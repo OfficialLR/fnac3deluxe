@@ -8,6 +8,11 @@ public class Utils {
         hitbox[1] = y;
     }
 
+    public static void setHitbox(int[] hitbox, int x, int y) {
+        hitbox[0] = x;
+        hitbox[1] = y;
+    }
+
     public static float setHitboxDistance(Data data, float distance){
         if (data.pointer == 1){
             distance *= 0.8f;

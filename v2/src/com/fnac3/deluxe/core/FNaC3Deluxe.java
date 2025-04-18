@@ -201,7 +201,7 @@ public class FNaC3Deluxe extends ApplicationAdapter implements InputProcessor {
 				if (Game.restart || (!Game.gameover && !Game.win && Gdx.input.isKeyJustPressed(Input.Keys.R))) {
 					Game.start(data, audioClass);
 				}
-				Game.input(stateManager, viewport, v3, data);
+				Game.input(stateManager, audioClass, viewport, v3, data);
 				Game.update(stateManager, camera, viewport, data, audioClass);
 				Game.render(batch, viewport, data);
 				break;

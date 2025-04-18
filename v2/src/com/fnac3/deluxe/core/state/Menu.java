@@ -395,24 +395,22 @@ public class Menu {
 
         arrowHovered = mouseOver(mx, my, 260, 712, 280, 740);
         if (leftPressed){
-            if (arrowHovered && false) {
+            if (arrowHovered) {
                 arrowHovered = false;
                 modeSwitch = true;
                 nightType++;
-                if (nightType == 3) nightType = 0;
+                if (nightType == 2) nightType = 0;
 
                 if (nightType != 0 && data.oldMenu && oldMenuContext == 0) oldMenuContext = 1;
 
                 if (nightType == 1) {
-                    pitchTarget = 0.75f;
+                    pitchTarget = 0.875f;
                 } else {
                     pitchTarget = 1;
                 }
 
-                if (nightType == 0 || nightType == 2) {
-                    playDeluxe = true;
-                    audioClass.stop(menuMusicName);
-                }
+                playDeluxe = true;
+                audioClass.stop(menuMusicName);
 
                 audioClass.play("thunder");
                 whiteAlpha = 1;
@@ -672,8 +670,8 @@ public class Menu {
                 data.stars.get(s).setVisibility(nightType, data.saveData.modes.get(s).beatType != 0);
             }
 
-            if (nightType == 0 || nightType == 1) menuMusicName = "deluxeMenu";
-            else menuMusicName = "candysMenu";
+            if (nightType == 0) menuMusicName = "deluxeMenu";
+            else menuMusicName = "dreamTheme";
 
             if (playDeluxe && stateManager.getState() == StateManager.State.MENU){
                 audioClass.play(menuMusicName);
@@ -896,7 +894,6 @@ public class Menu {
                     loading = true;
                     audioClass.stopAllSounds();
                 } else if (ImageHandler.doneLoading){
-                    previousNightType = 1;
                     loading = false;
                     loaded = true;
                     staticScreen = 0;
@@ -906,7 +903,7 @@ public class Menu {
                     Discord.updateStatus = true;
                     nightType = previousNightType;
                     playDeluxe = true;
-                    if (nightType == 1) pitchTarget = 0.75f;
+                    if (nightType == 1) pitchTarget = 0.875f;
                     blackFade = 0;
                 }
             } else {
@@ -1245,21 +1242,21 @@ public class Menu {
                 star.size);
 
         //change night
-//        texture = ImageHandler.images.get("menu/nightArrow");
-//        if (arrowHovered) batch.setColor(1, 1, 1, 1);
-//        else batch.setColor(r, 0, b, 1);
-//        batch.draw(texture, 260, 712);
+        texture = ImageHandler.images.get("menu/nightArrow");
+        if (arrowHovered) batch.setColor(1, 1, 1, 1);
+        else batch.setColor(r, 0, b, 1);
+        batch.draw(texture, 260, 712);
 
         //game mode
-//        if (nightType == 0){
-//            if (rightArrow) batch.setColor(1, 1, 1, (1 - oldMenuAlpha));
-//            else batch.setColor(r, 0, b, (1 - oldMenuAlpha));
-//            batch.draw(texture, rightArrowPosition, 54);
-//
-//            if (leftArrow) batch.setColor(1, 1, 1, (1 - oldMenuAlpha));
-//            else batch.setColor(r, 0, b, (1 - oldMenuAlpha));
-//            batch.draw(texture, leftArrowPosition + 24, 54, -24, 28);
-//        }
+        if (nightType == 0){
+            if (rightArrow) batch.setColor(1, 1, 1, (1 - oldMenuAlpha));
+            else batch.setColor(r, 0, b, (1 - oldMenuAlpha));
+            batch.draw(texture, rightArrowPosition, 54);
+
+            if (leftArrow) batch.setColor(1, 1, 1, (1 - oldMenuAlpha));
+            else batch.setColor(r, 0, b, (1 - oldMenuAlpha));
+            batch.draw(texture, leftArrowPosition + 24, 54, -24, 28);
+        }
 
         //icons
         texture = ImageHandler.images.get("menu/info");

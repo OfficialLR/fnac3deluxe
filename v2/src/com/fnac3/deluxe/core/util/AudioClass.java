@@ -37,6 +37,10 @@ public class AudioClass {
         pitch.put(path, 1f);
     }
 
+    public boolean isPlaying(String path){
+        return soundIDs.containsKey(path);
+    }
+
 //    public void pause(String path){
 //        if (!soundIDs.containsKey(path)) return;
 //        soundMap.get(path).pause(soundIDs.get(path));

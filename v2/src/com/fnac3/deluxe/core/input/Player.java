@@ -119,6 +119,12 @@ public class Player {
         buttonVisibility = 0;
     }
 
+    public static void setBlackness(int blacknessTimes, float blacknessMultiplier, float blacknessDelay) {
+        Player.blacknessTimes = blacknessTimes;
+        Player.blacknessMultiplier = blacknessMultiplier;
+        Player.blacknessDelay = blacknessDelay;
+    }
+
     public static void blackness(){
         if (blacknessTimes > 0 && blackness >= 0.75f){
             blacknessTimes--;
@@ -244,130 +250,6 @@ public class Player {
         return mx >= x1 && mx <= x2 && my >= y1 && my <= y2;
     }
 
-    public static boolean mouseOverEnemyInBed(){
-        float mx = flashlightPosition[0];
-        float my = flashlightPosition[1];
-        Texture texture;
-        int x = 0;
-        int y = 179;
-
-        if (flashlightAlpha == 0) return false;
-
-        if (Menu.nightType == 0){
-            if (Rat.room == 2 && !Rat.bedSpotted) {
-                if (Rat.side == 0) {
-                    texture = ImageHandler.images.get("game/Rat/Under Bed/Bed1");
-                } else {
-                    texture = ImageHandler.images.get("game/Rat/Under Bed/Bed2");
-                    x = 1438;
-                    y = 214;
-                }
-
-                Rat.bedSpotted = Player.mouseOver(mx, my,
-                        x, x + texture.getWidth(),
-                        y, y + texture.getHeight())
-                        && Monstergami.side != 3 && !freeze;
-                if (Rat.bedSpotted) {
-                    return true;
-                }
-            }
-
-            x = 0;
-            y = 194;
-            if (Cat.ai != 0 && Cat.room == 2 && !Cat.bedSpotted) {
-                if (Cat.side == 0) {
-                    texture = ImageHandler.images.get("game/Cat/Under Bed/Bed1");
-                } else {
-                    texture = ImageHandler.images.get("game/Cat/Under Bed/Bed2");
-                    x = 1163;
-                    y = 165;
-                }
-
-                Cat.bedSpotted = Player.mouseOver(mx, my,
-                        x, x + texture.getWidth(),
-                        y, y + texture.getHeight())
-                        && Monstergami.side != 3 && !freeze;
-                if (Cat.bedSpotted) {
-                    return true;
-                }
-            }
-
-            x = 0;
-            y = 170;
-            if (Vinnie.room == 2 && !Vinnie.bedSpotted) {
-                if (Vinnie.side == 0) {
-                    texture = ImageHandler.images.get("game/Vinnie/Under Bed/Bed1");
-                } else {
-                    texture = ImageHandler.images.get("game/Vinnie/Under Bed/Bed2");
-                    x = 1249;
-                    y = 195;
-                }
-
-                Vinnie.bedSpotted = Player.mouseOver(mx, my,
-                        x, x + texture.getWidth(),
-                        y, y + texture.getHeight())
-                        && Monstergami.side != 3 && !freeze;
-                return Vinnie.bedSpotted;
-            }
-        } else if (Menu.nightType == 1){
-            if (ShadowRat.room == 2 && !ShadowRat.bedSpotted) {
-                if (ShadowRat.side == 0) {
-                    texture = ImageHandler.images.get("game/Shadow Rat/Under Bed/Bed1");
-                } else {
-                    texture = ImageHandler.images.get("game/Shadow Rat/Under Bed/Bed2");
-                    x = 1438;
-                    y = 214;
-                }
-
-                ShadowRat.bedSpotted = Player.mouseOver(mx, my,
-                        x, x + texture.getWidth(),
-                        y, y + texture.getHeight())
-                        && Monstergami.side != 3 && !freeze;
-                if (ShadowRat.bedSpotted) {
-                    return true;
-                }
-            }
-
-            x = 0;
-            y = 167;
-            if (ShadowCat.active && ShadowCat.room == 2 && !ShadowCat.bedSpotted) {
-                if (ShadowCat.side == 0) {
-                    texture = ImageHandler.images.get("game/Shadow Cat/New/Under Bed/Bed1");
-                } else {
-                    texture = ImageHandler.images.get("game/Shadow Cat/New/Under Bed/Bed2");
-                    x = 1094;
-                }
-
-                ShadowCat.bedSpotted = Player.mouseOver(mx, my,
-                        x, x + texture.getWidth(),
-                        y, y + texture.getHeight())
-                        && Monstergami.side != 3 && !freeze;
-                if (ShadowCat.bedSpotted){
-                    return true;
-                }
-            }
-
-            x = 0;
-            y = 169;
-            if (ShadowVinnie.room == 2 && !ShadowVinnie.bedSpotted) {
-                if (ShadowVinnie.side == 0) {
-                    texture = ImageHandler.images.get("game/Shadow Vinnie/Under Bed/Bed1");
-                } else {
-                    texture = ImageHandler.images.get("game/Shadow Vinnie/Under Bed/Bed2");
-                    x = 1204;
-                    y = 180;
-                }
-
-                ShadowVinnie.bedSpotted = Player.mouseOver(mx, my,
-                        x, x + texture.getWidth(),
-                        y, y + texture.getHeight())
-                        && Monstergami.side != 3 && !freeze;
-                return ShadowVinnie.bedSpotted;
-            }
-        }
-        return false;
-    }
-
     public static void disableTape(){
         if (tape.isPlaying()) {
             tape.stop();
@@ -400,91 +282,29 @@ public class Player {
         return (pixel == -1677) && tapeCondition;
     }
 
-    public static void tapeFunctionality(Data data, AudioClass audioClass){
-
-        boolean notWeaselDreamscape = Menu.nightType == 1
-                && !ShadowRat.tapeWeasel && !ShadowCat.tapeWeasel && !ShadowVinnie.tapeWeasel;
-        boolean notWeaselCustomNight = Menu.nightType == 0
-                && !Rat.tapeWeasel && !Cat.tapeWeasel && !Vinnie.tapeWeasel;
-        boolean monstergamiNight = Menu.nightType == 2;
-
-        if (Monstergami.tapeStolen && !tapeStolen){
-            tapeStolen = true;
-            audioClass.play("tapeTaken");
-            Player.blacknessTimes = 2;
-            Player.blacknessMultiplier = 6;
-
-            if (!notWeaselCustomNight) {
-                audioClass.stop("tapeWeasel");
-            }
-
-            Rat.tapeWeasel = false;
-            Rat.tapePosition = 0;
-            Rat.tapeSpotted = true;
-
-            Cat.tapeWeasel = false;
-            Cat.tapePosition = 0;
-            Cat.tapeSpotted = true;
-
-            Vinnie.tapeWeasel = false;
-            Vinnie.tapePosition = 0;
-            Vinnie.tapeSpotted = true;
-
-            if (tapePlay) {
-                tapePosition = tape.getPosition();
-                tape.stop();
-
-                tapePlay = false;
-                playPosition = 0;
-            }
-
-            if (tapeRewind) {
-                audioClass.stop("tapeRewind");
-                tapeRewind = false;
-                rewindPosition = 0;
-            }
-
-            if (tapeStop) {
-                tapeStop = false;
-                stopPosition = 0;
-            }
-        }
-
-        if (!tape.isPlaying() && !data.hardCassette){
-            if (ShadowRat.timeUntilWeasel > 0){
-                ShadowRat.timeUntilWeasel = 0;
-            }
-
-            if (ShadowCat.timeUntilWeasel > 0){
-                ShadowCat.timeUntilWeasel = 0;
-            }
-
-            if (ShadowVinnie.timeUntilWeasel > 0){
-                ShadowVinnie.timeUntilWeasel = 0;
-            }
-
-            if (Rat.timeUntilWeasel > 0){
-                Rat.timeUntilWeasel = 0;
-            }
-
-            if (Cat.timeUntilWeasel > 0){
-                Cat.timeUntilWeasel = 0;
-            }
-
-            if (Vinnie.timeUntilWeasel > 0){
-                Vinnie.timeUntilWeasel = 0;
-            }
-        }
-
+    public static void tapeWeasel(AudioClass audioClass){
         if (tape.isPlaying()){
             tapePosition = tape.getPosition();
-            if (!tapePlay || (Menu.nightType == 0
-                    && (Rat.tapeWeasel || Cat.tapeWeasel || Vinnie.tapeWeasel))
-                    || (Menu.nightType == 1
-                    && (ShadowRat.tapeWeasel || ShadowCat.tapeWeasel || ShadowVinnie.tapeWeasel))){
+        }
+        Player.playPosition = 3;
+        Player.stopPosition = 0;
+        Player.rewindPosition = 0;
+        Player.tapeRewind = false;
+        Player.tapePlay = true;
+        Player.tapeStop = false;
+        Player.tape.stop();
+        audioClass.stop("tapeRewind");
+        audioClass.play("tapeWeasel");
+        audioClass.loop("tapeWeasel", true);
+    }
+
+    public static void tapeFunctionality(Data data, AudioClass audioClass){
+        if (tape.isPlaying()){
+            tapePosition = tape.getPosition();
+            if (!tapePlay){
                 tape.stop();
             }
-        } else if (tapePlay && playPosition == 3 && (notWeaselDreamscape || notWeaselCustomNight || monstergamiNight)){
+        } else if (tapePlay && playPosition == 3 && !audioClass.isPlaying("tapeWeasel")){
             tapePlay = false;
             tapeEnd = true;
             audioClass.play("tapeButton");

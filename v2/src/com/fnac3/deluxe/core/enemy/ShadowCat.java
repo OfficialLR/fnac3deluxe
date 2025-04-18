@@ -76,7 +76,7 @@ public class ShadowCat {
         room = 0;
 
         if (active) {
-            battleMode = !ShadowRat.active && ShadowVinnie.ai == 0;
+            battleMode = ShadowVinnie.ai == 0;
             if (battleMode) {
                 bedPatienceTimer = 1.5f;
                 side = 2 * random.nextInt(2);

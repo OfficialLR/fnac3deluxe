@@ -55,23 +55,26 @@ public class Loading {
 
             firstFrame = true;
             whiteAlpha = 1;
-            Rat.ai = 0;
             Cat.ai = 0;
             Vinnie.ai = 0;
-            ShadowRat.active = false;
             ShadowCat.active = false;
 
             if (nightType == 0){
-                Rat.ai = data.RatAI;
+                Game.rat.setDifficulty(4);
+                Game.rat.setType(0);
+            } else {
+                Game.rat.setDifficulty(4);
+                Game.rat.setType(1);
+            }
+
+            if (nightType == 0){
                 Cat.ai = data.CatAI;
                 Vinnie.ai = data.VinnieAI;
             } else if (nightType == 1) {
-                ShadowRat.active = data.ShadowRatAI;
                 ShadowCat.active = data.ShadowCatAI;
 //                ShadowCat.twitchyCat = data.challenge4;
                 ShadowVinnie.ai = data.ShadowVinnieAI ? 20 : 0;
             }
-//            Monstergami.active = data.challenge4 && nightType != 1;
 
             ImageHandler.addImages(data, stateManager);
             for (String s: SoundFiles.gameSounds){
