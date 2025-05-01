@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.fnac3.deluxe.core.data.Data;
-import com.fnac3.deluxe.core.enemy.*;
 import com.fnac3.deluxe.core.state.Game;
 import com.fnac3.deluxe.core.state.Menu;
 import com.fnac3.deluxe.core.util.AudioClass;
@@ -73,14 +72,14 @@ public class Player {
         lastCharacterAttack = "";
         tapeEnd = false;
         if (tape != null) tape.stop();
-        tape = Gdx.audio.newMusic(Gdx.files.local("assets/sounds/" + (Menu.nightType == 2 ? "monstergamiTape" : "tapemusic") + ".wav"));
+        tape = Gdx.audio.newMusic(Gdx.files.local("assets/sounds/tapemusic.wav"));
         side = 1;
         justStarted = true;
         snapPosition = false;
         batteryAvailable = false;
         flashlightStolen = false;
         flashlightTimer = 0;
-        if (data.faultyFlashlight){
+        if (data.limitedBattery){
             flashlightAlphaVisibility = 0;
             flickerTimer = 0;
         } else {
@@ -205,7 +204,7 @@ public class Player {
             flashlightTimer = 0;
             batteryAvailable = false;
             flashlightAlpha = 0;
-        } else if (data.faultyFlashlight){
+        } else if (data.limitedBattery){
             if (flashlightTimer > 0) {
                 flashlightTimer -= Gdx.graphics.getDeltaTime();
                 if (flashlightTimer < 0) {
@@ -298,7 +297,7 @@ public class Player {
         audioClass.loop("tapeWeasel", true);
     }
 
-    public static void tapeFunctionality(Data data, AudioClass audioClass){
+    public static void tapeFunctionality(AudioClass audioClass){
         if (tape.isPlaying()){
             tapePosition = tape.getPosition();
             if (!tapePlay){
@@ -571,41 +570,29 @@ public class Player {
     }
 
     public static void moveTarget(){
-
         switch (snapToSide){
-            case 0:
+            case 0 -> {
                 snapTo[0] = 60;
-                if (Vinnie.attack || ShadowVinnie.attack) snapTo[1] = 246;
-                else snapTo[1] = 225;
-                break;
-            case 1:
+                snapTo[1] = 225;
+            }
+            case 1 -> {
                 snapTo[0] = 1005;
-                if (Vinnie.attack) snapTo[1] = 180;
-                else if (ShadowVinnie.attack) snapTo[1] = 236;
-                else snapTo[1] = 140;
-                break;
-            case 2:
+                snapTo[1] = 140;
+            }
+            case 2 -> {
                 snapTo[0] = 1980;
                 snapTo[1] = 256;
-                break;
+            }
         }
 
         float distance = (snapTo[0] - roomPosition[0]);
-
         distance /= 10;
-
-        if (distance > 45){
-            distance = 45;
-        }
-
+        if (distance > 45) distance = 45;
         roomPosition[0] += distance * (Gdx.graphics.getDeltaTime() * 60);
-
         distance = (snapTo[1] - roomPosition[1]);
-
         distance /= 10;
 
         roomPosition[1] += distance * (Gdx.graphics.getDeltaTime() * 60);
-
     }
 
     public static void roomShake(){

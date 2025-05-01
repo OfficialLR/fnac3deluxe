@@ -59,11 +59,11 @@ public class Discord {
             numberOfChallenges++;
         }
 
-        if (data.faultyFlashlight){
+        if (data.limitedBattery){
             numberOfChallenges++;
         }
 
-        if (data.challenge4 && !monstergamiNight){
+        if (data.classicCat){
             numberOfChallenges++;
         }
 
@@ -78,13 +78,7 @@ public class Discord {
         presence.state = builder.toString();
         builder.delete(0, builder.length());
 
-        if (monstergamiNight){
-            presence.largeImageKey = "monstergami";
-        } else if (Menu.nightType == 0){
-            presence.largeImageKey = "customnight";
-        } else {
-            presence.largeImageKey = "dreamscape";
-        }
+        presence.largeImageKey = "dreamscape";
         lib.Discord_UpdatePresence(presence);
         updateStatus = false;
     }

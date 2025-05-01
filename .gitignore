@@ -3,6 +3,7 @@ dependencyJars/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+log_error.txt
 
 ### Eclipse ###
 .apt_generated

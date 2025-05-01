@@ -38,7 +38,6 @@ public abstract class AbstractEnemy {
         this.state = state;
         hovered = false;
         setHitbox(data);
-        resetDoor(type == 0 ? 6: 4, 5, false);
     }
 
     public void resetDoor(float awayTimer, float peekTimer, boolean leave) {
@@ -286,6 +285,10 @@ public abstract class AbstractEnemy {
 
     public void setType(int type){
         this.type = type;
+    }
+
+    public int getDifficulty() {
+        return difficulty;
     }
 
     public void setDifficulty(int difficulty){

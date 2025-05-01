@@ -1,8 +1,0 @@
-Cannot invoke "com.badlogic.gdx.graphics.Texture.getWidth()" because "texture" is null
-[com.fnac3.deluxe.core.state.Game.gameoverRender(Game.java:894)
-com.fnac3.deluxe.core.state.Game.render(Game.java:1012)
-com.fnac3.deluxe.core.FNaC3Deluxe.render(FNaC3Deluxe.java:206)
-com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window.update(Lwjgl3Window.java:387)
-com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.loop(Lwjgl3Application.java:193)
-com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.<init>(Lwjgl3Application.java:167)
-com.fnac3.deluxe.desktop.DesktopLauncher.main(DesktopLauncher.java:25)]

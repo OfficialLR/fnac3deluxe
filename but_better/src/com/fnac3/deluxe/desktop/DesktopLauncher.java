@@ -30,7 +30,10 @@ public class DesktopLauncher {
 			var writer = new FileWriter(file);
 			writer.write(error);
 			writer.close();
-			JOptionPane.showMessageDialog(null, error);
+			var optionPane = new JOptionPane(error, JOptionPane.ERROR_MESSAGE);
+			var dialog = optionPane.createDialog("FNaC 3 Deluxe Error!");
+			dialog.setVisible(true);
+			dialog.requestFocusInWindow();
 		}
 	}
 }

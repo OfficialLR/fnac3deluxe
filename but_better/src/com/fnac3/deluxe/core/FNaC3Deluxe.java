@@ -56,8 +56,7 @@ public class FNaC3Deluxe extends ApplicationAdapter implements InputProcessor {
 		audioClass = new AudioClass();
 		audioClass.createSound("thunder");
 		audioClass.createSound("deluxeMenu");
-		audioClass.createSound("candysMenu");
-		audioClass.createSound("dreamTheme");
+		audioClass.createSound("menu");
 		audioClass.createSound("select");
 		data = new Data();
 		stateManager = new StateManager();
@@ -186,7 +185,7 @@ public class FNaC3Deluxe extends ApplicationAdapter implements InputProcessor {
 				Menu.render(batch, viewport, mx, my, data);
 				break;
 			case LOADING:
-				Loading.update(Menu.nightType, data, stateManager, audioClass);
+				Loading.update(data, stateManager, audioClass);
 				Loading.render(batch, viewport);
 				if (ImageHandler.doneLoading) {
 					if (data.vSync) {
@@ -211,7 +210,7 @@ public class FNaC3Deluxe extends ApplicationAdapter implements InputProcessor {
 		ImageHandler.load();
 
 		if (Discord.updateStatus) {
-			Discord.update(data, stateManager.getState().toString(), Menu.modeName, Game.hourOfGame,
+			Discord.update(data, stateManager.getState().toString(), "Shadow Rat & Cat Remake", Game.hourOfGame,
 					data.flashDebug || data.hitboxDebug);
 		}
 

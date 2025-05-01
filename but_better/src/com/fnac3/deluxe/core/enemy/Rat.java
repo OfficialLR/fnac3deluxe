@@ -9,6 +9,12 @@ import com.fnac3.deluxe.core.util.Utils;
 
 public class Rat extends AbstractEnemy {
 
+    @Override
+    public void reset(Data data, int state, int side, int type, int difficulty){
+        super.reset(data, state, side, type, difficulty);
+        resetDoor(type == 0 ? 6: 4, 5, false);
+    }
+
 	@Override
 	public void update(Data data, AudioClass audioClass) {
         if (!isActive()) return;
@@ -205,30 +211,11 @@ public class Rat extends AbstractEnemy {
     @Override
     protected void setJumpscare(){
         String name = "Rat";
-        String texture;
-        String sound;
-        float timer;
-        int frameTarget;
+        String texture = "game/enemy/Rat/Shadow/Jumpscare/Jumpscare";
+        String sound = "shadowJumpscare";
+        float timer = 0.9f;
+        int frameTarget = -1;
         float pitch = 1;
-
-        if (type == 0){
-            if (state == 2 || state == 3){
-                texture = "game/enemy/Rat/Monster/Jumpscare/Bed/Jumpscare";
-                sound = "bedJumpscare";
-                timer = 1.35f;
-                frameTarget = 28;
-            } else {
-                texture = "game/enemy/Rat/Monster/Jumpscare/Room/Jumpscare";
-                sound = "roomJumpscare";
-                timer = 1.5f;
-                frameTarget = 35;
-            }
-        } else {
-            texture = "game/enemy/Rat/Shadow/Jumpscare/Jumpscare";
-            sound = "shadowJumpscare";
-            timer = 0.9f;
-            frameTarget = -1;
-        }
         Game.setJumpscare(name, texture, sound, timer, frameTarget, pitch);
     }
 }

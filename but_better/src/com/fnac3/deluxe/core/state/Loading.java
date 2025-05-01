@@ -13,7 +13,6 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.fnac3.deluxe.core.FNaC3Deluxe;
 import com.fnac3.deluxe.core.data.Data;
 import com.fnac3.deluxe.core.discord.Discord;
-import com.fnac3.deluxe.core.enemy.*;
 import com.fnac3.deluxe.core.util.AudioClass;
 import com.fnac3.deluxe.core.util.ImageHandler;
 import com.fnac3.deluxe.core.util.SoundFiles;
@@ -30,7 +29,7 @@ public class Loading {
     public static boolean startLoading;
     private static float whiteAlpha;
 
-    public static void update(int nightType, Data data, StateManager stateManager, AudioClass audioClass){
+    public static void update(Data data, StateManager stateManager, AudioClass audioClass){
         if (!startLoading){
             FreeTypeFontGenerator fontGenerator = new FreeTypeFontGenerator(Gdx.files.local("assets/fonts/timeFont.ttf"));
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -51,32 +50,15 @@ public class Loading {
                 titleLayout.reset();
             }
 
-            titleLayout.setText(loadingLabel, Menu.modeName);
+            titleLayout.setText(loadingLabel, "Shadow Rat & Cat Remake");
 
             firstFrame = true;
             whiteAlpha = 1;
-            Cat.ai = 0;
-            Vinnie.ai = 0;
-            ShadowCat.active = false;
 
-            if (nightType == 0){
-                Game.rat.setDifficulty(4);
-                Game.rat.setType(0);
-            } else {
-                Game.rat.setDifficulty(4);
-                Game.rat.setType(1);
-            }
+            Game.rat.setDifficulty(4);
+            Game.rat.setType(1);
 
-            if (nightType == 0){
-                Cat.ai = data.CatAI;
-                Vinnie.ai = data.VinnieAI;
-            } else if (nightType == 1) {
-                ShadowCat.active = data.ShadowCatAI;
-//                ShadowCat.twitchyCat = data.challenge4;
-                ShadowVinnie.ai = data.ShadowVinnieAI ? 20 : 0;
-            }
-
-            ImageHandler.addImages(data, stateManager);
+            ImageHandler.addImages(stateManager);
             for (String s: SoundFiles.gameSounds){
                 audioClass.createSound(s);
             }
@@ -125,13 +107,7 @@ public class Loading {
 
         Texture texture = screenBuffer.getColorBufferTexture();
         texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        if (Menu.nightType == 0){
-            batch.setColor(1, 0, 0.25f, 1);
-        } else if (Menu.nightType == 1){
-            batch.setColor(0.6f, 0, 1, 1);
-        } else {
-            batch.setColor(0.35f, 0.175f, 0.95f, 1);
-        }
+        batch.setColor(0.6f, 0, 1, 1);
         batch.draw(texture, 0, texture.getHeight(), texture.getWidth(), -texture.getHeight());
         batch.setColor(1, 1, 1, whiteAlpha);
         batch.draw(FNaC3Deluxe.shapeBuffer.getColorBufferTexture(), 0 ,0);

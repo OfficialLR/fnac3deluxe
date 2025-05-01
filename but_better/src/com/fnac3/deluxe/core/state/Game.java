@@ -32,14 +32,12 @@ public class Game {
 
     private static BitmapFont gameoverFont;
     private static BitmapFont gameoverSelectionsFont;
-    private static GlyphLayout layout;
     private static float gameoverScreenAlpha;
     private static boolean fontsAdded;
     private static boolean retryButton;
     private static boolean menuButton;
     private static boolean pressedRetry;
     private static boolean pressedMenu;
-    private static boolean dreamscapeStart;
     private static float gameoverStatic;
     private static float zoomCharacter;
     private static float monstergamiCooldown;
@@ -50,7 +48,6 @@ public class Game {
 
     public static float screenAlpha;
     public static Music ambience;
-    public static Music theaterMusic;
 
     private static boolean jumpscare;
     private static float jumpscarePitch;
@@ -63,7 +60,6 @@ public class Game {
     private static String jumpscareSound;
 
     public static String gameoverReason;
-    public static String nightTime;
     public static float time;
     public static float hour;
     public static int previousHourOfGame;
@@ -94,6 +90,8 @@ public class Game {
     public static final Knock knock = new Knock();
 
     public static final Rat rat = new Rat();
+    public static final Cat cat = new Cat();
+    public static final ClassicCat classicCat = new ClassicCat();
 
     private static final TextureRegion roomRegion = new TextureRegion();
 
@@ -121,24 +119,16 @@ public class Game {
         if (ambience != null){
             ambience.stop();
         }
-        if (theaterMusic != null){
-            theaterMusic.stop();
-        }
         gameover = false;
         winDuration = 0;
         win = false;
         winAlpha = 0;
         Player.reset(data);
-        Monstergami.reset(audioClass);
 
-        rat.reset(data, 0, -1, Menu.nightType, 4);
+        rat.reset(data, 0, -1, 1, 4);
+        cat.reset(data, 2, -1, 1, 4);
+        classicCat.reset(data, 0, -1, 1, 1);
 
-        Cat.reset(random, audioClass);
-        Vinnie.reset();
-        ShadowVinnie.reset(audioClass);
-
-        ShadowCat.reset(audioClass, random);
-        Candy.reset(data.challenge4, true);
         jumpscare = false;
         jumpscareFrame = 0;
         jumpscareFrameTarget = 0;
@@ -148,7 +138,6 @@ public class Game {
 
         screenAlpha = 0;
         firstFrame = true;
-        dreamscapeStart = true;
         restart = false;
         hour = 60;
         time = 0;
@@ -190,16 +179,15 @@ public class Game {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F2)){
             stateManager.setState(StateManager.State.MENU);
             ambience.stop();
-            theaterMusic.stop();
             Player.tape.stop();
             return;
         }
 
         if (jumpscare) return;
 
-        if (!Player.turningAround && !Player.freeze && (!Player.snapPosition || data.freeScroll || Monstergami.attack || Player.room != 0)) {
+        if (!Player.turningAround && !Player.freeze && (!Player.snapPosition || data.freeScroll || Player.room != 0)) {
             Player.move(mx, my, viewport.getWorldWidth(), viewport.getWorldHeight());
-        } else if (Player.snapPosition && !data.freeScroll && !Monstergami.attack){
+        } else if (Player.snapPosition && !data.freeScroll){
             Player.moveTarget();
         }
 
@@ -255,11 +243,6 @@ public class Game {
                 if (Player.tapePlay) {
                     Player.playPosition = 3;
                     Player.tapePlay = false;
-
-                    Cat.tapeWeasel = false;
-                    ShadowCat.tapeWeasel = false;
-                    Vinnie.tapeWeasel = false;
-                    ShadowVinnie.tapeWeasel = false;
                 } else if (Player.tapeRewind) {
                     Player.rewindPosition = 3;
                     Player.tapeRewind = false;
@@ -276,40 +259,6 @@ public class Game {
             }
 
             Player.batteryInput(mx, my);
-        }
-
-        if (Menu.nightType == 0){
-            if (Cat.ai != 0) {
-                Cat.input();
-                if (Player.room == 2 && !Player.turningAround) {
-                    Cat.tapeSpotted = true;
-                }
-            }
-
-            if (Vinnie.ai != 0) {
-                Vinnie.input();
-                if (Player.room == 2 && !Player.turningAround) {
-                    Vinnie.tapeSpotted = true;
-                }
-            }
-        } else {
-            if (ShadowCat.active) {
-                ShadowCat.input();
-                if (Player.room == 2 && !Player.turningAround) {
-                    ShadowCat.tapeSpotted = true;
-                }
-            }
-
-            if (ShadowVinnie.ai != 0) {
-                ShadowVinnie.input();
-                if (Player.room == 2 && !Player.turningAround) {
-                    ShadowVinnie.tapeSpotted = true;
-                }
-            }
-        }
-
-        if (Monstergami.active) {
-            Monstergami.input();
         }
     }
 
@@ -438,8 +387,6 @@ public class Game {
             fontParameter.size = 28;
             gameoverSelectionsFont = fontGenerator.generateFont(fontParameter);
 
-            layout = new GlyphLayout();
-
             fontsAdded = true;
         }
 
@@ -493,26 +440,6 @@ public class Game {
             ambience.play();
         }
 
-        if (dreamscapeStart && data.nightMusic && Menu.modeName.contains("The Dreamscape")){
-            audioClass.play("dreamTheme");
-            audioClass.setVolume("dreamTheme", 0.2f);
-            audioClass.loop("dreamTheme", true);
-        }
-        dreamscapeStart = false;
-
-        if (theaterMusic == null) {
-            theaterMusic = Gdx.audio.newMusic(Gdx.files.local("assets/sounds/theaterMusic.wav"));
-            theaterMusic.setLooping(true);
-            theaterMusic.setVolume(0.3f);
-            if (Menu.modeName.contains("Rat & Cat Theater") && data.nightMusic){
-                theaterMusic.play();
-            }
-        } else if (!theaterMusic.isPlaying() && stateManager.getState() == StateManager.State.GAME) {
-            if (Menu.modeName.contains("Rat & Cat Theater") && data.nightMusic){
-                theaterMusic.play();
-            }
-        }
-
         if (screenAlpha < 1 && !firstFrame) {
             if (Gdx.graphics.getDeltaTime() < 0.5f) {
                 screenAlpha += Gdx.graphics.getDeltaTime() * 4;
@@ -526,15 +453,12 @@ public class Game {
 
         float add = Gdx.graphics.getDeltaTime();
 
-        if (Menu.nightType != 2 && Player.tape.isPlaying()) {
+        if (Player.tape.isPlaying()) {
             if (data.hardCassette) time += add;
             else time += add * 1.5f;
-        } else if (Menu.nightType == 2){
-            time += add;
         }
 
-        boolean tapeWeasel = Vinnie.tapeWeasel || Cat.tapeWeasel || ShadowCat.tapeWeasel || ShadowVinnie.tapeWeasel;
-        if (data.hardCassette && tapeWeasel) time -= add;
+        if (data.hardCassette && audioClass.isPlaying("tapeWeasel")) time -= add;
         if (time < 0) time = 0;
 
         if (time / hour >= 1) {
@@ -545,28 +469,14 @@ public class Game {
             }
         }
 
-        if (Menu.nightType == 2){
-            int hour = (int) time / 60;
-            nightTime = hour + ":";
-            int tempTime = (int) (time % 60);
-            if (tempTime < 10) nightTime += 0;
-            nightTime += tempTime;
-        }
-
-        if ((Menu.nightType != 2 && hourOfGame == 6) || (Menu.nightType == 2 && Player.tapeEnd)) {
+        if (hourOfGame == 6) {
             win = true;
-            if (Menu.nightType == 0){
-                data.writeWin(Menu.modeName,
-                        !data.flashDebug && !data.hitboxDebug);
-            } else if (Menu.nightType == 1){
-                data.writeWin("The Deepscape",
-                        rat.isActive() && ShadowCat.active && ShadowVinnie.ai != 0
-                                    && !data.flashDebug && !data.hitboxDebug);
-            }
+            data.writeWin(Math.min(rat.getDifficulty(), cat.getDifficulty()),
+                    rat.isActive() && cat.isActive() &&
+                    !data.flashDebug && !data.hitboxDebug && !data.timerDebug);
             audioClass.stopAllSounds();
             audioClass.play("win");
             ambience.stop();
-            theaterMusic.stop();
             Player.tape.stop();
             camera.position.x = viewport.getWorldWidth() / 2 + Player.roomPosition[0] + Player.shakingPosition;
             camera.position.y = viewport.getWorldHeight() / 2 + Player.roomPosition[1];
@@ -574,7 +484,7 @@ public class Game {
             return;
         }
 
-        Player.tapeFunctionality(data, audioClass);
+        Player.tapeFunctionality(audioClass);
         Player.flashlightFlickerMechanic(data, random);
         if (Player.batterySound){
             audioClass.play("battery");
@@ -617,19 +527,7 @@ public class Game {
                 Player.roomPosition[1] = 0;
                 audioClass.stopAllSounds();
                 ambience.stop();
-                theaterMusic.stop();
                 gameoverReason = "Fell asleep";
-                if (Menu.nightType == 2) {
-                    zoomCharacter = 1;
-                    gameoverAlpha = 0;
-                    monstergamiFrames = 9.99f;
-                    monstergamiPositive = false;
-                    monstergamiTimes = 0;
-                    monstergamiCooldown = 3 + random.nextInt(4);
-                    audioClass.play("scaryImpact");
-                    audioClass.play("monstergami");
-                    audioClass.loop("monstergami", true);
-                }
             }
         }
 
@@ -651,71 +549,6 @@ public class Game {
                 if (rat.isAttack()) {
                     attack = true;
                 }
-            }
-
-            if (Menu.nightType == 0) {
-
-                if (Vinnie.ai != 0 && !jumpscare) {
-                    Vinnie.update(random, data, audioClass);
-                    if (Vinnie.attack) {
-                        attack = true;
-                    }
-                }
-
-                if (Cat.ai != 0 && !jumpscare){
-                    Cat.update(random, data, audioClass);
-                    if (Cat.attack) {
-                        attack = true;
-                    }
-                }
-
-                if ((Cat.room == 1 && Cat.attack) || (Cat.room == 3 && Cat.timeToFlash > 0)) {
-                    Cat.twitchingNow = Cat.shaking && !jumpscare;
-                }
-
-                if (Cat.room == 4 && Cat.timeToFlash > 0) {
-                    if (Cat.shaking && !Cat.twitchingNow && !jumpscare) {
-                        audioClass.play("catPulse");
-                        audioClass.loop("catPulse", true);
-                        Cat.twitchingNow = true;
-                    } else if (jumpscare || (!Cat.shaking && Cat.twitchingNow)) {
-                        audioClass.stop("catPulse");
-                        Cat.twitchingNow = false;
-                    }
-                }
-
-                if ((Vinnie.room == 1 && Vinnie.attack) || (Vinnie.room == 3 && Vinnie.timeToFlash > 0)) {
-                    Vinnie.twitchingNow = Vinnie.shaking && !jumpscare;
-                }
-
-            } else if (Menu.nightType == 1) {
-
-                if (ShadowVinnie.ai != 0 && !jumpscare) {
-                    ShadowVinnie.update(random, data, audioClass);
-                    if (ShadowVinnie.attack) {
-                        attack = true;
-                    }
-                }
-
-                if (ShadowCat.active && !jumpscare) {
-                    ShadowCat.update(random, data, audioClass);
-                    if (ShadowCat.attack) {
-                        attack = true;
-                    }
-                }
-
-                if (!Player.freeze && (ShadowCat.shaking && !ShadowCat.twitchingNow)) {
-                    audioClass.play("twitch");
-                    audioClass.loop("twitch", true);
-                }
-
-                if ((ShadowCat.room == 1 && ShadowCat.attack) || (ShadowCat.room == 3 && ShadowCat.timeToFlash > 0) || (ShadowCat.room == 4 && (int) ShadowCat.bedPosition == 0)) {
-                    ShadowCat.twitchingNow = ShadowCat.shaking && !jumpscare;
-                }
-            }
-
-            if (!jumpscare) {
-                Candy.update(audioClass);
             }
 
             if (!Player.freeze
@@ -744,39 +577,17 @@ public class Game {
                 Player.buttonVisibility();
 
                 if (!Player.scared && attack) {
-                    if (!Monstergami.attack) {
-                        audioClass.play("attack_begin");
-                        if (!ShadowCat.attack && !Cat.attack) {
-                            audioClass.play("attack");
-                            audioClass.loop("attack", true);
-                        }
-                    } else {
-                        audioClass.play("monstergamiAmbience");
-                        audioClass.loop("monstergamiAmbience", true);
-                        audioClass.setVolume("monstergamiAmbience", 0);
-                    }
+                    audioClass.play("attack_begin");
+                    audioClass.play("attack");
+                    audioClass.loop("attack", true);
                     Player.scared = true;
                 } else if (Player.scared) {
                     if (attack) {
                         String path = "attack";
-                        if (Monstergami.attack){
-                            path = "monstergamiAmbience";
-                            if (audioClass.getVolume(path) < 0.8){
-                                float volume = audioClass.getVolume(path) + Gdx.graphics.getDeltaTime();
-                                if (volume > 0.8){
-                                    volume = 0.8f;
-                                }
-                                audioClass.setVolume(path, volume);
-                            }
-                        }
                         float pitch = audioClass.getPitch(path);
                         float speed = Gdx.graphics.getDeltaTime() * 60;
-                        if (Monstergami.attack){
-                            pitch += 0.000435f * speed;
-                        } else if (Vinnie.attack){
-                            pitch += 0.000175f * speed;
-                        } else if (rat.isAttack() && rat.getType() == 1) {
-                            pitch += 0.001f * speed;
+                        if (rat.isAttack() && rat.getType() == 1) {
+                            pitch += 0.005f * speed;
                         } else {
                             pitch += 0.00025f * speed;
                         }
@@ -789,7 +600,6 @@ public class Game {
                     } else {
                         Player.scared = false;
                         audioClass.stop("attack");
-                        audioClass.stop("monstergamiAmbience");
                     }
                 }
 
@@ -810,10 +620,6 @@ public class Game {
                     ambience.stop();
                 }
 
-                if (theaterMusic.isPlaying()){
-                    theaterMusic.stop();
-                }
-
                 if (!Player.freeze) {
                     Player.scared = false;
                     Player.buttonVisibility = 0;
@@ -824,25 +630,10 @@ public class Game {
                 }
 
                 if (jumpscareTimer <= 0) {
-
                     StringBuilder gameoverBuilder = new StringBuilder("Died to ");
-
-                    if (Menu.nightType == 0) {
-                        zoomCharacter = 1;
-                        gameoverAlpha = 0;
-                        switch (jumpscareCharacter) {
-                            case "Rat" -> gameoverBuilder.append("Rat");
-                            case "Cat" -> gameoverBuilder.append("Cat");
-                            case "Vinnie" -> gameoverBuilder.append("Vinnie");
-                            case "Candy" -> gameoverBuilder.append("Candy");
-                        }
-                    } else if (Menu.nightType == 1) {
-                        switch (jumpscareCharacter) {
-                            case "Rat" -> gameoverBuilder.append("Shadow Rat");
-                            case "Cat" -> gameoverBuilder.append("Shadow Cat");
-                            case "Vinnie" -> gameoverBuilder.append("Shadow Vinnie");
-                            case "Candy" -> gameoverBuilder.append("Shadow Candy");
-                        }
+                    switch (jumpscareCharacter) {
+                        case "Rat" -> gameoverBuilder.append("Shadow Rat");
+                        case "Cat" -> gameoverBuilder.append("Shadow Cat");
                     }
                     gameoverReason = gameoverBuilder.toString();
 
@@ -856,9 +647,6 @@ public class Game {
                     Player.roomPosition[0] = 0;
                     Player.roomPosition[1] = 0;
                     audioClass.stopAllSounds();
-                    if (zoomCharacter == 1) {
-                        audioClass.play("gameoverCustomNight");
-                    }
                 }
             }
         }
@@ -875,65 +663,16 @@ public class Game {
         batch.setColor(0, 0, 0, 1);
         batch.draw(FNaC3Deluxe.shapeBuffer.getColorBufferTexture(), 0, 0);
 
-        switch (Menu.nightType){
-            case 0 -> {
-                batch.setColor(1, 1, 1, 1);
-                String name = null;
-                switch (jumpscareCharacter){
-                    case "Rat" -> name = "rat";
-                    case "Cat" -> name = "cat";
-                    case "Vinnie" -> name = "vinnie";
-                    case "Candy" -> name = "candy";
-                }
-                if (name != null) {
-                    if (zoomCharacter == 0) name += 2;
-                    else name += 1;
-
-                    Texture texture = ImageHandler.images.get("game/gameover/" + name);
-
-                    float width = texture.getWidth() * 8;
-                    float height = texture.getHeight() * 8;
-
-                    float zoom = (float) Math.sin(Math.toRadians(zoomCharacter * 90)) * 2;
-                    width /= (3 - zoom);
-                    height /= (3 - zoom);
-
-                    float position = (float) Math.sin(Math.toRadians(gameoverAlpha * 90));
-
-                    float x = viewport.getWorldWidth() / 2 - width / 2;
-                    float y = viewport.getWorldHeight() / 2 - height / 2 + (position * 150);
-                    batch.draw(texture, x, y, width, height);
-                }
-            }
-            case 1 -> {
-                batch.setColor(0.5f, 0.5f, 0.5f, 1);
-                String name = null;
-                switch (jumpscareCharacter){
-                    case "Rat" -> name = "shadowRat";
-                    case "Cat" -> name = "shadowCat";
-                    case "Vinnie" -> name = "shadowVinnie";
-                    case "Candy" -> name = "shadowCandy";
-                }
-                if (name != null) {
-                    batch.draw(ImageHandler.images.get("game/gameover/" + name), 0, 0);
-                }
-            }
-            case 2 -> {
-                batch.setColor(1, 1, 1, 1);
-                Texture texture = ImageHandler.images.get("game/gameover/monstergami" + (10 - (int) monstergamiFrames));
-                float position = (float) Math.sin(Math.toRadians(gameoverAlpha * 90));
-                float x = viewport.getWorldWidth() / 2 - (float) texture.getWidth() / 2;
-                float y = viewport.getWorldHeight() / 2 - (float) texture.getHeight() / 2 + (position * 200);
-
-                batch.draw(texture, x, y);
-            }
+        batch.setColor(0.5f, 0.5f, 0.5f, 1);
+        String name = null;
+        switch (jumpscareCharacter){
+            case "Rat" -> name = "shadowRat";
+            case "Cat" -> name = "shadowCat";
         }
-
-        if (Menu.nightType == 0){
-            batch.setColor(1f, 0, 0, 1);
-        } else if (Menu.nightType == 1){
-            batch.setColor(0.4f, 0, 1f, 1);
+        if (name != null) {
+            batch.draw(ImageHandler.images.get("game/gameover/" + name), 0, 0);
         }
+        batch.setColor(0.4f, 0, 1f, 1);
 
         int srcFunc = batch.getBlendSrcFunc();
         int dstFunc = batch.getBlendDstFunc();
@@ -946,44 +685,28 @@ public class Game {
         batch.flush();
         batch.setBlendFunction(srcFunc, dstFunc);
 
-        if (Menu.nightType == 0){
-            gameoverFont.setColor(1, 0, 0, gameoverAlpha);
-        } else if (Menu.nightType == 1){
-            gameoverFont.setColor(0.4f, 0, 1f, gameoverAlpha);
-        }
-
+        gameoverFont.setColor(0.4f, 0, 1f, gameoverAlpha);
         gameoverFont.draw(batch, "GAME OVER", 363.5f, 424);
 
         if (retryButton) {
             gameoverSelectionsFont.setColor(1, 1, 1, gameoverAlpha);
         } else {
-            if (Menu.nightType == 0){
-                gameoverSelectionsFont.setColor(1, 0, 0, gameoverAlpha);
-            } else if (Menu.nightType == 1){
-                gameoverSelectionsFont.setColor(0.4f, 0, 1, gameoverAlpha);
-            }
+            gameoverSelectionsFont.setColor(0.4f, 0, 1, gameoverAlpha);
         }
         gameoverSelectionsFont.draw(batch, "Retry", 396, 300);
 
         if (menuButton) {
             gameoverSelectionsFont.setColor(1, 1, 1, gameoverAlpha);
         } else {
-            if (Menu.nightType == 0){
-                gameoverSelectionsFont.setColor(1, 0, 0, gameoverAlpha);
-            } else if (Menu.nightType == 1){
-                gameoverSelectionsFont.setColor(0.4f, 0, 1, gameoverAlpha);
-            }
+            gameoverSelectionsFont.setColor(0.4f, 0, 1, gameoverAlpha);
         }
         gameoverSelectionsFont.draw(batch, "Menu", 573, 300);
 
         batch.flush();
 
         texture = FNaC3Deluxe.shapeBuffer.getColorBufferTexture();
-        if (Menu.nightType == 0){
-            batch.setColor(0.5f, 0, 0, gameoverScreenAlpha);
-        } else if (Menu.nightType == 1){
-            batch.setColor(0.2f, 0, 0.5f, gameoverScreenAlpha);
-        }
+        batch.setColor(0.2f, 0, 0.5f, gameoverScreenAlpha);
+
         batch.draw(texture, Player.roomPosition[0], Player.roomPosition[1]);
         batch.setColor(1, 1, 1, 1);
 
@@ -1054,41 +777,7 @@ public class Game {
 
             batch.draw(ImageHandler.images.get(room), 0, 0);
 
-            if (Candy.side == 2) Candy.render(batch);
-
             EnemyRenderer.backRender(batch);
-
-            if (Menu.nightType == 0) {
-                if (Vinnie.ai != 0 && !Vinnie.jumpscare){
-                    Vinnie.render(batch);
-                }
-
-                if (Monstergami.active && !Monstergami.jumpscare) {
-                    Monstergami.render(batch);
-                }
-
-                if (Cat.ai != 0 && !Cat.jumpscare) {
-                    Cat.render(batch);
-                }
-            } else if (Menu.nightType == 1) {
-                if (ShadowVinnie.ai != 0) {
-                    ShadowVinnie.render(batch);
-                }
-
-                if (ShadowCat.active) {
-                    if (!ShadowCat.render(batch) && !Player.turningAround && Player.room == 0){
-                        batch.draw(ImageHandler.images.get("game/room/FullRoomBed"), 0, 0);
-                    }
-                } else if (Player.room == 0 && !Player.turningAround){
-                    batch.draw(ImageHandler.images.get("game/room/FullRoomBed"), 0, 0);
-                }
-            } else if (Menu.nightType == 2){
-                if (Monstergami.active && !Monstergami.jumpscare) {
-                    Monstergami.render(batch);
-                }
-            }
-
-            if (Candy.side == 0) Candy.render(batch);
 
             batch.flush();
 
@@ -1153,9 +842,6 @@ public class Game {
 
         roomRegion.setRegion(roomBuffer.getColorBufferTexture());
         roomRegion.flip(false, true);
-        if (Menu.nightType == 2){
-            batch.setColor(0.7f, 0.7f, 1, 1);
-        }
         batch.draw(roomRegion, position, Player.roomPosition[1]);
 
         batch.setColor(1, 1, 1, 1);
@@ -1166,7 +852,6 @@ public class Game {
         batch.setBlendFunction(GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_ONE);
 
         texture = switch (Player.lastCharacterAttack) {
-            case "Vinnie" -> ImageHandler.images.get("game/VinnieBattleOverlay");
             case "Shadow" -> ImageHandler.images.get("game/ShadowBattleOverlay");
             case "RatCat" -> ImageHandler.images.get("game/RatCatBattleOverlay");
             default -> texture;
@@ -1228,19 +913,8 @@ public class Game {
                 batch.setColor(1, 1, 1, 1);
                 break;
         }
-
-        if (Menu.nightType != 2) {
-            texture = ImageHandler.images.get("game/time/" + hourOfGame + "AM");
-            batch.draw(texture, 916 + position, 724 + Player.roomPosition[1]);
-        } else {
-            gameoverSelectionsFont.setColor(1, 1, 1, 1);
-            layout.reset();
-            layout.setText(gameoverSelectionsFont, nightTime);
-            gameoverSelectionsFont.draw(batch, layout,
-                    1024 - layout.width - 16 + position,
-                    768 - layout.height + Player.roomPosition[1]);
-        }
-
+        texture = ImageHandler.images.get("game/time/" + hourOfGame + "AM");
+        batch.draw(texture, 916 + position, 724 + Player.roomPosition[1]);
         batch.flush();
         screenBuffer.end(viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
         batch.end();
@@ -1286,14 +960,6 @@ public class Game {
                 batch.setColor(1, 0, 1, 0.25f);
 
                 hitboxRender(batch, rat.getHitboxSize(), rat.getHitbox()[0], rat.getHitbox()[1]);
-
-                if (Menu.nightType == 0 && Player.room == 0){
-                    hitboxRender(batch, Cat.hitboxDistance, Cat.hitboxPosition[0], Cat.hitboxPosition[1]);
-                    hitboxRender(batch, Vinnie.hitboxDistance, Vinnie.hitboxPosition[0], Vinnie.hitboxPosition[1]);
-                } else if (Menu.nightType == 1 && Player.room == 0){
-                    hitboxRender(batch, ShadowCat.hitboxDistance, ShadowCat.hitboxPosition[0], ShadowCat.hitboxPosition[1]);
-                    hitboxRender(batch, ShadowVinnie.hitboxDistance, ShadowVinnie.hitboxPosition[0], ShadowVinnie.hitboxPosition[1]);
-                }
 
                 batch.setColor(1, 1, 1, 1);
             }

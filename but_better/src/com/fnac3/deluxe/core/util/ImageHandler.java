@@ -2,10 +2,7 @@ package com.fnac3.deluxe.core.util;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.fnac3.deluxe.core.data.Data;
-import com.fnac3.deluxe.core.enemy.*;
 import com.fnac3.deluxe.core.state.Game;
-import com.fnac3.deluxe.core.state.Menu;
 import com.fnac3.deluxe.core.state.StateManager;
 import org.lwjgl.stb.STBImage;
 
@@ -84,16 +81,16 @@ public class ImageHandler {
         doneLoading = false;
     }
 
-    public static void addImages(Data data, StateManager stateManager){
+    public static void addImages(StateManager stateManager){
         ImageHandler.dispose();
         if (stateManager.getState() == StateManager.State.LOADING) {
-            gameLoad(data);
+            gameLoad();
         } else if (stateManager.getState() == StateManager.State.MENU){
             menuLoad();
         }
     }
 
-    private static void gameLoad(Data data){
+    private static void gameLoad(){
         roomLoad();
         Game.loadPixmaps();
         add("game/Buttons/TapePlayer");
@@ -114,20 +111,7 @@ public class ImageHandler {
         }
 
         add("game/Flashlight");
-
-        switch (Menu.nightType){
-            case 0 -> customNightLoad();
-            case 1 -> deepscape(data);
-            case 2 -> monstergamiLoad();
-        }
-        if (data.challenge4){
-            String type = Menu.nightType == 0 ? "Monster" : "Shadow";
-            String prefix = "game/Candy/" + type + "/";
-            for (int i = 1; i <= 59; i++){
-                add(prefix + "Retreat/Left/" + i);
-                add(prefix + "Retreat/Right/" + i);
-            }
-        }
+        shadowNight();
     }
 
     private static void menuLoad(){
@@ -135,61 +119,18 @@ public class ImageHandler {
             add("Static/Static" + i);
             add("Static/GameoverStatic" + i);
         }
-        for (int i = 1; i <= 32; i++){
-            add("menu/candy/monster/" + i);
-            add("menu/candy/shadow/" + i);
-        }
         add("menu/challenge_off");
         add("menu/challenge_on");
         add("menu/ready");
         add("menu/star");
-        add("menu/ai_box_off");
-        add("menu/ai_box_on");
+        add("menu/starMini");
         add("menu/ai_box");
         add("menu/info");
         add("menu/help");
-        add("menu/nightArrow");
 
         add("menu/rat");
         add("menu/cat");
-        add("menu/vinnie");
-        add("menu/shadowrat");
-        add("menu/shadowcat");
-        add("menu/shadowvinnie");
-
-        //old ui
-        add("menu/old/ai_box");
-        add("menu/old/ai_box_off");
-        add("menu/old/ai_box_on");
-        add("menu/old/ready");
-
-        add("menu/old/nightModes");
-        add("menu/old/challenges");
-        add("menu/old/settings");
-        add("menu/old/options");
-
-        for (int i = 1; i <= 6; i++){
-            add("menu/old/mode" + i);
-        }
-
-        add("menu/old/laserPointer");
-        add("menu/old/hardCassette");
-        add("menu/old/faultyFlashlight");
-        add("menu/old/monstergami");
-        add("menu/old/twitchyCat");
-
-        add("menu/old/vsync");
-        add("menu/old/oldMenu");
-        add("menu/old/nightMusic");
-        add("menu/old/menuMusic");
-
-        add("menu/old/flash");
-        add("menu/old/hitbox");
-        add("menu/old/freeScroll");
-        add("menu/old/expandedPointer");
-
-        add("menu/old/enableAll");
-        add("menu/old/disableAll");
+        add("menu/classiccat");
     }
 
     public static void roomLoad(){
@@ -230,247 +171,55 @@ public class ImageHandler {
         add(prefix + "Stop3");
     }
 
-    public static void deepscape(Data data){
+    public static void shadowNight(){
         add("game/ShadowBattleOverlay");
 
         ratLoad();
-
-        String prefix = "game/Shadow Cat/New/";
-        if (ShadowCat.active){
-            if (ShadowVinnie.ai != 0){
-                for (int i = 1; i <= 2; i++){
-                    add(prefix + "Retreat/Retreat Left/Shaking" + i);
-                    add(prefix + "Retreat/Retreat Right/Shaking" + i);
-                }
-
-                for (int i = 1; i <= 20; i++) {
-                    add(prefix + "Retreat/Retreat Left/Retreat" + i);
-                    add(prefix + "Retreat/Retreat Right/Retreat" + i);
-                }
-            } else {
-                String[] sidesList = new String[]{"Left", "Middle", "Right"};
-                for (String side: sidesList) {
-                    add(prefix + "Battle/" + side + "/Left1");
-                    add(prefix + "Battle/" + side + "/Left2");
-                    add(prefix + "Battle/" + side + "/Right1");
-                    add(prefix + "Battle/" + side + "/Right2");
-                    add(prefix + "Battle/" + side + "/Up1");
-                    add(prefix + "Battle/" + side + "/Up2");
-                    add(prefix + "Battle/" + side + "/Down1");
-                    add(prefix + "Battle/" + side + "/Down2");
-                    add(prefix + "Battle/" + side + "/MoveDownLeft1");
-                    add(prefix + "Battle/" + side + "/MoveDownLeft2");
-                    add(prefix + "Battle/" + side + "/MoveDownRight1");
-                    add(prefix + "Battle/" + side + "/MoveDownRight2");
-                    add(prefix + "Battle/" + side + "/MoveLeftRight1");
-                    add(prefix + "Battle/" + side + "/MoveLeftRight2");
-                    add(prefix + "Battle/" + side + "/MoveUpLeft1");
-                    add(prefix + "Battle/" + side + "/MoveUpLeft2");
-                    add(prefix + "Battle/" + side + "/MoveUpRight1");
-                    add(prefix + "Battle/" + side + "/MoveUpRight2");
-                }
-                for (int i = 1; i <= 2; i++) {
-                    add(prefix + "Battle/Second Middle/Left" + i);
-                    add(prefix + "Battle/Second Middle/Right" + i);
-                    add(prefix + "Battle/Second Middle/Up" + i);
-                    add(prefix + "Battle/Second Middle/MoveDownLeft" + i);
-                    add(prefix + "Battle/Second Middle/MoveDownRight" + i);
-                    add(prefix + "Battle/Second Middle/MoveLeftRight" + i);
-                    add(prefix + "Under Bed/Bed" + i);
-                }
-                tapeAssetsLoad(prefix, 12);
-            }
-            for (int i = 1; i <= 6; i++) {
-                add(prefix + "Jumpscare/Jumpscare" + i);
-            }
-            add("game/gameover/shadowCat");
-        }
-        if (ShadowVinnie.ai != 0){
-            prefix = "game/Shadow Vinnie/";
-
-            for (int i = 0; i < 48; i++){
-                add(prefix + "Battle/Left/" + i);
-                add(prefix + "Battle/Middle/" + i);
-                add(prefix + "Battle/Right/" + i);
-            }
-            for (int i = 1; i <= 21; i++) {
-                add(prefix + "Battle/Jump/Left/" + i);
-            }
-
-            for (int i = 1; i <= 19; i++) {
-                add(prefix + "Battle/Jump/Right/" + i);
-            }
-
-            for (int i = 1; i <= 6; i++) {
-                add(prefix + "Jumpscare/Jumpscare" + i);
-            }
-
-            for (int i = 1; i <= 2; i++) {
-                add(prefix + "Under Bed/Bed" + i);
-            }
-
-            tapeAssetsLoad(prefix, 14);
-
-            add("game/gameover/shadowVinnie");
-        }
-
-        monstergamiLoad();
-    }
-
-    public static void customNightLoad() {
-        add("game/RatCatBattleOverlay");
-        add("game/VinnieBattleOverlay");
-
-        ratLoad();
-
-        String prefix;
-
-        if (Cat.ai != 0) {
-            prefix = "game/Cat/";
-            triangleAttackLoad(prefix);
-
-            for (int i = 1; i <= 35; i++) {
-                add(prefix + "Jumpscare/Room Jumpscare/Jumpscare" + i);
-            }
-
-            for (int i = 1; i <= 29; i++) {
-                add(prefix + "Jumpscare/Bed Jumpscare/Jumpscare" + i);
-            }
-
-            for (int i = 1; i <= 58; i++) {
-                add(prefix + "Retreat/Retreat Left/Retreat" + i);
-                add(prefix + "Retreat/Retreat Right/Retreat" + i);
-            }
-
-            tapeAssetsLoad(prefix, 12);
-            bedAssetsLoad(prefix);
-
-            add("game/gameover/cat1");
-            add("game/gameover/cat2");
-        }
-
-        prefix = "game/Vinnie/";
-        if (Vinnie.ai != 0) {
-
-            String[] sidesList = new String[]{"Left", "Middle", "Right"};
-            for (String side : sidesList) {
-                add(prefix + "Battle/" + side + "/DownLeft1");
-                add(prefix + "Battle/" + side + "/DownLeft2");
-                add(prefix + "Battle/" + side + "/DownRight1");
-                add(prefix + "Battle/" + side + "/DownRight2");
-                add(prefix + "Battle/" + side + "/UpLeft1");
-                add(prefix + "Battle/" + side + "/UpLeft2");
-                add(prefix + "Battle/" + side + "/UpRight1");
-                add(prefix + "Battle/" + side + "/UpRight2");
-                add(prefix + "Battle/" + side + "/Up1");
-                add(prefix + "Battle/" + side + "/Up2");
-                add(prefix + "Battle/" + side + "/Down1");
-                add(prefix + "Battle/" + side + "/Down2");
-                add(prefix + "Battle/" + side + "/MoveDownLeft");
-                add(prefix + "Battle/" + side + "/MoveDownRight");
-                add(prefix + "Battle/" + side + "/MoveUpLeft");
-                add(prefix + "Battle/" + side + "/MoveUpRight");
-                add(prefix + "Battle/" + side + "/MoveLeft");
-                add(prefix + "Battle/" + side + "/MoveRight");
-            }
-
-            for (int i = 1; i <= 35; i++) {
-                add(prefix + "Jumpscare/Room Jumpscare/Jumpscare" + i);
-            }
-
-            for (int i = 1; i <= 29; i++) {
-                add(prefix + "Jumpscare/Bed Jumpscare/Jumpscare" + i);
-            }
-
-            for (int i = 1; i <= 21; i++) {
-                add(prefix + "Battle/Jump Right/Jump" + i);
-            }
-
-            for (int i = 1; i <= 19; i++) {
-                add(prefix + "Battle/Jump Left/Jump" + i);
-            }
-
-            doorAssetsLoad(prefix);
-            tapeAssetsLoad(prefix, 14);
-            bedAssetsLoad(prefix);
-            add("game/gameover/vinnie1");
-            add("game/gameover/vinnie2");
-        }
-
-        monstergamiLoad();
-    }
-
-    public static void monstergamiLoad(){
-        add("game/MonstergamiBattleOverlay");
-
-        String prefix = "game/Monstergami/";
-        if (Monstergami.active){
-            String[] sidesList = new String[]{"Left", "Middle", "Right"};
-            for (String side : sidesList) {
-                for (int i = 1; i <= 2; i++) {
-                    add(prefix + "Battle/" + side + "/Up" + i);
-                    add(prefix + "Battle/" + side + "/DownLeft" + i);
-                    add(prefix + "Battle/" + side + "/DownRight" + i);
-                    add(prefix + "Battle/" + side + "/UpLeft" + i);
-                    add(prefix + "Battle/" + side + "/UpRight" + i);
-                    add(prefix + "Battle/" + side + "/MoveUpToDownLeft" + i);
-                    add(prefix + "Battle/" + side + "/MoveDownLeftToUpRight" + i);
-                    add(prefix + "Battle/" + side + "/MoveUpRightToUpLeft" + i);
-                    add(prefix + "Battle/" + side + "/MoveUpLeftToDownRight" + i);
-                    add(prefix + "Battle/" + side + "/MoveDownRightToUp" + i);
-                }
-            }
-
-            add(prefix + "Battle/Bed/Left1");
-            add(prefix + "Battle/Bed/Left2");
-            add(prefix + "Battle/Bed/MoveLeft1");
-            add(prefix + "Battle/Bed/MoveLeft2");
-            add(prefix + "Battle/Bed/Middle1");
-            add(prefix + "Battle/Bed/Middle2");
-            add(prefix + "Battle/Bed/Right1");
-            add(prefix + "Battle/Bed/Right2");
-            add(prefix + "Battle/Bed/MoveRight1");
-            add(prefix + "Battle/Bed/MoveRight2");
-
-            for (int i = 1; i <= 6; i++){
-                add(prefix + "Jumpscare/Jumpscare" + i);
-            }
-
-            if (Menu.nightType != 2) return;
-            for (int i = 1; i <= 10; i++){
-                add("game/gameover/monstergami" + i);
-            }
-        }
     }
 
     private static void ratLoad(){
         if (!Game.rat.isActive()) return;
-        String prefix = "game/enemy/Rat/";
-        if (Game.rat.getType() == 0) prefix += "Monster/";
-        else prefix += "Shadow/";
+        String prefix = "game/enemy/Rat/Shadow/";
 
         triangleAttackLoad(prefix);
         doorAssetsLoad(prefix);
-        tapeAssetsLoad(prefix, 12);
+        tapeAssetsLoad(prefix);
         bedAssetsLoad(prefix);
-        crouchAssetsLoad(prefix);
+        crouchAssetsLoad(prefix, 2);
 
-        if (Game.rat.getType() == 0) {
-            for (int i = 1; i <= 35; i++) {
-                add(prefix + "Jumpscare/Room/Jumpscare" + i);
-            }
-
-            for (int i = 1; i <= 28; i++) {
-                add(prefix + "Jumpscare/Bed/Jumpscare" + i);
-            }
-            add("game/gameover/rat1");
-            add("game/gameover/rat2");
-            return;
-        }
         for (int i = 1; i <= 6; i++) {
             add(prefix + "Jumpscare/Jumpscare" + i);
         }
         add("game/gameover/shadowRat");
+    }
+
+    private static void catLoad(){
+        if (Game.cat.isActive()){
+            String prefix = "game/enemy/Cat/Shadow/";
+
+            triangleAttackLoad(prefix);
+            bedAssetsLoad(prefix);
+            crouchAssetsLoad(prefix, 22);
+
+            for (int i = 1; i <= 6; i++) {
+                add(prefix + "Jumpscare/Jumpscare" + i);
+            }
+        }
+
+        if (Game.classicCat.isActive()){
+            String prefix = "game/enemy/ClassicCat/Shadow/";
+
+            for (int i = 1; i <= 59; i++){
+                add(prefix + "Retreat/Left/Retreat" + i);
+                add(prefix + "Retreat/Right/Retreat" + i);
+            }
+
+            for (int i = 1; i <= 6; i++) {
+                add(prefix + "Jumpscare/Jumpscare" + i);
+            }
+        }
+
+        add("game/gameover/shadowCat");
     }
 
     private static void triangleAttackLoad(String prefix){
@@ -502,15 +251,15 @@ public class ImageHandler {
         add(prefix + "Bed/Right");
     }
 
-    private static void crouchAssetsLoad(String prefix){
-        for (int i = 1; i <= 2; i++){
+    private static void crouchAssetsLoad(String prefix, int framesTotal){
+        for (int i = 1; i <= framesTotal; i++){
             add(prefix + "Crouch/Left/Crouch" + i);
             add(prefix + "Crouch/Right/Crouch" + i);
         }
     }
 
-    private static void tapeAssetsLoad(String prefix, int limit){
-        for (int i = 1; i <= limit; i++) {
+    private static void tapeAssetsLoad(String prefix){
+        for (int i = 1; i <= 12; i++) {
             add(prefix + "Tape/Tape" + i);
         }
     }
