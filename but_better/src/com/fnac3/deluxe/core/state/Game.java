@@ -587,7 +587,7 @@ public class Game {
                         float pitch = audioClass.getPitch(path);
                         float speed = Gdx.graphics.getDeltaTime() * 60;
                         if (rat.isAttack() && rat.getType() == 1) {
-                            pitch += 0.005f * speed;
+                            pitch += 0.0003f * speed;
                         } else {
                             pitch += 0.00025f * speed;
                         }
@@ -951,7 +951,7 @@ public class Game {
 
                 float rect_value = 0;
 
-                if (rat.getState() == 1) rect_value = Math.min(rat.getTimer1(), 0.75f) / 0.75f;
+                if (rat.getState() == 1) rect_value = Math.min(rat.getTimer1(), 1);
 
                 batch.draw(texture, position + width, offsety + 110, width * 2 * rect_value, 20);
             }

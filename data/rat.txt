@@ -1,0 +1,12 @@
+{
+	"Attack/Left": [200, 200],
+	"Attack/Middle": [1250, 76],
+	"Attack/Right": [2505, 200],
+	"Bed/Left": [],
+	"Bed/Right": [],
+	"Crouch/Left": [],
+	"Crouch/Right": [],
+	"Door/Left": [],
+	"Door/Middle": [],
+
+}

@@ -38,7 +38,10 @@ public class Rat extends AbstractEnemy {
                 Game.knock.set(side, 0, 0, 0);
                 audioClass.play("walking_in");
                 Player.setBlackness(3, 6, 0);
-                resetAttack(5, 0.65f, type == 0 ? 5 : 4);
+                resetAttack(5, 0.65f, 3);
+                setInterval1(5 + (int) (Math.random() * 3));
+                setInterval2(2);
+                setInterval3(3);
                 state = 1;
                 setHitbox(data);
             }
@@ -91,22 +94,52 @@ public class Rat extends AbstractEnemy {
 
                     move = false;
                     setHitbox(data);
-                    killTimer = 0.75f;
-                    if (type == 0){
-                        if (Math.random() < 0.85f) flashTimer = (float) (0.35f + 0.05f * Math.random() * 5);
+                    if (getInterval1() == 0) {
+                        flashTimer = 0.65f - 0.05f * multiplier;
+                        setInterval1(5 + (int) (Math.random() * 3));
+                    } else if (getInterval3() == 0 || Math.random() < 0.85f) {
+                        flashTimer = 0.05f;
+                        setInterval1(getInterval1() - 1);
+                        setInterval3(3);
                     } else {
-                        if (Math.random() < 0.75f) flashTimer = 0.3f - 0.05f * multiplier;
+                        setInterval3(getInterval3() - 1);
                     }
                 }
             } else if (logic == 2){
-                audioClass.play("thunder");
-                blackout();
+                if (getInterval2() == 0) {
+                    audioClass.play("thunder");
+                    blackout();
+                } else {
+                    setInterval2(getInterval2() - 1);
+                    killTimer = 2.5f;
+                    int chance = (int) (Math.random() * 2);
+                    if (side == 0){
+                        side = 1 + chance;
+                        audioClass.play("dodgeRight");
+                    } else if (side == 1){
+                        side = 2 * chance;
+                        if (side == 0) audioClass.play("dodgeLeft");
+                        else audioClass.play("dodgeRight");
+                    } else {
+                        side = chance;
+                        audioClass.play("dodgeLeft");
+                    }
+                    flashTimer = 0.65f - 0.05f * multiplier;
+                    setInterval1(5 + (int) (Math.random() * 3));
+                    Player.snapPosition = false;
+                    Player.setBlackness(1, 6, 0);
+                    position = 0;
+                    move = false;
+                    frame = 1;
+                    targetFrame = frame;
+                    setHitbox(data);
+                    healthBar = 3;
+                }
             } else if (logic == 3){
                 setJumpscare();
             } else if (logic == 4){
-                if (type == 0) Player.lastCharacterAttack = "RatCat";
-                else Player.lastCharacterAttack = "Shadow";
-                killTimer = 0.75f;
+                Player.lastCharacterAttack = "Shadow";
+                killTimer = 0.5f;
             }
 
             timer1 = killTimer;
@@ -118,7 +151,11 @@ public class Rat extends AbstractEnemy {
             Player.setBlackness(Player.blacknessTimes, 1, Player.blacknessDelay);
             audioClass.play("crawl");
             side = (int) (Math.random() * 2) * 2;
-            resetBed(1.5f, 10, 1.5f, 12);
+            if (Game.cat.getState() == 2){
+                if (Game.cat.getSide() == 0) side = 2;
+                else side = 0;
+            }
+            resetBed(1.5f, 8, 1.5f, 12);
             setHitbox(data);
         } else if (state == 2) {
             logic = bedUpdate(data, audioClass);

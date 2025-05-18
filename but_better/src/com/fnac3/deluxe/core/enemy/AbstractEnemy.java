@@ -10,6 +10,9 @@ public abstract class AbstractEnemy {
 	protected float timer2;
 	protected float timer3;
 	protected float frame;
+    protected int interval1;
+    protected int interval2;
+    protected int interval3;
 	protected float twitchFrame;
 	protected float targetFrame;
     protected boolean move;
@@ -140,8 +143,12 @@ public abstract class AbstractEnemy {
 
         twitchUpdate();
 
-        if (!Player.freeze) {
-            if (!hovered && !move) killTimer -= time;
+        if (!Player.freeze && !move) {
+            if (!hovered) killTimer -= time / 1.75f;
+            else {
+                killTimer += time;
+                if (killTimer > 1) killTimer = 1;
+            }
         }
         if (lock) {
             if (hovered) {
@@ -153,15 +160,23 @@ public abstract class AbstractEnemy {
                     move = true;
                     hovered = false;
                 } else {
-                    lock = false;
                     returnValue = 2;
                 }
             }
-        } else if (healthBar > 0){
-            lock = Player.inititiateSnapPosition(side);
-            if (lock) {
-                killTimer += time;
-                returnValue = 4;
+            if (!Player.snapPosition && healthBar > 0){
+                Player.inititiateSnapPosition(side);
+                if (Player.snapPosition) {
+                    killTimer += time;
+                    returnValue = 4;
+                }
+            }
+        } else {
+            if (!Player.snapPosition && healthBar > 0){
+                lock = Player.inititiateSnapPosition(side);
+                if (lock) {
+                    killTimer += time;
+                    returnValue = 4;
+                }
             }
         }
 
@@ -255,9 +270,37 @@ public abstract class AbstractEnemy {
         return timer3;
     }
 
-	public int getState() {
+    public int getInterval1() {
+        return interval1;
+    }
+
+    public void setInterval1(int interval1) {
+        this.interval1 = interval1;
+    }
+
+    public int getInterval2() {
+        return interval2;
+    }
+
+    public void setInterval2(int interval2) {
+        this.interval2 = interval2;
+    }
+
+    public int getInterval3() {
+        return interval3;
+    }
+
+    public void setInterval3(int interval3) {
+        this.interval3 = interval3;
+    }
+
+    public int getState() {
 		return state;
 	}
+
+    public int getSide() {
+        return side;
+    }
 
 	public boolean isHovered() {
 		return hovered;

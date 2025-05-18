@@ -190,7 +190,7 @@ public class ImageHandler {
         for (int i = 1; i <= 6; i++) {
             add(prefix + "Jumpscare/Jumpscare" + i);
         }
-        add("game/gameover/shadowRat");
+//        add("game/gameover/shadowRat");
     }
 
     private static void catLoad(){
