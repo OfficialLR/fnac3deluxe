@@ -102,7 +102,7 @@ public class Cat extends AbstractEnemy {
                 Player.setBlackness(Player.blacknessTimes, 1, Player.blacknessDelay);
                 audioClass.play("crawl");
                 side = (int) (Math.random() * 2) * 2;
-                resetBed(1.5f, 18, -1, -1);
+                resetBed(1.5f, 20, -1, -1);
                 setHitbox(data);
             } else {
                 setInterval2(getInterval2() - 1);
@@ -142,7 +142,7 @@ public class Cat extends AbstractEnemy {
                 setHitbox(data);
             }
         } else if (state == 2) {
-            if (Game.rat.isAttack() && timer2 > 8) timer2 = 18 - multiplier * 2;
+            if (Game.rat.isAttack() && timer2 > 8) timer2 = 18 - multiplier * 1.5f;
             logic = bedUpdate(data, audioClass);
 
             if (logic == 1) {

@@ -161,7 +161,7 @@ public class Rat extends AbstractEnemy {
                 if (Game.cat.getSide() == 0) side = 2;
                 else side = 0;
             }
-            resetBed(1.5f,  8 - multiplier, 1.5f, 12);
+            resetBed(1.5f,  9 - multiplier, 1.5f, 12);
             setHitbox(data);
         } else if (state == 2) {
             logic = bedUpdate(data, audioClass);
