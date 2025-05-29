@@ -12,34 +12,37 @@ public class Rat extends AbstractEnemy {
     @Override
     public void reset(Data data, int state, int side, int type, int difficulty){
         super.reset(data, state, side, type, difficulty);
-        resetDoor(type == 0 ? 6: 4, 5, false);
+        resetDoor(6, 5, false);
     }
 
 	@Override
 	public void update(Data data, AudioClass audioClass) {
         if (!isActive()) return;
         int logic;
+        int multiplier = Game.hourOfGame / 2;
+        if (Game.hourOfGame == 12) multiplier = 0;
 		if (state == 0) {
 			logic = doorUpdate(data);
             if (logic == 1){
                 var peekTimer = timer2;
-                int mandatorySide = -1;
+                int mandatorySide = Game.cat.getState() == 3 || Game.cat.getState() == 1 ? Game.cat.side : -1;
                 int knockType = peekTimer > 3 ? 1 : 2;
                 float knockTarget = 0.1f + (Math.max(0.065f, 0.05f * peekTimer));
                 if (mandatorySide != -1) side = mandatorySide;
                 else side = (int) (Math.random() * 3);
+                reservedSide = side;
                 setHitbox(data);
                 Game.knock.set(side, 3, knockType, knockTarget);
             } else if (logic == 2){
-                timer1 = type == 0 ? 6 : 4;
+                timer1 = 6 - multiplier;
                 setHitbox(data);
                 Game.knock.retreat(side);
             } else if (logic == 3){
                 Game.knock.set(side, 0, 0, 0);
                 audioClass.play("walking_in");
                 Player.setBlackness(3, 6, 0);
-                resetAttack(5, 0.65f, 3);
-                setInterval1(5 + (int) (Math.random() * 3));
+                resetAttack(3, 0.65f, 3);
+                setInterval1(4 + (int) (Math.random() * 2));
                 setInterval2(2);
                 setInterval3(3);
                 state = 1;
@@ -47,15 +50,12 @@ public class Rat extends AbstractEnemy {
             }
 		} else if (state == 1) {
             var time = Gdx.graphics.getDeltaTime();
-            var speed = type == 0 ? time * 15 : time * 18;
+            var speed = time * 16;
             logic = attackUpdate();
 
             var killTimer = timer1;
             var flashTimer = timer2;
             var healthBar = timer3;
-
-            int multiplier = Game.hourOfGame / 2;
-            if (Game.hourOfGame == 12) multiplier = 0;
 
             if (logic == 1){
                 if (frame == targetFrame) {
@@ -96,7 +96,7 @@ public class Rat extends AbstractEnemy {
                     setHitbox(data);
                     if (getInterval1() == 0) {
                         flashTimer = 0.65f - 0.05f * multiplier;
-                        setInterval1(5 + (int) (Math.random() * 3));
+                        setInterval1(4 + (int) (Math.random() * 2));
                     } else if (getInterval3() == 0 || Math.random() < 0.85f) {
                         flashTimer = 0.05f;
                         setInterval1(getInterval1() - 1);
@@ -111,21 +111,27 @@ public class Rat extends AbstractEnemy {
                     blackout();
                 } else {
                     setInterval2(getInterval2() - 1);
-                    killTimer = 2.5f;
+                    killTimer = 3;
                     int chance = (int) (Math.random() * 2);
                     if (side == 0){
-                        side = 1 + chance;
+                        if (reservedSide == 2) side = 1;
+                        else if (reservedSide == 1) side = 2;
+                        else side = 1 + chance;
                         audioClass.play("dodgeRight");
                     } else if (side == 1){
-                        side = 2 * chance;
+                        if (reservedSide == 0) side = 2;
+                        else if (reservedSide == 2) side = 0;
+                        else side = 2 * chance;
                         if (side == 0) audioClass.play("dodgeLeft");
                         else audioClass.play("dodgeRight");
                     } else {
-                        side = chance;
+                        if (reservedSide == 0) side = 1;
+                        else if (reservedSide == 1) side = 0;
+                        else side = chance;
                         audioClass.play("dodgeLeft");
                     }
                     flashTimer = 0.65f - 0.05f * multiplier;
-                    setInterval1(5 + (int) (Math.random() * 3));
+                    setInterval1(4 + (int) (Math.random() * 2));
                     Player.snapPosition = false;
                     Player.setBlackness(1, 6, 0);
                     position = 0;
@@ -155,7 +161,7 @@ public class Rat extends AbstractEnemy {
                 if (Game.cat.getSide() == 0) side = 2;
                 else side = 0;
             }
-            resetBed(1.5f, 8, 1.5f, 12);
+            resetBed(1.5f,  8 - multiplier, 1.5f, 12);
             setHitbox(data);
         } else if (state == 2) {
             logic = bedUpdate(data, audioClass);
@@ -187,7 +193,7 @@ public class Rat extends AbstractEnemy {
             state = 4;
             audioClass.play("leave");
             Player.setBlackness(Player.blacknessTimes, 1, Player.blacknessDelay);
-            resetDoor(9, 5, true);
+            resetDoor(6 - multiplier, 5, true);
             setHitbox(data);
         } else if (state == 4) {
             frame -= Gdx.graphics.getDeltaTime() * 25;

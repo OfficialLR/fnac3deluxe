@@ -175,6 +175,7 @@ public class ImageHandler {
         add("game/ShadowBattleOverlay");
 
         ratLoad();
+        catLoad();
     }
 
     private static void ratLoad(){
@@ -193,8 +194,10 @@ public class ImageHandler {
 //        add("game/gameover/shadowRat");
     }
 
-    private static void catLoad(){
-        if (Game.cat.isActive()){
+    private static void catLoad() {
+        boolean catGameOver = false;
+        if (Game.cat.isActive()) {
+            catGameOver = true;
             String prefix = "game/enemy/Cat/Shadow/";
 
             triangleAttackLoad(prefix);
@@ -206,10 +209,11 @@ public class ImageHandler {
             }
         }
 
-        if (Game.classicCat.isActive()){
+        if (Game.classicCat.isActive()) {
+            catGameOver = true;
             String prefix = "game/enemy/ClassicCat/Shadow/";
 
-            for (int i = 1; i <= 59; i++){
+            for (int i = 1; i <= 58; i++){
                 add(prefix + "Retreat/Left/Retreat" + i);
                 add(prefix + "Retreat/Right/Retreat" + i);
             }
@@ -219,7 +223,9 @@ public class ImageHandler {
             }
         }
 
-        add("game/gameover/shadowCat");
+        if (catGameOver) {
+//            add("game/gameover/shadowCat");
+        }
     }
 
     private static void triangleAttackLoad(String prefix){

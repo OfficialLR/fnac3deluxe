@@ -13,11 +13,13 @@ public abstract class AbstractEnemy {
     protected int interval1;
     protected int interval2;
     protected int interval3;
+    protected int interval4;
 	protected float twitchFrame;
 	protected float targetFrame;
     protected boolean move;
     protected int position;
 	protected int side;
+    protected int reservedSide;
 	protected int state;
 	protected boolean lock;
 	protected boolean hovered;
@@ -101,6 +103,7 @@ public abstract class AbstractEnemy {
     }
 
 	protected int doorUpdate(Data data) {
+        if (Player.freeze) return 0;
         var awayTimer = timer1;
         var peekTimer = timer2;
         var time = Gdx.graphics.getDeltaTime();
@@ -144,7 +147,7 @@ public abstract class AbstractEnemy {
         twitchUpdate();
 
         if (!Player.freeze && !move) {
-            if (!hovered) killTimer -= time / 1.75f;
+            if (!hovered) killTimer -= time / 1.5f;
             else {
                 killTimer += time;
                 if (killTimer > 1) killTimer = 1;
@@ -164,7 +167,7 @@ public abstract class AbstractEnemy {
                 }
             }
             if (!Player.snapPosition && healthBar > 0){
-                Player.inititiateSnapPosition(side);
+                Player.inititiateSnapPosition(side, false);
                 if (Player.snapPosition) {
                     killTimer += time;
                     returnValue = 4;
@@ -172,7 +175,7 @@ public abstract class AbstractEnemy {
             }
         } else {
             if (!Player.snapPosition && healthBar > 0){
-                lock = Player.inititiateSnapPosition(side);
+                lock = Player.inititiateSnapPosition(side, false);
                 if (lock) {
                     killTimer += time;
                     returnValue = 4;
@@ -319,7 +322,7 @@ public abstract class AbstractEnemy {
     }
 
     public boolean isAttack(){
-        return lock && state == 1;
+        return lock && (state == 1 || (state == 3 && timer2 <= 0));
     }
 
     public int getType() {

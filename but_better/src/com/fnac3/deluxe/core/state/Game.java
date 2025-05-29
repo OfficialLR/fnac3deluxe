@@ -125,8 +125,8 @@ public class Game {
         winAlpha = 0;
         Player.reset(data);
 
-        rat.reset(data, 0, -1, 1, 4);
-        cat.reset(data, 2, -1, 1, 4);
+        rat.reset(data, 0, -1, 1, data.RatAI);
+        cat.reset(data, 2, Math.random() < 0.5 ? 0 : 2, 1, data.CatAI);
         classicCat.reset(data, 0, -1, 1, 1);
 
         jumpscare = false;
@@ -549,10 +549,26 @@ public class Game {
                 if (rat.isAttack()) {
                     attack = true;
                 }
+
+                cat.update(data, audioClass);
+                cat.audioUpdate(audioClass);
+                if (cat.isAttack()) {
+                    attack = true;
+                }
+
+                classicCat.update(data, audioClass);
+            }
+
+            if (classicCat.isHovered() && !audioClass.isPlaying("catPulse")) {
+                audioClass.play("catPulse");
+                audioClass.loop("catPulse", true);
+            } else if (!classicCat.isHovered() && audioClass.isPlaying("catPulse")) {
+                audioClass.stop("catPulse");
             }
 
             if (!Player.freeze
-                    && rat.isHovered() && rat.getState() != 0){
+                    && (rat.isHovered() && rat.getState() != 0)
+                    || cat.isHovered()){
                 if (!audioClass.isPlaying("twitch")){
                     audioClass.play("twitch");
                     audioClass.loop("twitch", true);
@@ -578,24 +594,25 @@ public class Game {
 
                 if (!Player.scared && attack) {
                     audioClass.play("attack_begin");
-                    audioClass.play("attack");
-                    audioClass.loop("attack", true);
+                    if (!cat.isAttack()) {
+                        audioClass.play("attack");
+                        audioClass.loop("attack", true);
+                    }
+                    if (Player.overlayTransparency != 1) Player.overlayTransparency = 1;
                     Player.scared = true;
                 } else if (Player.scared) {
                     if (attack) {
-                        String path = "attack";
-                        float pitch = audioClass.getPitch(path);
-                        float speed = Gdx.graphics.getDeltaTime() * 60;
-                        if (rat.isAttack() && rat.getType() == 1) {
-                            pitch += 0.0003f * speed;
-                        } else {
-                            pitch += 0.00025f * speed;
-                        }
+                        if (!cat.isAttack()) {
+                            String path = "attack";
+                            float pitch = audioClass.getPitch(path);
+                            float speed = Gdx.graphics.getDeltaTime() * 60;
+                            if (rat.isAttack() && rat.getType() == 1) {
+                                pitch += 0.0003f * speed;
+                            } else {
+                                pitch += 0.00025f * speed;
+                            }
 
-                        audioClass.setPitch(path, pitch);
-                        if (Player.overlayTransparency != 1) {
-                            Player.overlayTransparency = 1;
-                            Player.battleOverlay = 1;
+                            audioClass.setPitch(path, pitch);
                         }
                     } else {
                         Player.scared = false;
@@ -779,6 +796,12 @@ public class Game {
 
             EnemyRenderer.backRender(batch);
 
+            if (Player.room == 0 && !Player.turningAround) {
+                batch.draw(ImageHandler.images.get("game/room/FullRoomBed"), 0, 0);
+            }
+
+            EnemyRenderer.forthRender(batch);
+
             batch.flush();
 
             if (Player.room != 2 && !Player.turningAround) {
@@ -952,6 +975,7 @@ public class Game {
                 float rect_value = 0;
 
                 if (rat.getState() == 1) rect_value = Math.min(rat.getTimer1(), 1);
+                else if (cat.getState() == 1) rect_value = Math.min(cat.getTimer1(), 1);
 
                 batch.draw(texture, position + width, offsety + 110, width * 2 * rect_value, 20);
             }
@@ -960,6 +984,8 @@ public class Game {
                 batch.setColor(1, 0, 1, 0.25f);
 
                 hitboxRender(batch, rat.getHitboxSize(), rat.getHitbox()[0], rat.getHitbox()[1]);
+                hitboxRender(batch, cat.getHitboxSize(), cat.getHitbox()[0], cat.getHitbox()[1]);
+                hitboxRender(batch, classicCat.getHitboxSize(), classicCat.getHitbox()[0], classicCat.getHitbox()[1]);
 
                 batch.setColor(1, 1, 1, 1);
             }

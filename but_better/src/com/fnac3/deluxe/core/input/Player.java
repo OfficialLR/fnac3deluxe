@@ -163,8 +163,13 @@ public class Player {
         }
     }
 
-    public static boolean inititiateSnapPosition(int side){
-        if (side == 0 && Player.roomPosition[0] < 450 && Player.flashlightPosition[0] < 600) {
+    public static boolean inititiateSnapPosition(int side, boolean force){
+        if (Player.turningPosition > 0 || Player.room != 0) return false;
+        if (force) {
+            Player.snapPosition = true;
+            Player.snapToSide = side;
+            return true;
+        } else if (side == 0 && Player.roomPosition[0] < 450 && Player.flashlightPosition[0] < 600) {
             Player.snapPosition = true;
             Player.snapToSide = side;
             return true;
@@ -333,7 +338,7 @@ public class Player {
 
         if (tapeRewind){
             if (tapePosition > 0) {
-                tapePosition -= Gdx.graphics.getDeltaTime() * 3;
+                tapePosition -= Gdx.graphics.getDeltaTime() * 3.5f;
                 if (tapePosition < 0) {
                     tapePosition = 0;
                 }

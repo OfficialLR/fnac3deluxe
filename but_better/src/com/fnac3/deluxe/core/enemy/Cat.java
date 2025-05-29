@@ -5,6 +5,7 @@ import com.fnac3.deluxe.core.data.Data;
 import com.fnac3.deluxe.core.input.Player;
 import com.fnac3.deluxe.core.state.Game;
 import com.fnac3.deluxe.core.util.AudioClass;
+import com.fnac3.deluxe.core.util.Utils;
 
 public class Cat extends AbstractEnemy {
 
@@ -12,23 +13,26 @@ public class Cat extends AbstractEnemy {
     public void reset(Data data, int state, int side, int type, int difficulty){
         super.reset(data, state, side, type, difficulty);
         if (isActive()) resetBed(1.5f, 8, 0, 0);
+        else this.state = 0;
+        interval3 = 0;
+        interval4 = 0;
+        reservedSide = -1;
     }
 
     @Override
     public void update(Data data, AudioClass audioClass) {
         if (!isActive()) return;
         int logic;
+        int multiplier = Game.hourOfGame / 2;
+        if (Game.hourOfGame == 12) multiplier = 0;
         if (state == 1) {
             var time = Gdx.graphics.getDeltaTime();
-            var speed = type == 0 ? time * 15 : time * 18;
+            var speed = time * 16;
             logic = attackUpdate();
 
             var killTimer = timer1;
             var flashTimer = timer2;
             var healthBar = timer3;
-
-            int multiplier = Game.hourOfGame / 2;
-            if (Game.hourOfGame == 12) multiplier = 0;
 
             if (logic == 1){
                 if (frame == targetFrame) {
@@ -68,22 +72,22 @@ public class Cat extends AbstractEnemy {
                     move = false;
                     setHitbox(data);
                     if (getInterval1() == 0 || Math.random() < 0.5f) {
-                        if (Math.random() < 0.5f) {
-                            flashTimer = 0.125f * (int) (Math.random() * 3) + 1;
-                            setInterval1(3);
-                        }
+                        flashTimer = 0.2f + (int) (Math.random() * 3) * 0.1f;
+                        setInterval1(3);
                     } else {
-                        flashTimer = 0.01f;
+                        if (Math.random() < 0.5f) {
+                            flashTimer = 0.01f;
+                        }
                         setInterval1(getInterval1() - 1);
                     }
                 }
             } else if (logic == 2){
                 audioClass.play("thunder");
                 blackout();
+                if (getInterval2() == 0) audioClass.stop("cat");
             } else if (logic == 3){
                 setJumpscare();
             } else if (logic == 4){
-                Player.lastCharacterAttack = "Shadow";
                 killTimer = 0.5f;
             }
 
@@ -98,22 +102,47 @@ public class Cat extends AbstractEnemy {
                 Player.setBlackness(Player.blacknessTimes, 1, Player.blacknessDelay);
                 audioClass.play("crawl");
                 side = (int) (Math.random() * 2) * 2;
-                resetBed(1.5f, 10, 1.5f, 12);
+                resetBed(1.5f, 18, -1, -1);
                 setHitbox(data);
             } else {
                 setInterval2(getInterval2() - 1);
                 int chance = (int) (Math.random() * 2);
                 if (side == 0){
                     side = 1 + chance;
+                    if (reservedSide == side) {
+                        if (interval4 == 0) interval4++;
+                        else {
+                            if (reservedSide == 2) side = 1;
+                            else side = 2;
+                            interval4 = 0;
+                        }
+                    } else interval4 = 0;
                 } else {
                     side = chance;
+                    if (reservedSide == side) {
+                        if (interval4 == 0) interval4++;
+                        else {
+                            if (reservedSide == 0) side = 1;
+                            else side = 0;
+                            interval4 = 0;
+                        }
+                    } else interval4 = 0;
                 }
-                resetAttack(2, 0.4f, 3.5f);
+                reservedSide = side;
+                resetAttack(1.75f, 0.4f, 4);
+                if (interval3 == 0){
+                    interval3++;
+                } else {
+                    position = (int) (1 + (Math.random() * 2));
+                    if (position == 1) frame = 3;
+                    else if (position == 2) frame = 5;
+                    targetFrame = frame;
+                }
                 setInterval1(3);
-                setInterval2(1);
                 setHitbox(data);
             }
         } else if (state == 2) {
+            if (Game.rat.isAttack() && timer2 > 8) timer2 = 18 - multiplier * 2;
             logic = bedUpdate(data, audioClass);
 
             if (logic == 1) {
@@ -121,7 +150,8 @@ public class Cat extends AbstractEnemy {
                 boolean lookingAway = (Player.side == 0 && side == 2) || (Player.side == 2 && side == 0);
                 if (timer1 < 1.5f && lookingAway) {
                     state = 3;
-                    resetCrouch(1.75f, 2.25f);
+                    Player.lastCharacterAttack = "Shadow";
+                    resetCrouch(1.75f, 1.5f);
                     setHitbox(data);
                 } else {
                     logic = 2;
@@ -132,7 +162,7 @@ public class Cat extends AbstractEnemy {
             }
         } else if (state == 3) {
             var healthBar = timer2;
-            Player.overlayTransparency = healthBar / 2.25f;
+            Player.overlayTransparency = 1 - healthBar / 1.5f;
             logic = crouchUpdate();
             if (logic == 1) {
                 setJumpscare();
@@ -140,27 +170,60 @@ public class Cat extends AbstractEnemy {
                 hovered = false;
                 frame = 2;
                 lock = true;
-                Player.inititiateSnapPosition(side);
+                setHitbox(data);
+                Player.inititiateSnapPosition(side, true);
                 Player.scared = true;
             }
             if (healthBar > 0) return;
-            frame += Gdx.graphics.getDeltaTime();
+            frame += Gdx.graphics.getDeltaTime() * 60;
             if (frame < 22) return;
 
             state = 1;
-            resetAttack(0.75f, 0.4f, 1.75f);
+            resetAttack(0.5f, 0.25f, 1.75f);
+            lock = true;
             setInterval1(3);
             setInterval2(1);
             setHitbox(data);
-        } else if (state == 4) {
-            frame -= Gdx.graphics.getDeltaTime() * 25;
-            if (frame < 1) state = 0;
         }
     }
 
     @Override
     protected void setHitbox(Data data) {
+        hovered = false;
+        hitboxSize = -1;
+        Utils.setHitbox(hitbox, 0, 0);
+        if (state == 1 && !move) {
+            if (side == 0) {
+                hitboxSize = 70;
+                if (position == 0) Utils.setHitbox(hitbox, 365, 742);
+                else if (position == 1) Utils.setHitbox(hitbox, 277, 614);
+                else Utils.setHitbox(hitbox, 467, 607);
+            } else if (side == 1) {
+                hitboxSize = 80;
+                if (position == 0) Utils.setHitbox(hitbox, 1529, 724);
+                else if (position == 1) Utils.setHitbox(hitbox, 1339, 582);
+                else Utils.setHitbox(hitbox, 1705, 610);
+            } else {
+                hitboxSize = 90;
+                if (position == 0) Utils.setHitbox(hitbox, 2560, 890);
+                else if (position == 1) Utils.setHitbox(hitbox, 2390, 717);
+                else Utils.setHitbox(hitbox, 2730, 671);
+            }
+        } else if (state == 2){
+            if (side == 0) {
+                Utils.setHitbox(hitbox, 0, 216);
+                Utils.setHitbox(hitboxDimension, 786, 501);
+            } else {
+                Utils.setHitbox(hitbox, 1100, 186);
+                Utils.setHitbox(hitboxDimension, 948, 520);
+            }
+        } else if (state == 3 && timer2 > 0){
+            hitboxSize = 80;
+            if (side == 0) Utils.setHitbox(hitbox, 656, 438);
+            else Utils.setHitbox(hitbox, 2349, 512);
+        }
 
+        hitboxSize = Utils.setHitboxDistance(data, hitboxSize);
     }
 
     @Override
@@ -172,5 +235,28 @@ public class Cat extends AbstractEnemy {
         int frameTarget = -1;
         float pitch = 1;
         Game.setJumpscare(name, texture, sound, timer, frameTarget, pitch);
+    }
+
+    public void audioUpdate(AudioClass audioClass){
+        if (!isActive()) return;
+        if (!audioClass.isPlaying("cat")) {
+            audioClass.play("cat");
+            audioClass.loop("cat", true);
+            audioClass.setVolume("cat", 0);
+        }
+        float catVolume = audioClass.getVolume("cat");
+        float catPitch = audioClass.getPitch("cat");
+        if (state == 2 && timer2 > 8){
+            if (catVolume < 0.2f) catVolume += Gdx.graphics.getDeltaTime() / 2;
+            if (catVolume > 0.2f) catVolume = 0.2f;
+        } else {
+            if (catVolume < 0.65f) catVolume += Gdx.graphics.getDeltaTime() / 2;
+            if (catVolume > 0.65f) catVolume = 0.65f;
+
+            if (catPitch < 2) catPitch += Gdx.graphics.getDeltaTime() / 85;
+            if (catPitch > 2) catPitch = 2;
+        }
+        audioClass.setVolume("cat", catVolume);
+        audioClass.setPitch("cat", catPitch);
     }
 }

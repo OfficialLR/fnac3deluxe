@@ -55,8 +55,14 @@ public class Loading {
             firstFrame = true;
             whiteAlpha = 1;
 
-            Game.rat.setDifficulty(4);
+            Game.rat.setDifficulty(data.RatAI);
             Game.rat.setType(1);
+
+            Game.cat.setDifficulty(data.CatAI);
+            Game.cat.setType(1);
+
+            Game.classicCat.setDifficulty(data.classicCat ? 1 : 0);
+            Game.classicCat.setType(1);
 
             ImageHandler.addImages(stateManager);
             for (String s: SoundFiles.gameSounds){
