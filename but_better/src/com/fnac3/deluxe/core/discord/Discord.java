@@ -48,7 +48,6 @@ public class Discord {
         presence.details = builder.toString();
         builder.delete(0, builder.length());
 
-        boolean monstergamiNight = gameMode.equals("Monstergami Night");
         int numberOfChallenges = 0;
 
         if (data.pointer > 0){
@@ -69,11 +68,13 @@ public class Discord {
 
         if (Game.win) {
             builder.append("Mode Beaten: ").append(gameMode);
-            challengeBuilder(data, monstergamiNight, numberOfChallenges);
+            challengeBuilder(data, numberOfChallenges);
         } else {
             builder.append("Mode: ").append(gameMode);
-            challengeBuilder(data, monstergamiNight, numberOfChallenges);
+            challengeBuilder(data, numberOfChallenges);
         }
+
+        System.out.println(builder.toString());
 
         presence.state = builder.toString();
         builder.delete(0, builder.length());
@@ -83,9 +84,8 @@ public class Discord {
         updateStatus = false;
     }
 
-    private static void challengeBuilder(Data data, boolean monstergamiNight, int numberOfChallenges){
-        if ((!monstergamiNight && numberOfChallenges == 4)
-                || (monstergamiNight && numberOfChallenges == 3)){
+    private static void challengeBuilder(Data data, int numberOfChallenges){
+        if (numberOfChallenges == 4){
             builder.append(" All Challenges");
         } else if (numberOfChallenges != 0){
             builder.append(" + ").append(numberOfChallenges).append(" Challenge");

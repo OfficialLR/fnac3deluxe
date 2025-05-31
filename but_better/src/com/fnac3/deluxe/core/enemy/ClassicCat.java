@@ -110,30 +110,30 @@ public class ClassicCat extends AbstractEnemy {
         Utils.setHitbox(hitbox, 0, 0);
         if (side == 0){
             if ((int) frame == 29){
-                Utils.setHitbox(hitbox, 211, 611);
+                Utils.setHitbox(hitbox, 215, 616);
                 hitboxSize = 75;
             } else if ((int) frame == 39){
-                Utils.setHitbox(hitbox, 205, 690);
+                Utils.setHitbox(hitbox, 207, 704);
                 hitboxSize = 80;
             } else if ((int) frame == 48){
-                Utils.setHitbox(hitbox, 169, 673);
+                Utils.setHitbox(hitbox, 175, 680);
                 hitboxSize = 85;
             } else if ((int) frame == 58){
-                Utils.setHitbox(hitbox, 186, 661);
+                Utils.setHitbox(hitbox, 187, 661);
                 hitboxSize = 90;
             }
         } else {
             if ((int) frame == 29){
-                Utils.setHitbox(hitbox, 2868, 485);
+                Utils.setHitbox(hitbox, 2877, 465);
                 hitboxSize = 80;
             } else if ((int) frame == 39){
-                Utils.setHitbox(hitbox, 2851, 533);
+                Utils.setHitbox(hitbox, 2833, 523);
                 hitboxSize = 85;
             } else if ((int) frame == 48){
-                Utils.setHitbox(hitbox, 2831, 566);
+                Utils.setHitbox(hitbox, 2820, 564);
                 hitboxSize = 90;
             } else if ((int) frame == 58){
-                Utils.setHitbox(hitbox, 2741, 617);
+                Utils.setHitbox(hitbox, 2795, 619);
                 hitboxSize = 90;
             }
         }

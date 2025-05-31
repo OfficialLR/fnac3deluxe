@@ -79,14 +79,15 @@ public abstract class AbstractEnemy {
     public boolean hitboxCircleCollision(){
         float lineA = Math.abs(Player.flashlightPosition[0] - hitbox[0]);
         float lineB = Math.abs(Player.flashlightPosition[1] - hitbox[1]);
-        return Math.hypot(lineA, lineB) <= hitboxSize;
+        return Math.hypot(lineA, lineB) <= hitboxSize && Player.flashlightAlpha > 0;
     }
 
     public boolean hitboxRectangleCollision(){
         float mx = Player.flashlightPosition[0];
         float my = Player.flashlightPosition[1];
 
-        return mx >= hitbox[0]
+        return Player.flashlightAlpha > 0
+                && mx >= hitbox[0]
                 && my >= hitbox[1]
                 && mx <= hitbox[0] + hitboxDimension[0]
                 && my <= hitbox[1] + hitboxDimension[1];
@@ -146,14 +147,14 @@ public abstract class AbstractEnemy {
 
         twitchUpdate();
 
-        if (!Player.freeze && !move) {
-            if (!hovered) killTimer -= time / 1.5f;
-            else {
-                killTimer += time;
-                if (killTimer > 1) killTimer = 1;
-            }
-        }
         if (lock) {
+            if (!Player.freeze && !move) {
+                if (!hovered) killTimer -= time / 1.3f;
+                else {
+                    killTimer += time;
+                    if (killTimer > 1) killTimer = 1;
+                }
+            }
             if (hovered) {
                 flashTimer -= time;
                 healthBar -= time;
@@ -174,6 +175,7 @@ public abstract class AbstractEnemy {
                 }
             }
         } else {
+            if (!Player.freeze) killTimer -= time;
             if (!Player.snapPosition && healthBar > 0){
                 lock = Player.inititiateSnapPosition(side, false);
                 if (lock) {

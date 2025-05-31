@@ -13,9 +13,8 @@ public class TextString {
             + "two attack phases, and you must also stall Rat while mid-attack. He will then have a big cooldown timer "
             + "before repeating his cycle.";
 
-    public static String classicCatText = "Classic Cat will be behind the bed posts. "
-            + "He gets closer slowly. If looked at, he will stop, but then gets closer quicker if not flashed."
-            + "Flashing him pushes him back. Flashing him fully makes him switch sides.";
+    public static String classicCatText = "Classic Cat will be behind the bed posts. making progress towards you. "
+            + "Flashing him will pause him. Flashing him all the away will scare him away.";
 
     public static String laserPointerText = "The flashlight and hitbox size decreases.";
 
@@ -32,7 +31,7 @@ public class TextString {
     public static String timerText = "The enemy's timers are visible.";
 
     public static String freeScrollText = "This setting prevents you from automatically locking "
-            + "into place when battling a monster.";
+            + "into place when attacking a monster.";
 
     public static String infoText = version + "\n" + """
             Creator: Official_LR

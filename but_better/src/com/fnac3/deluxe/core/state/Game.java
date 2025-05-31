@@ -127,7 +127,7 @@ public class Game {
 
         rat.reset(data, 0, -1, 1, data.RatAI);
         cat.reset(data, 2, Math.random() < 0.5 ? 0 : 2, 1, data.CatAI);
-        classicCat.reset(data, 0, -1, 1, 1);
+        classicCat.reset(data, 0, -1, 1, data.classicCat ? 1 : 0);
 
         jumpscare = false;
         jumpscareFrame = 0;
@@ -607,7 +607,7 @@ public class Game {
                             float pitch = audioClass.getPitch(path);
                             float speed = Gdx.graphics.getDeltaTime() * 60;
                             if (rat.isAttack() && rat.getType() == 1) {
-                                pitch += 0.0003f * speed;
+                                pitch += 0.00035f * speed;
                             } else {
                                 pitch += 0.00025f * speed;
                             }

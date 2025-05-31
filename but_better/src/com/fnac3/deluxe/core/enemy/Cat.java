@@ -2,6 +2,7 @@ package com.fnac3.deluxe.core.enemy;
 
 import com.badlogic.gdx.Gdx;
 import com.fnac3.deluxe.core.data.Data;
+import com.fnac3.deluxe.core.functions.Knock;
 import com.fnac3.deluxe.core.input.Player;
 import com.fnac3.deluxe.core.state.Game;
 import com.fnac3.deluxe.core.util.AudioClass;
@@ -73,9 +74,9 @@ public class Cat extends AbstractEnemy {
                     setHitbox(data);
                     if (getInterval1() == 0 || Math.random() < 0.5f) {
                         flashTimer = 0.2f + (int) (Math.random() * 3) * 0.1f;
-                        setInterval1(3);
+                        setInterval1(difficulty - 1);
                     } else {
-                        if (Math.random() < 0.5f) {
+                        if (Math.random() < 0.2f) {
                             flashTimer = 0.01f;
                         }
                         setInterval1(getInterval1() - 1);
@@ -129,7 +130,11 @@ public class Cat extends AbstractEnemy {
                     } else interval4 = 0;
                 }
                 reservedSide = side;
-                resetAttack(1.75f, 0.4f, 4);
+                float newKillTimer = 1.75f;
+                if (difficulty <= 2) newKillTimer += 0.75f;
+                if (difficulty <= 1) newKillTimer += 0.5f;
+
+                resetAttack(newKillTimer, 0.4f, 4);
                 if (interval3 == 0){
                     interval3++;
                 } else {
@@ -138,11 +143,16 @@ public class Cat extends AbstractEnemy {
                     else if (position == 2) frame = 5;
                     targetFrame = frame;
                 }
-                setInterval1(3);
+                setInterval1(difficulty - 1);
                 setHitbox(data);
             }
         } else if (state == 2) {
-            if (Game.rat.isAttack() && timer2 > 8) timer2 = 18 - multiplier * 1.5f;
+            if (Game.rat.isAttack() && timer2 > 8) {
+                float multiple = 1.5f;
+                if (difficulty <= 2) multiple -= 0.25f;
+                if (difficulty <= 1) multiple -= 0.25f;
+                timer2 = 18 - multiplier * multiple;
+            }
             logic = bedUpdate(data, audioClass);
 
             if (logic == 1) {
@@ -151,7 +161,10 @@ public class Cat extends AbstractEnemy {
                 if (timer1 < 1.5f && lookingAway) {
                     state = 3;
                     Player.lastCharacterAttack = "Shadow";
-                    resetCrouch(1.75f, 1.5f);
+                    float killTimer = 1.75f;
+                    if (difficulty <= 2) killTimer += 0.75f;
+                    if (difficulty <= 1) killTimer += 0.5f;
+                    resetCrouch(killTimer, 1.5f);
                     setHitbox(data);
                 } else {
                     logic = 2;
@@ -181,7 +194,7 @@ public class Cat extends AbstractEnemy {
             state = 1;
             resetAttack(0.5f, 0.25f, 1.75f);
             lock = true;
-            setInterval1(3);
+            setInterval1(difficulty - 1);
             setInterval2(1);
             setHitbox(data);
         }

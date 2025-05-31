@@ -10,7 +10,7 @@ public class EnemyRenderer {
         if (Player.turningPosition > 0) return;
         ratRender(batch);
         catRender(batch);
-//        classicCatRender(batch, false);
+        classicCatRender(batch, false);
     }
 
     public static void forthRender(SpriteBatch batch){
@@ -331,17 +331,15 @@ public class EnemyRenderer {
         float x = 0, y = 0;
         if (Player.room == 0 && cat.frame >= 1){
             textureBuilder.append("Retreat/");
-            if (cat.side == 0) {
+            if (cat.side == 0 && forth) {
                 textureBuilder.append("Left/Retreat").append((int) (59 - cat.frame));
                 y = 216;
-            } else {
+            } else if (cat.side == 2 && !forth){
                 textureBuilder.append("Right/Retreat").append((int) (59 - cat.frame));
                 x = 2532;
                 y = 218;
-            }
+            } else render = false;
         } else render = false;
-
-        System.out.println(prefix + textureBuilder);
 
         if (render) batch.draw(ImageHandler.images.get(prefix + textureBuilder), x, y);
     }

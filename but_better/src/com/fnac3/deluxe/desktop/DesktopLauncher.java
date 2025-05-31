@@ -19,7 +19,7 @@ public class DesktopLauncher {
 		config.useVsync(false);
 		config.setWindowedMode(1024, 768);
 		config.setResizable(false);
-		config.setWindowIcon(Files.FileType.Local, "assets/customnight.png");
+		config.setWindowIcon(Files.FileType.Local, "assets/dreamscape.png");
 		config.setTitle("Five Nights at Candy's 3 Reimagined");
 		try {
 			new Lwjgl3Application(new FNaC3Deluxe(), config);

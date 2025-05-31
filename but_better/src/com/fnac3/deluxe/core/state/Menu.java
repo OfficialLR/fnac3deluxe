@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -29,10 +30,12 @@ import java.util.Map;
 public class Menu {
 
     private static FrameBuffer screenBuffer;
+    private static FrameBuffer rainbowStarBuffer;
 
     private static float ratAlpha;
     private static float catAlpha;
     private static float whiteAlpha;
+    private static float rainbowPosition;
 
     private static int ratAITextAlign;
     private static int catAITextAlign;
@@ -360,6 +363,7 @@ public class Menu {
            audioClass.play("select");
            buttonConfigSync(data);
            data.writeConfig();
+           Discord.updateStatus = true;
        }
     }
 
@@ -369,6 +373,12 @@ public class Menu {
         if (data.menuMusic) volume += time * 6;
         else volume -= time * 6;
         volume = volume < 0 ? 0 : volume > 1 ? 1 : volume;
+
+        rainbowPosition += time * 60;
+        if (rainbowPosition > 80) {
+            rainbowPosition -= 80;
+            if (rainbowPosition < 0 || rainbowPosition > 80) rainbowPosition = 0;
+        }
 
         if (loaded) {
             if (blackFade < 1){
@@ -489,6 +499,25 @@ public class Menu {
         if (screenBuffer == null){
             screenBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 768, true);
         }
+
+        if (rainbowStarBuffer == null){
+            rainbowStarBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 768, true);
+        }
+        rainbowStarBuffer.begin();
+
+        renderStar(batch, normalStar, 0, data);
+        renderStar(batch, laserStar, 1, data);
+        renderStar(batch, cassetteStar, 2, data);
+        renderStar(batch, batteryStar, 3, data);
+        renderStar(batch, catStar, 4, data);
+        renderStar(batch, allChallengesStar, 5, data);
+
+        batch.flush();
+        rainbowStarBuffer.end(viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
         screenBuffer.begin();
 
         float r = 0.6f;
@@ -532,17 +561,6 @@ public class Menu {
         texture = ImageHandler.images.get("menu/ready");
         batch.setColor(r, 0, b, 0.75f + readyAlpha);
         batch.draw(texture, readyButton.x, readyButton.y);
-
-        //stars
-//        Star star = data.stars.get(modeName);
-//        texture = ImageHandler.images.get("menu/star");
-//        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-//        batch.setColor(star.color[0], star.color[1], star.color[2], star.visibility + star.alphaVisibility);
-//        batch.draw(texture,
-//                433 - star.size / 2,
-//                148 - star.size / 2,
-//                star.size,
-//                star.size);
 
         //icons
         batch.setColor(r, 0, b, 1);
@@ -648,13 +666,13 @@ public class Menu {
         }
 
         //stars
-        renderStar(batch, normalStar, 0, data);
-        renderStar(batch, laserStar, 1, data);
-        renderStar(batch, cassetteStar, 2, data);
-        renderStar(batch, batteryStar, 3, data);
-        renderStar(batch, catStar, 4, data);
-        renderStar(batch, allChallengesStar, 5, data);
+        batch.setColor(1, 1, 1, 1);
+        texture = rainbowStarBuffer.getColorBufferTexture();
+        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
+        batch.draw(texture, 0, texture.getHeight(), texture.getWidth(), -texture.getHeight());
+
+        texture = FNaC3Deluxe.shapeBuffer.getColorBufferTexture();
         batch.setColor(0, 0, 0, 1 - blackFade);
         batch.draw(texture, 0, 0);
 
@@ -792,14 +810,31 @@ public class Menu {
     private static void renderStar(SpriteBatch batch, Button starButton, int starIndex, Data data){
         int value = data.saveData.stars[starIndex];
         Texture texture = ImageHandler.images.get("menu/star" + (starIndex < 5 ? "Mini" : ""));
-        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         if (value == 0) batch.setColor(0.5f, 0.5f, 0.5f, 0.5f);
         else if (value == 1) batch.setColor(0.9f, 0, 0.1f, 1);
         else if (value == 2) batch.setColor(0.75f, 0, 1, 1);
         else if (value == 3) batch.setColor(1, 0.82f, 0, 1);
         else batch.setColor(1, 1, 1, 1);
 
+        int srcFunc = batch.getBlendSrcFunc();
+        int dstFunc = batch.getBlendDstFunc();
+
+        if (value == 4) {
+            float multiplier = 1;
+            if (starIndex < 5) multiplier = 0.525f;
+            Texture rainbowTexture = ImageHandler.images.get("menu/rainbow" + (starIndex < 5 ? "Mini" : ""));
+            TextureRegion region = new TextureRegion(rainbowTexture);
+            region.setRegion((int) (rainbowPosition * multiplier), 0, starButton.width, starButton.height);
+            batch.draw(region, starButton.x, starButton.y);
+            batch.setBlendFunction(GL20.GL_DST_COLOR, GL20.GL_SRC_COLOR);
+        }
+
         batch.draw(texture, starButton.x, starButton.y);
+
+        if (value == 4){
+            batch.flush();
+            batch.setBlendFunction(srcFunc, dstFunc);
+        }
 
         batch.setColor(1, 1, 1, 1);
     }

@@ -27,10 +27,11 @@ public class Data {
     public SaveData saveData;
 
     //file names
+    private static final String name = "ButBetter_Beta";
     private static final String externalName = "AppData/Roaming/Five Nights at Candy's 3 Deluxe/Save";
     static final String dirName = System.getProperty("user.home") + "/" + externalName;
-    private static final String fileName = dirName + "/Game_ButBetter_v1.save";
-    private static final String configFileName = dirName + "/Config_ButBetter_v1.save";
+    private static final String fileName = dirName + "/" + name + ".save";
+    private static final String configFileName = dirName + "/" + name + ".config";
     private File configFile;
 
     public Data(){
@@ -153,10 +154,14 @@ public class Data {
     private void mode(int difficulty){
         boolean[] arr = new boolean[]{true, pointer > 0, hardCassette, limitedBattery, classicCat};
         int starIndex = 0;
+        boolean allChallenges = true;
 
         for (boolean b : arr) {
             if (b) saveData.stars[starIndex] = Math.max(saveData.stars[starIndex], difficulty);
+            else allChallenges = false;
+            starIndex++;
         }
+        if (allChallenges) saveData.stars[starIndex] = Math.max(saveData.stars[starIndex], difficulty);
     }
 
     private void readModes(){

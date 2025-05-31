@@ -124,6 +124,8 @@ public class ImageHandler {
         add("menu/ready");
         add("menu/star");
         add("menu/starMini");
+        add("menu/rainbow");
+        add("menu/rainbowMini");
         add("menu/ai_box");
         add("menu/info");
         add("menu/help");
