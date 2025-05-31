@@ -74,8 +74,6 @@ public class Discord {
             challengeBuilder(data, numberOfChallenges);
         }
 
-        System.out.println(builder.toString());
-
         presence.state = builder.toString();
         builder.delete(0, builder.length());
 
