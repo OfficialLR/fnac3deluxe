@@ -37,7 +37,7 @@ public class EnemyRenderer {
                     y = 382;
                 } else {
                     textureBuilder.append("Right/");
-                    x = 2483;
+                    x = 2484;
                     y = 321;
                 }
                 textureBuilder.append("Peek").append((int) (14 - rat.frame));

@@ -346,7 +346,7 @@ public class Menu {
            writeConfig = true;
        } else if (button3.isLeftPressed()) {
            if (data.options == 0) data.limitedBattery = !data.limitedBattery;
-           else if (data.options == 1) data.timerDebug = !data.timerDebug;
+           else if (data.options == 1) data.lightDebug = !data.lightDebug;
            else data.menuMusic = !data.menuMusic;
            writeConfig = true;
        } else if (button4.isLeftPressed()) {
@@ -608,7 +608,7 @@ public class Menu {
         text = data.options == 0 ? "Hard Cassette" : data.options == 1 ? "Hitbox Debug" : "Mute Jumpscare";
         menuFontHeading.draw(batch, text, button2.x + 40, button2.y + 26);
 
-        text = data.options == 0 ? "Limited Battery" : data.options == 1 ? "Timer Debug" : "Menu Music";
+        text = data.options == 0 ? "Limited Battery" : data.options == 1 ? "Light Room Debug" : "Menu Music";
         menuFontHeading.draw(batch, text, button3.x + 40, button3.y + 26);
 
         text = data.options == 0 ? "Classic Cat" : data.options == 1 ? "Free Scroll" : "OG Music";
@@ -859,7 +859,7 @@ public class Menu {
 
         button1.setState(data.options == 1, data.flashDebug ? 1 : 0);
         button2.setState(data.options == 1, data.hitboxDebug ? 1 : 0);
-        button3.setState(data.options == 1, data.timerDebug ? 1 : 0);
+        button3.setState(data.options == 1, data.lightDebug ? 1 : 0);
         button4.setState(data.options == 1, data.freeScroll ? 1 : 0);
 
         button1.setState(data.options == 2, data.vSync ? 1 : 0);

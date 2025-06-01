@@ -333,14 +333,16 @@ public class Game {
         }
     }
 
-    private static void jumpscareUpdate(AudioClass audioClass){
+    private static void jumpscareUpdate(AudioClass audioClass, Data data){
         jumpscareTimer -= Gdx.graphics.getDeltaTime();
         if (jumpscareTimer < 0) jumpscareTimer = 0;
         if (jumpscareFrame == 0){
             jumpscareFrame++;
             audioClass.stopAllSounds();
-            audioClass.play(jumpscareSound);
-            audioClass.setPitch(jumpscareSound, jumpscarePitch);
+            if (!data.muteJumpscare) {
+                audioClass.play(jumpscareSound);
+                audioClass.setPitch(jumpscareSound, jumpscarePitch);
+            }
         }
 
         if (jumpscareFrameTarget == -1){
@@ -473,7 +475,7 @@ public class Game {
             win = true;
             data.writeWin(Math.min(rat.getDifficulty(), cat.getDifficulty()),
                     rat.isActive() && cat.isActive() &&
-                    !data.flashDebug && !data.hitboxDebug && !data.timerDebug);
+                    !data.flashDebug && !data.hitboxDebug && !data.lightDebug);
             audioClass.stopAllSounds();
             audioClass.play("win");
             ambience.stop();
@@ -584,7 +586,7 @@ public class Game {
             Player.blackness();
 
             if (jumpscare && Player.blacknessTimes == 0){
-                jumpscareUpdate(audioClass);
+                jumpscareUpdate(audioClass, data);
             }
 
             if (!jumpscare) {

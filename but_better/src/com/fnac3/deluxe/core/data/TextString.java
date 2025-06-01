@@ -2,7 +2,7 @@ package com.fnac3.deluxe.core.data;
 
 public class TextString {
 
-    private static final String version = "Beta v1.0.1";
+    private static final String version = "Beta v1.0.2";
 
     public static String ratText = "Rat comes from the doors. Flashing him scares him away. Once he gets in, "
             + "he will wait to begin his attack. He also teleports while attacking. Afterwards, he will go "
@@ -18,7 +18,7 @@ public class TextString {
 
     public static String laserPointerText = "The flashlight and hitbox size decreases.";
 
-    public static String hardCassetteText = "The cassette slows the night's progression and keeps you awake. "
+    public static String hardCassetteText = "The cassette must be played to slowly progress through the night and stay awake. "
             + "The night's progression will rewind if left tampered";
 
     public static String faultyFlashlight = "The flashlight batteries are limited and will run out. "
@@ -28,7 +28,7 @@ public class TextString {
 
     public static String flashHPText = "The health bar for attack phase is visible.";
 
-    public static String timerText = "The enemy's timers are visible.";
+    public static String timerText = "The room lights are on";
 
     public static String freeScrollText = "This setting prevents you from automatically locking "
             + "into place when attacking a monster.";

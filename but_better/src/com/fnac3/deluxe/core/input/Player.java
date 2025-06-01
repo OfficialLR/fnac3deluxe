@@ -10,9 +10,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.fnac3.deluxe.core.FNaC3Deluxe;
 import com.fnac3.deluxe.core.data.Data;
 import com.fnac3.deluxe.core.state.Game;
-import com.fnac3.deluxe.core.state.Menu;
 import com.fnac3.deluxe.core.util.AudioClass;
 import com.fnac3.deluxe.core.util.ImageHandler;
 
@@ -638,6 +638,7 @@ public class Player {
         Texture texture = fbo.getColorBufferTexture();
         batch.draw(texture, roomPosition[0] + shakingPosition, roomPosition[1] + texture.getHeight(),
                     texture.getWidth(), -texture.getHeight());
+        batch.setColor(1, 1, 1, 1);
 
         batch.end();
         batch.begin();
@@ -652,22 +653,28 @@ public class Player {
         fbo.begin();
 
         batch.draw(ImageHandler.images.get(room + "Effect"), 0, 0);
-        Texture texture = ImageHandler.images.get("game/Flashlight");
+        if (!data.lightDebug) {
+            Texture texture = ImageHandler.images.get("game/Flashlight");
 
-        float h = texture.getHeight();
-        float w = texture.getWidth();
+            float h = texture.getHeight();
+            float w = texture.getWidth();
 
-        float percentage = 1 - 0.25f * data.pointer;
+            float percentage = 1 - 0.25f * data.pointer;
 
-        w *= percentage;
-        h *= percentage;
+            w *= percentage;
+            h *= percentage;
 
-        batch.setColor(1, 1, 1, flashlightAlpha);
-        batch.draw(texture,
-                flashlightPosition[0] - w / 2,
-                flashlightPosition[1] - h / 2,
-                w, h);
-        batch.setColor(1, 1, 1, 1);
+            batch.setColor(1, 1, 1, flashlightAlpha);
+            batch.draw(texture,
+                    flashlightPosition[0] - w / 2,
+                    flashlightPosition[1] - h / 2,
+                    w, h);
+            batch.setColor(1, 1, 1, 1);
+        } else {
+            batch.setColor(1, 1, 1, flashlightAlpha);
+            batch.draw(FNaC3Deluxe.shapeBuffer.getColorBufferTexture(), Player.roomPosition[0] + Player.shakingPosition, Player.roomPosition[1]);
+            batch.setColor(1, 1, 1, 1);
+        }
 
         batch.flush();
         batch.end();

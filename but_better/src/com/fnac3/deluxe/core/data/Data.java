@@ -14,7 +14,7 @@ public class Data {
 
     public boolean flashDebug;
     public boolean hitboxDebug;
-    public boolean timerDebug;
+    public boolean lightDebug;
     public boolean freeScroll;
 
     public int pointer;
@@ -98,7 +98,7 @@ public class Data {
 
             flashDebug = readBooleanLineConfig(br);
             hitboxDebug = readBooleanLineConfig(br);
-            timerDebug = readBooleanLineConfig(br);
+            lightDebug = readBooleanLineConfig(br);
             freeScroll = readBooleanLineConfig(br);
 
             pointer = readIntLineConfig(br);
@@ -131,7 +131,7 @@ public class Data {
                 .append("ogMusic = ").append(ogMusic).append("\n")
                 .append("flashDebug = ").append(flashDebug).append("\n")
                 .append("hitboxDebug = ").append(hitboxDebug).append("\n")
-                .append("timerDebug = ").append(timerDebug).append("\n")
+                .append("lightDebug = ").append(lightDebug).append("\n")
                 .append("freeScroll = ").append(freeScroll).append("\n")
                 .append("pointer = ").append(pointer).append("\n")
                 .append("hardCassette = ").append(hardCassette).append("\n")
