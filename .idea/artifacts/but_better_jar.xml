@@ -1,8 +1,8 @@
 <component name="ArtifactManager">
-  <artifact name="v2:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/v2_jar</output-path>
+  <artifact name="but_better:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/but_better_jar</output-path>
     <root id="root">
-      <element id="archive" name="v2.jar">
+      <element id="archive" name="but_better.jar">
         <element id="module-output" name="but_better" />
       </element>
     </root>

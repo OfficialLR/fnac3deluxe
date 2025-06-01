@@ -129,6 +129,8 @@ public class Game {
         cat.reset(data, 2, Math.random() < 0.5 ? 0 : 2, 1, data.CatAI);
         classicCat.reset(data, 0, -1, 1, data.classicCat ? 1 : 0);
 
+        knock.reset();
+
         jumpscare = false;
         jumpscareFrame = 0;
         jumpscareFrameTarget = 0;
