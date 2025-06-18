@@ -14,6 +14,7 @@ public abstract class AbstractEnemy {
     protected int interval2;
     protected int interval3;
     protected int interval4;
+    protected int interval5;
 	protected float twitchFrame;
 	protected float targetFrame;
     protected boolean move;
@@ -61,6 +62,7 @@ public abstract class AbstractEnemy {
         position = 0;
         frame = 1;
         targetFrame = 1;
+        move = false;
     }
 
     public void resetBed(float killTimer, float bedTimer, float tapeTimer, int targetFrame) {
@@ -103,7 +105,7 @@ public abstract class AbstractEnemy {
         }
     }
 
-	protected int doorUpdate(Data data) {
+	protected int doorUpdate() {
         if (Player.freeze) return 0;
         var awayTimer = timer1;
         var peekTimer = timer2;
@@ -119,6 +121,7 @@ public abstract class AbstractEnemy {
             awayTimer -= time;
             if (awayTimer <= 0) {
                 peekTimer += awayTimer;
+                if (peekTimer <= 0.175f) peekTimer = 0.175f;
                 returnValue = 1;
             } else {
                 frame -= speed;
@@ -266,38 +269,6 @@ public abstract class AbstractEnemy {
 	public float getTimer1() {
 		return timer1;
 	}
-
-	public float getTimer2() {
-		return timer2;
-	}
-
-    public float getTimer3(){
-        return timer3;
-    }
-
-    public int getInterval1() {
-        return interval1;
-    }
-
-    public void setInterval1(int interval1) {
-        this.interval1 = interval1;
-    }
-
-    public int getInterval2() {
-        return interval2;
-    }
-
-    public void setInterval2(int interval2) {
-        this.interval2 = interval2;
-    }
-
-    public int getInterval3() {
-        return interval3;
-    }
-
-    public void setInterval3(int interval3) {
-        this.interval3 = interval3;
-    }
 
     public int getState() {
 		return state;

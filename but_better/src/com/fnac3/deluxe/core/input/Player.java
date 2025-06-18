@@ -255,9 +255,7 @@ public class Player {
     }
 
     public static void disableTape(){
-        if (tape.isPlaying()) {
-            tape.stop();
-        }
+        if (tape.isPlaying()) tape.stop();
     }
 
     public static boolean tapeCondition(String path, boolean tapeCondition, float mx, float my){

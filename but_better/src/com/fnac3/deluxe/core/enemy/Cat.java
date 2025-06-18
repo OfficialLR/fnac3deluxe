@@ -2,7 +2,6 @@ package com.fnac3.deluxe.core.enemy;
 
 import com.badlogic.gdx.Gdx;
 import com.fnac3.deluxe.core.data.Data;
-import com.fnac3.deluxe.core.functions.Knock;
 import com.fnac3.deluxe.core.input.Player;
 import com.fnac3.deluxe.core.state.Game;
 import com.fnac3.deluxe.core.util.AudioClass;
@@ -72,20 +71,22 @@ public class Cat extends AbstractEnemy {
 
                     move = false;
                     setHitbox(data);
-                    if (getInterval1() == 0 || Math.random() < 0.5f) {
-                        flashTimer = 0.2f + (int) (Math.random() * 3) * 0.1f;
-                        setInterval1(difficulty - 1);
+                    if (interval1 == 0 || (interval5 < 7 - difficulty && Math.random() < 0.35f)) {
+                        flashTimer = 0.16f + (int) (Math.random() * 3) * 0.08f;
+                        interval1 = difficulty - 1;
+                        interval5++;
                     } else {
                         if (Math.random() < 0.2f) {
                             flashTimer = 0.01f;
                         }
-                        setInterval1(getInterval1() - 1);
+                        interval5 = 0;
+                        interval1--;
                     }
                 }
             } else if (logic == 2){
                 audioClass.play("thunder");
                 blackout();
-                if (getInterval2() == 0) audioClass.stop("cat");
+                if (interval2 == 0) audioClass.stop("cat");
             } else if (logic == 3){
                 setJumpscare();
             } else if (logic == 4){
@@ -98,7 +99,7 @@ public class Cat extends AbstractEnemy {
 
             if (healthBar > 0 || lock || Player.blacknessTimes > 0) return;
 
-            if (getInterval2() == 0) {
+            if (interval2 == 0) {
                 state = 2;
                 Player.setBlackness(Player.blacknessTimes, 1, Player.blacknessDelay);
                 audioClass.play("crawl");
@@ -106,7 +107,7 @@ public class Cat extends AbstractEnemy {
                 resetBed(1.5f, 20, -1, -1);
                 setHitbox(data);
             } else {
-                setInterval2(getInterval2() - 1);
+                interval2--;
                 int chance = (int) (Math.random() * 2);
                 if (side == 0){
                     side = 1 + chance;
@@ -143,7 +144,9 @@ public class Cat extends AbstractEnemy {
                     else if (position == 2) frame = 5;
                     targetFrame = frame;
                 }
-                setInterval1(difficulty - 1);
+
+                interval1 = difficulty - 1;
+                interval5 = (int) (Math.random() * (7 - difficulty));
                 setHitbox(data);
             }
         } else if (state == 2) {
@@ -194,8 +197,9 @@ public class Cat extends AbstractEnemy {
             state = 1;
             resetAttack(0.5f, 0.25f, 1.75f);
             lock = true;
-            setInterval1(difficulty - 1);
-            setInterval2(1);
+            interval1 = difficulty - 1;
+            interval2 = 1;
+            interval5 = (int) (Math.random() * (7 - difficulty));
             setHitbox(data);
         }
     }

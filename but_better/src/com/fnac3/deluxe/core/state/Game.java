@@ -639,9 +639,6 @@ public class Game {
             } else {
                 if (ambience.isPlaying()) {
                     ambience.stop();
-                }
-
-                if (!Player.freeze) {
                     Player.scared = false;
                     Player.buttonVisibility = 0;
                     Player.battleOverlay = 0;
