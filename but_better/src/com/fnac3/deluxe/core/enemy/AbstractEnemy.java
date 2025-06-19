@@ -221,7 +221,7 @@ public abstract class AbstractEnemy {
         if (Player.room == 2 && (int) Player.turningPosition == 0) {
             if (frame < targetFrame) frame += time * 30;
             if (frame > targetFrame) frame = targetFrame;
-        } else if (frame < targetFrame && (data.hardCassette || Player.tape.isPlaying())) {
+        } else if (frame < targetFrame && (data.cassette > 0 || Player.tape.isPlaying())) {
             if (tapeTimer > 0) {
                 tapeTimer -= time;
                 if (tapeTimer <= 0) {

@@ -18,7 +18,7 @@ public class Data {
     public boolean freeScroll;
 
     public int pointer;
-    public boolean hardCassette;
+    public int cassette;
     public boolean limitedBattery;
     public boolean classicCat;
 
@@ -27,7 +27,7 @@ public class Data {
     public SaveData saveData;
 
     //file names
-    private static final String name = "ButBetter_Beta";
+    private static final String name = "ButBetter_Beta_2";
     private static final String externalName = "AppData/Roaming/Five Nights at Candy's 3 Deluxe/Save";
     static final String dirName = System.getProperty("user.home") + "/" + externalName;
     private static final String fileName = dirName + "/" + name + ".save";
@@ -102,7 +102,7 @@ public class Data {
             freeScroll = readBooleanLineConfig(br);
 
             pointer = readIntLineConfig(br);
-            hardCassette = readBooleanLineConfig(br);
+            cassette = readIntLineConfig(br);
             limitedBattery = readBooleanLineConfig(br);
             classicCat = readBooleanLineConfig(br);
         } catch (IOException e){
@@ -134,7 +134,7 @@ public class Data {
                 .append("lightDebug = ").append(lightDebug).append("\n")
                 .append("freeScroll = ").append(freeScroll).append("\n")
                 .append("pointer = ").append(pointer).append("\n")
-                .append("hardCassette = ").append(hardCassette).append("\n")
+                .append("cassette = ").append(cassette).append("\n")
                 .append("limitedBattery = ").append(limitedBattery).append("\n")
                 .append("classicCat = ").append(classicCat).append("\n");
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(configFile))){
@@ -152,7 +152,7 @@ public class Data {
     }
 
     private void mode(int difficulty){
-        boolean[] arr = new boolean[]{true, pointer > 0, hardCassette, limitedBattery, classicCat};
+        boolean[] arr = new boolean[]{true, pointer > 0, cassette > 0, limitedBattery, classicCat};
         int starIndex = 0;
         boolean allChallenges = true;
 

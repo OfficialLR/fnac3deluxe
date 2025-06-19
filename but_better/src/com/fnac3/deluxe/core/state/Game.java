@@ -147,7 +147,7 @@ public class Game {
         previousHourOfGame = 12;
         purpleTime = 0;
         purpleSlownessTimer = 10;
-        purpleTimeTarget = 40;
+        purpleTimeTarget = 60;
         Discord.updateStatus = true;
     }
 
@@ -458,11 +458,11 @@ public class Game {
         float add = Gdx.graphics.getDeltaTime();
 
         if (Player.tape.isPlaying()) {
-            if (data.hardCassette) time += add;
+            if (data.cassette > 0) time += add;
             else time += add * 1.5f;
         }
 
-        if (data.hardCassette && audioClass.isPlaying("tapeWeasel")) time -= add;
+        if (data.cassette > 0 && audioClass.isPlaying("tapeWeasel")) time -= add;
         if (time < 0) time = 0;
 
         if (time / hour >= 1) {
@@ -495,10 +495,10 @@ public class Game {
             Player.batterySound = false;
         }
 
-        if (data.hardCassette) {
+        if (data.cassette > 0) {
             if ((Player.tape.isPlaying() && !Player.tapeEnd) || jumpscare) {
                 purpleSlownessTimer = 10;
-                if (purpleTime > 0) {
+                if (purpleTime > 0 && (data.cassette == 1 || jumpscare)) {
                     purpleTime -= Gdx.graphics.getDeltaTime() * 100;
                     if (purpleTime < 0) {
                         purpleTime = 0;
@@ -513,9 +513,10 @@ public class Game {
                 }
 
                 if (purpleSlownessTimer == 0) {
-                    purpleTime += Gdx.graphics.getDeltaTime() * 1.5f;
+                    purpleTime += Gdx.graphics.getDeltaTime() * 2;
                 } else {
-                    purpleTime += Gdx.graphics.getDeltaTime() / 2;
+                    if (data.cassette == 2) purpleTime += Gdx.graphics.getDeltaTime() / 2.5f;
+                    else purpleTime += Gdx.graphics.getDeltaTime() / 2;
                 }
             }
 

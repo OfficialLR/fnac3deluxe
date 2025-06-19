@@ -71,12 +71,12 @@ public class Cat extends AbstractEnemy {
 
                     move = false;
                     setHitbox(data);
-                    if (interval1 == 0 || (interval5 < 7 - difficulty && Math.random() < 0.35f)) {
-                        flashTimer = 0.16f + (int) (Math.random() * 3) * 0.08f;
+                    if (interval1 == 0 || (interval5 < 7 - difficulty && Math.random() < 0.75f)) {
+                        flashTimer = 0.2f + (int) (Math.random() * 3) * 0.08f;
                         interval1 = difficulty - 1;
                         interval5++;
                     } else {
-                        if (Math.random() < 0.2f) {
+                        if (Math.random() < 0.05f) {
                             flashTimer = 0.01f;
                         }
                         interval5 = 0;

@@ -2,7 +2,6 @@ package com.fnac3.deluxe.core.discord;
 
 import com.fnac3.deluxe.core.data.Data;
 import com.fnac3.deluxe.core.state.Game;
-import com.fnac3.deluxe.core.state.Menu;
 
 import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
@@ -54,7 +53,7 @@ public class Discord {
             numberOfChallenges++;
         }
 
-        if (data.hardCassette){
+        if (data.cassette > 0){
             numberOfChallenges++;
         }
 
