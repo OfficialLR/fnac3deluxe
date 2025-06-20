@@ -72,18 +72,21 @@ public class Menu {
     private static float charactersX;
     private static float charactersY;
 
+    public static String mode;
+
     private static final Button button1 = new Button(414, 638, 32, 32, 0);
     private static final Button button2 = new Button(414, 594, 32, 32, 0);
     private static final Button button3 = new Button(414, 550, 32, 32, 0);
     private static final Button button4 = new Button(414, 506, 32, 32, 0);
+    private static final Button shadowButton = new Button(414, 462, 32, 32, 0);
 
     private static final Button button5 = new Button(848, 104, 32, 32, 1);
     private static final Button button6 = new Button(848, 60, 32, 32, 0);
     private static final Button button7 = new Button(848, 16, 32, 32, 0);
     private static final Button readyButton = new Button(414, 16, 196, 99, 0);
 
-    private static final Button ratBox = new Button(33, 255, 474, 256, 0);
-    private static final Button catBox = new Button(525, 255, 474, 256, 0);
+    private static final Button ratBox = new Button(33, 255, 474, 200, 0);
+    private static final Button catBox = new Button(525, 255, 474, 200, 0);
 
     private static final Button infoBox = new Button(16, 16, 32, 32, 0);
     private static final Button helpBox = new Button(16, 60, 32, 32, 0);
@@ -104,6 +107,7 @@ public class Menu {
     private static BitmapFont menuFontCaption;
 
     private static boolean playDeluxe;
+    private static float musicPitch;
 
     public static void input(float mx, float my, StateManager stateManager, Data data, AudioClass audioClass){
         if (!loaded) return;
@@ -117,6 +121,7 @@ public class Menu {
         button2.update(mx, my);
         button3.update(mx, my);
         button4.update(mx, my);
+        shadowButton.update(mx, my);
         button5.update(mx, my);
         button6.update(mx, my);
         button7.update(mx, my);
@@ -213,22 +218,22 @@ public class Menu {
         }
 
         if (normalStar.isHovering()){
-            textModifier("Shadow Rat and Cat");
+            textModifier(mode);
             textCase = 9;
         } else if (laserStar.isHovering()){
-            textModifier("Shadow Rat and Cat with Laser Pointer");
+            textModifier(mode + " with Laser Pointer");
             textCase = 10;
         } else if (cassetteStar.isHovering()){
-            textModifier("Shadow Rat and Cat with Hard Cassette");
+            textModifier(mode + " with Hard Cassette");
             textCase = 11;
         } else if (batteryStar.isHovering()){
-            textModifier("Shadow Rat and Cat with Limited Battery");
+            textModifier(mode + " with Limited Battery");
             textCase = 12;
         } else if (catStar.isHovering()){
-            textModifier("Shadow Rat and Cats");
+            textModifier(mode + " with Classic Cat");
             textCase = 13;
         } else if (allChallengesStar.isHovering()){
-            textModifier("Shadow Rat and Cat All Challenges");
+            textModifier(mode + " All Challenges");
             textCase = 14;
         }
 
@@ -376,6 +381,21 @@ public class Menu {
                playDeluxe = true;
            }
            writeConfig = true;
+       } else if (shadowButton.isLeftPressed() && data.options == 0){
+           writeConfig = true;
+           data.shadowChallenge = !data.shadowChallenge;
+
+           if (data.shadowChallenge) {
+                mode = "Shadow Rat & Cat";
+                musicPitch = 0.75f;
+            } else {
+                mode = "Monster Rat & Cat";
+                musicPitch = 1;
+            }
+
+           audioClass.play("thunder");
+           audioClass.setPitch(menuMusicName, musicPitch);
+           whiteAlpha = 1;
        }
        if (writeConfig) {
            audioClass.play("select");
@@ -421,7 +441,7 @@ public class Menu {
 
             if (playDeluxe && stateManager.getState() == StateManager.State.MENU){
                 audioClass.play(menuMusicName);
-                audioClass.setPitch(menuMusicName, 0.75f);
+                audioClass.setPitch(menuMusicName, musicPitch);
                 audioClass.loop(menuMusicName, true);
                 playDeluxe = false;
             }
@@ -501,6 +521,14 @@ public class Menu {
 
                     catAIText = enemyAIText(catBox);
                     catAITextAlign = enemyAITextAlign(catBox, catAIText);
+
+                    if (shadowButton.getState() == 1) {
+                        mode = "Shadow Rat & Cat";
+                        musicPitch = 0.75f;
+                    } else {
+                        mode = "Monster Rat & Cat";
+                        musicPitch = 1;
+                    }
                 }
             } else {
                 audioClass.stopAllSounds();
@@ -538,8 +566,8 @@ public class Menu {
 
         screenBuffer.begin();
 
-        float r = 0.6f;
-        float b = 1;
+        float r = musicPitch == 0.75f ? 0.6f : 1;
+        float b = musicPitch == 0.75f ? 1 : 0.3f;
 
         //static
         Texture texture = ImageHandler.images.get("Static/Static" + ((int) staticScreen + 1));
@@ -549,17 +577,35 @@ public class Menu {
         batch.setColor(r / 1.5f, 0, b / 1.5f, 0.75f);
         batch.draw(texture, 0, 0);
 
-        //characters
+        int srcFunc = batch.getBlendSrcFunc();
+        int dstFunc = batch.getBlendDstFunc();
 
-        texture = ImageHandler.images.get("menu/cat");
-        float color = 0.5f + catAlpha;
-        batch.setColor(1, 1, 1, color / 2 + 0.5f);
+        if (mode.equals("Monster Rat & Cat")){
+            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_DST_ALPHA);
+        }
+
+        //characters
+        if (mode.equals("Monster Rat & Cat")) {
+            texture = ImageHandler.images.get("menu/cat");
+        } else {
+            texture = ImageHandler.images.get("menu/shadowCat");
+        }
+        batch.setColor(1, 1, 1, 1);
         batch.draw(texture, charactersX + 562, charactersY + 88);
 
-        texture = ImageHandler.images.get("menu/rat");
-        color = 0.5f + ratAlpha;
-        batch.setColor(1, 1, 1, color / 2 + 0.5f);
+        if (mode.equals("Monster Rat & Cat")) {
+            texture = ImageHandler.images.get("menu/rat");
+        } else {
+            texture = ImageHandler.images.get("menu/shadowRat");
+        }
+        batch.setColor(1, 1, 1, 1);
         batch.draw(texture, charactersX + 13, charactersY + 84);
+
+        if (mode.equals("Monster Rat & Cat")){
+            batch.setColor(1, 1, 1, 1);
+            batch.flush();
+            batch.setBlendFunction(srcFunc, dstFunc);
+        }
 
         //character buttons box
         customNightAIBox(batch, r, b);
@@ -570,6 +616,7 @@ public class Menu {
         challengeBoxRender(batch, button2, r, b);
         challengeBoxRender(batch, button3, r, b);
         challengeBoxRender(batch, button4, r, b);
+        if (data.options == 0) challengeBoxRender(batch, shadowButton, r, b);
 
         challengeBoxRender(batch, button5, r, b);
         challengeBoxRender(batch, button6, r, b);
@@ -603,14 +650,13 @@ public class Menu {
 
         menuFontTitle.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         menuFontTitle.setColor(r, 0, b, 1);
-        String text = "Shadow Rat & Cat Remake";
         layoutModeTemp.reset();
-        layoutModeTemp.setText(menuFontTitle, text);
-        menuFontTitle.draw(batch, text, 512 - layoutModeTemp.width / 2, 768 - 18);
+        layoutModeTemp.setText(menuFontTitle, mode);
+        menuFontTitle.draw(batch, mode, 512 - layoutModeTemp.width / 2, 768 - 18);
 
         menuFontLabel.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         menuFontLabel.setColor(r, 0, b, 1);
-        text = "Click to adjust AI";
+        String text = "Click to adjust AI";
         layoutModeTemp.reset();
         layoutModeTemp.setText(menuFontLabel, text);
         menuFontLabel.draw(batch, text, 512 - layoutModeTemp.width / 2, 704);
@@ -633,6 +679,11 @@ public class Menu {
 
         text = data.options == 0 ? "Classic Cat" : data.options == 1 ? "Free Scroll" : "OG Music";
         menuFontHeading.draw(batch, text, button4.x + 40, button4.y + 26);
+
+        if (data.options == 0){
+            text = "Shadow Challenge";
+            menuFontHeading.draw(batch, text, shadowButton.x + 40, shadowButton.y + 26);
+        }
 
         menuFontHeading.draw(batch, "Challenges", button5.x + 40, button5.y + 26);
         menuFontHeading.draw(batch, "Options", button6.x + 40, button6.y + 26);
@@ -769,12 +820,12 @@ public class Menu {
     private static float nightCharacterAlpha(boolean condition2, float alpha){
         if (condition2) {
             if (alpha < 0.5f) {
-                alpha += Gdx.graphics.getDeltaTime() * 4;
-                if (alpha > 0.5f) alpha = 0.5f;
+                alpha += Gdx.graphics.getDeltaTime() * 5;
+                if (alpha > 0.75f) alpha = 0.75f;
             }
         } else {
             if (alpha > 0) {
-                alpha -= Gdx.graphics.getDeltaTime() * 4;
+                alpha -= Gdx.graphics.getDeltaTime() * 5;
                 if (alpha < 0) alpha = 0;
             }
         }
@@ -793,7 +844,7 @@ public class Menu {
             Menu.enemyCase = enemyCase;
             captionAlignment = 1;
             captionPosition[0] = enemyBox.x + (float) enemyBox.width / 2 + charactersX;
-            captionPosition[1] = enemyBox.y - 40 + charactersY;
+            captionPosition[1] = enemyBox.y - 60 + charactersY;
         }
         return enemyBox.getState();
     }
@@ -828,7 +879,13 @@ public class Menu {
     }
 
     private static void renderStar(SpriteBatch batch, Button starButton, int starIndex, Data data){
-        int value = data.saveData.stars[starIndex];
+        int[] stars;
+        if (mode.equals("Monster Rat & Cat")) {
+            stars = data.saveData.ratCatMonsterStars;
+        } else {
+            stars = data.saveData.ratCatShadowStars;
+        }
+        int value = stars[starIndex];
         Texture texture = ImageHandler.images.get("menu/star" + (starIndex < 5 ? "Mini" : ""));
         if (value == 0) batch.setColor(0.5f, 0.5f, 0.5f, 0.5f);
         else if (value == 1) batch.setColor(0.9f, 0, 0.1f, 1);
@@ -876,6 +933,7 @@ public class Menu {
         button2.setState(data.options == 0, data.cassette > 0 ? 1 : 0);
         button3.setState(data.options == 0, data.limitedBattery ? 1 : 0);
         button4.setState(data.options == 0, data.classicCat ? 1 : 0);
+        shadowButton.setState(data.options == 0, data.shadowChallenge ? 1 : 0);
 
         button1.setState(data.options == 1, data.flashDebug ? 1 : 0);
         button2.setState(data.options == 1, data.hitboxDebug ? 1 : 0);

@@ -1,5 +1,7 @@
 package com.fnac3.deluxe.core.data;
 
+import com.fnac3.deluxe.core.state.Menu;
+
 import java.io.*;
 
 public class Data {
@@ -21,13 +23,14 @@ public class Data {
     public int cassette;
     public boolean limitedBattery;
     public boolean classicCat;
+    public boolean shadowChallenge;
 
     public int options;
 
     public SaveData saveData;
 
     //file names
-    private static final String name = "ButBetter_Beta_2";
+    private static final String name = "Reimagined_Beta_1";
     private static final String externalName = "AppData/Roaming/Five Nights at Candy's 3 Deluxe/Save";
     static final String dirName = System.getProperty("user.home") + "/" + externalName;
     private static final String fileName = dirName + "/" + name + ".save";
@@ -37,9 +40,7 @@ public class Data {
     public Data(){
         saveData = new SaveData();
         readSaveFile();
-
         readConfigFile();
-
     }
 
     private void readSaveFile(){
@@ -105,6 +106,7 @@ public class Data {
             cassette = readIntLineConfig(br);
             limitedBattery = readBooleanLineConfig(br);
             classicCat = readBooleanLineConfig(br);
+            shadowChallenge = readBooleanLineConfig(br);
         } catch (IOException e){
             throw new RuntimeException(e);
         }
@@ -136,7 +138,8 @@ public class Data {
                 .append("pointer = ").append(pointer).append("\n")
                 .append("cassette = ").append(cassette).append("\n")
                 .append("limitedBattery = ").append(limitedBattery).append("\n")
-                .append("classicCat = ").append(classicCat).append("\n");
+                .append("classicCat = ").append(classicCat).append("\n")
+                .append("shadowChallenge = ").append(shadowChallenge).append("\n");
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(configFile))){
             bufferedWriter.write(sb.toString());
         } catch (IOException e) {
@@ -144,24 +147,30 @@ public class Data {
         }
     }
 
-    public void writeWin(int difficulty, boolean notCheating){
+    public void writeWin(Data data, int difficulty, boolean notCheating){
         if (notCheating){
-            mode(difficulty);
+            int[] stars;
+            if (Menu.mode.equals("Monster Rat & Cat")) {
+                stars = data.saveData.ratCatMonsterStars;
+            } else {
+                stars = data.saveData.ratCatShadowStars;
+            }
+            mode(difficulty, stars);
         }
         writeModes();
     }
 
-    private void mode(int difficulty){
+    private void mode(int difficulty, int[] stars){
         boolean[] arr = new boolean[]{true, pointer > 0, cassette > 0, limitedBattery, classicCat};
         int starIndex = 0;
         boolean allChallenges = true;
 
         for (boolean b : arr) {
-            if (b) saveData.stars[starIndex] = Math.max(saveData.stars[starIndex], difficulty);
+            if (b) stars[starIndex] = Math.max(stars[starIndex], difficulty);
             else allChallenges = false;
             starIndex++;
         }
-        if (allChallenges) saveData.stars[starIndex] = Math.max(saveData.stars[starIndex], difficulty);
+        if (allChallenges) stars[starIndex] = Math.max(stars[starIndex], difficulty);
     }
 
     private void readModes(){

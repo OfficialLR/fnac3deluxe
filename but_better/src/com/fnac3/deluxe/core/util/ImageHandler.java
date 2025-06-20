@@ -132,7 +132,8 @@ public class ImageHandler {
 
         add("menu/rat");
         add("menu/cat");
-        add("menu/classicCat");
+        add("menu/shadowRat");
+        add("menu/shadowCat");
     }
 
     public static void roomLoad(){

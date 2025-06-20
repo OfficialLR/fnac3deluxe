@@ -62,6 +62,7 @@ public class Game {
     public static String gameoverReason;
     public static float time;
     public static float hour;
+    public static String mode;
     public static int previousHourOfGame;
     public static int hourOfGame;
     public static float purpleSlownessTimer;
@@ -475,7 +476,7 @@ public class Game {
 
         if (hourOfGame == 6) {
             win = true;
-            data.writeWin(Math.min(rat.getDifficulty(), cat.getDifficulty()),
+            data.writeWin(data, Math.min(rat.getDifficulty(), cat.getDifficulty()),
                     rat.isActive() && cat.isActive() &&
                     !data.flashDebug && !data.hitboxDebug && !data.lightDebug);
             audioClass.stopAllSounds();
