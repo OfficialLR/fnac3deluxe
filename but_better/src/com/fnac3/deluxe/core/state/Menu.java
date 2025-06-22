@@ -178,8 +178,13 @@ public class Menu {
             }
         } else if (button3.isHovering()){
             if (challenges){
-                textModifier(TextString.limitedBattery);
-                textCase = 5;
+                if (data.limitedBattery != 2) {
+                    textModifier(TextString.limitedBattery);
+                    textCase = 5;
+                } else {
+                    textModifier(TextString.deadlyBattery);
+                    textCase = 19;
+                }
             } else if (options){
                 textModifier(TextString.timerText);
                 textCase = 6;
@@ -191,8 +196,13 @@ public class Menu {
             }
         } else if (button4.isHovering()){
             if (challenges){
-                textModifier(TextString.classicCatText);
-                textCase = 7;
+                if (data.classicCat != 2) {
+                    textModifier(TextString.classicCatText);
+                    textCase = 7;
+                } else {
+                    textModifier(TextString.hardClassicCatText);
+                    textCase = 20;
+                }
             } else if (options) {
                 textModifier(TextString.freeScrollText);
                 textCase = 8;

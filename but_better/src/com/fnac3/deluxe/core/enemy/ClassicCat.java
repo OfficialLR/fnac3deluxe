@@ -63,7 +63,7 @@ public class ClassicCat extends AbstractEnemy {
                     frame = interval1;
                     setHitbox(data);
                 }
-            } else {
+            } else if (!Player.freeze){
                 if (timer3 > 0) {
                     timer3 -= Gdx.graphics.getDeltaTime();
                     if (timer3 <= 0) timer2 = 1.15f;
