@@ -128,7 +128,7 @@ public class Game {
 
         rat.reset(data, 0, -1, 1, data.RatAI);
         cat.reset(data, 2, Math.random() < 0.5 ? 0 : 2, 1, data.CatAI);
-        classicCat.reset(data, 0, -1, 1, data.classicCat ? 1 : 0);
+        classicCat.reset(data, 0, -1, 1, data.classicCat);
 
         knock.reset();
 

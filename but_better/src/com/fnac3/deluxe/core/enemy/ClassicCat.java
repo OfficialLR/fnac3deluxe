@@ -45,6 +45,17 @@ public class ClassicCat extends AbstractEnemy {
             }
         } else {
             hovered = Player.room == 0 && !Player.turningAround && hitboxCircleCollision();
+
+            if (hovered) {
+                if (difficulty == 2) timer3 = 2.5f;
+                else timer3 = 5;
+                timer2 -= Gdx.graphics.getDeltaTime();
+                if (timer2 <= 0) {
+                    frame -= Gdx.graphics.getDeltaTime() * 90;
+                    setHitbox(data);
+                }
+            }
+
             if ((int) frame < interval1) {
                 if (interval1 == 29) frame += Gdx.graphics.getDeltaTime() * 70;
                 else frame += Gdx.graphics.getDeltaTime() * 35;
@@ -88,16 +99,9 @@ public class ClassicCat extends AbstractEnemy {
                             setJumpscare();
                         }
                         setHitbox(data);
-                        timer1 = 5;
+                        if (type == 1) timer1 = 5;
+                        else timer1 = 6.5f;
                     }
-                }
-            }
-            if (hovered) {
-                timer3 = 5;
-                timer2 -= Gdx.graphics.getDeltaTime();
-                if (timer2 <= 0) {
-                    frame -= Gdx.graphics.getDeltaTime() * 90;
-                    setHitbox(data);
                 }
             }
         }

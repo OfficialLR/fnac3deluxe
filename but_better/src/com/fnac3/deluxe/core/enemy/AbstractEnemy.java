@@ -96,13 +96,14 @@ public abstract class AbstractEnemy {
     }
 
     protected void twitchUpdate(){
-        var time = Gdx.graphics.getDeltaTime() * 30;
+        var time = Gdx.graphics.getDeltaTime() * 25;
         if (hovered) {
             twitchFrame += time;
-            if (twitchFrame >= 2) twitchFrame -= 2;
+            if ((int) twitchFrame >= 2) twitchFrame -= 2;
         } else {
             twitchFrame = 0;
         }
+        if (twitchFrame < 0 || twitchFrame > 2) twitchFrame = 0;
     }
 
 	protected int doorUpdate() {

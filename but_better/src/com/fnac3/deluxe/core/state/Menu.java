@@ -121,7 +121,7 @@ public class Menu {
         button2.update(mx, my);
         button3.update(mx, my);
         button4.update(mx, my);
-        shadowButton.update(mx, my);
+//        shadowButton.update(mx, my);
         button5.update(mx, my);
         button6.update(mx, my);
         button7.update(mx, my);
@@ -178,7 +178,7 @@ public class Menu {
             }
         } else if (button3.isHovering()){
             if (challenges){
-                textModifier(TextString.faultyFlashlight);
+                textModifier(TextString.limitedBattery);
                 textCase = 5;
             } else if (options){
                 textModifier(TextString.timerText);
@@ -287,56 +287,68 @@ public class Menu {
         if (normalStar.isLeftPressed()){
             data.pointer = 0;
             data.cassette = 0;
-            data.limitedBattery = false;
-            data.classicCat = false;
+            data.limitedBattery = 0;
+            data.classicCat = 0;
             writeConfig = true;
         } else if (laserStar.isLeftPressed()){
-            if (data.cassette == 0 && !data.limitedBattery && !data.classicCat) {
-                if (data.pointer == 0 || data.pointer == 3) data.pointer = 1;
+            if (data.pointer == 0) data.pointer = 1;
+            else if (data.cassette == 0 && data.limitedBattery == 0 && data.classicCat == 0) {
+                if (data.pointer == 3) data.pointer = 1;
                 else data.pointer++;
             }
-            if (data.pointer == 0) data.pointer = 1;
             data.cassette = 0;
-            data.limitedBattery = false;
-            data.classicCat = false;
+            data.limitedBattery = 0;
+            data.classicCat = 0;
             writeConfig = true;
         } else if (cassetteStar.isLeftPressed()){
-            if (data.pointer == 0 && !data.limitedBattery && !data.classicCat) {
-                if (data.cassette == 0 || data.cassette == 2) data.cassette = 1;
+            if (data.cassette == 0) data.cassette = 1;
+            else if (data.pointer == 0 && data.limitedBattery == 0 && data.classicCat == 0) {
+                if (data.cassette == 2) data.cassette = 1;
                 else data.cassette++;
             }
-            if (data.cassette == 0) data.cassette = 1;
             data.pointer = 0;
-            data.limitedBattery = false;
-            data.classicCat = false;
+            data.limitedBattery = 0;
+            data.classicCat = 0;
             writeConfig = true;
         } else if (batteryStar.isLeftPressed()){
+            if (data.limitedBattery == 0) data.limitedBattery = 1;
+            else if (data.pointer == 0 && data.cassette == 0 && data.classicCat == 0) {
+                if (data.limitedBattery == 2) data.limitedBattery = 1;
+                else data.limitedBattery++;
+            }
             data.pointer = 0;
             data.cassette = 0;
-            data.limitedBattery = true;
-            data.classicCat = false;
+            data.classicCat = 0;
             writeConfig = true;
         } else if (catStar.isLeftPressed()){
+            if (data.classicCat == 0) data.classicCat = 1;
+            else if (data.pointer == 0 && data.cassette == 0 && data.limitedBattery == 0) {
+                if (data.classicCat == 2) data.classicCat = 1;
+                else data.classicCat++;
+            }
             data.pointer = 0;
             data.cassette = 0;
-            data.limitedBattery = false;
-            data.classicCat = true;
+            data.limitedBattery = 0;
             writeConfig = true;
         } else if (allChallengesStar.isLeftPressed()){
-            if (data.limitedBattery && data.classicCat){
-                if (data.cassette != 0) {
-                    if (data.pointer == 0 || data.pointer == 3) data.pointer = 1;
-                    else data.pointer++;
-                }
-                if (data.pointer != 0) {
-                    if (data.cassette == 0 || data.cassette == 2) data.cassette = 1;
-                    else data.cassette++;
-                }
-            }
-            if (data.pointer == 0) data.pointer = 1;
-            if (data.cassette == 0) data.pointer = 1;
-            data.limitedBattery = true;
-            data.classicCat = true;
+            if (data.pointer > 0 && data.cassette > 0 && data.limitedBattery > 0 && data.classicCat > 0){
+                if (data.pointer == 3) data.pointer = 1;
+                else data.pointer++;
+
+                if (data.cassette == 2) data.cassette = 1;
+                else data.cassette++;
+
+                if (data.limitedBattery == 2) data.limitedBattery = 1;
+                else data.limitedBattery++;
+
+                if (data.classicCat == 2) data.classicCat = 1;
+                else data.classicCat++;
+            } else {
+                if (data.pointer == 0) data.pointer = 1;
+                if (data.cassette == 0) data.cassette = 1;
+                if (data.limitedBattery == 0) data.limitedBattery = 1;
+                if (data.classicCat == 0) data.classicCat = 1;
+             }
             writeConfig = true;
         }
 
@@ -368,12 +380,18 @@ public class Menu {
            else data.muteJumpscare = !data.muteJumpscare;
            writeConfig = true;
        } else if (button3.isLeftPressed()) {
-           if (data.options == 0) data.limitedBattery = !data.limitedBattery;
+           if (data.options == 0) {
+               data.limitedBattery++;
+               if (data.limitedBattery > 2) data.limitedBattery = 0;
+           }
            else if (data.options == 1) data.lightDebug = !data.lightDebug;
            else data.menuMusic = !data.menuMusic;
            writeConfig = true;
        } else if (button4.isLeftPressed()) {
-           if (data.options == 0) data.classicCat = !data.classicCat;
+           if (data.options == 0) {
+               data.classicCat++;
+               if (data.classicCat > 2) data.classicCat = 0;
+           }
            else if (data.options == 1) data.freeScroll = !data.freeScroll;
            else {
                data.ogMusic = !data.ogMusic;
@@ -674,10 +692,14 @@ public class Menu {
                 data.options == 1 ? "Hitbox Debug" : "Mute Jumpscare";
         menuFontHeading.draw(batch, text, button2.x + 40, button2.y + 26);
 
-        text = data.options == 0 ? "Limited Battery" : data.options == 1 ? "Light Room Debug" : "Menu Music";
+        text = data.options == 0 ?
+                (data.limitedBattery == 2 ? "Deadly" : "Limited") + " Battery" :
+                data.options == 1 ? "Light Room Debug" : "Menu Music";
         menuFontHeading.draw(batch, text, button3.x + 40, button3.y + 26);
 
-        text = data.options == 0 ? "Classic Cat" : data.options == 1 ? "Free Scroll" : "OG Music";
+        text = data.options == 0 ?
+                (data.classicCat == 2 ? "Hard " : "") + "Classic Cat" :
+                data.options == 1 ? "Free Scroll" : "OG Music";
         menuFontHeading.draw(batch, text, button4.x + 40, button4.y + 26);
 
         if (data.options == 0){
@@ -931,9 +953,9 @@ public class Menu {
     private static void buttonConfigSync(Data data){
         button1.setState(data.options == 0, data.pointer > 0 ? 1 : 0);
         button2.setState(data.options == 0, data.cassette > 0 ? 1 : 0);
-        button3.setState(data.options == 0, data.limitedBattery ? 1 : 0);
-        button4.setState(data.options == 0, data.classicCat ? 1 : 0);
-        shadowButton.setState(data.options == 0, data.shadowChallenge ? 1 : 0);
+        button3.setState(data.options == 0, data.limitedBattery > 0 ? 1 : 0);
+        button4.setState(data.options == 0, data.classicCat > 0 ? 1 : 0);
+        shadowButton.setState(true, 1);
 
         button1.setState(data.options == 1, data.flashDebug ? 1 : 0);
         button2.setState(data.options == 1, data.hitboxDebug ? 1 : 0);

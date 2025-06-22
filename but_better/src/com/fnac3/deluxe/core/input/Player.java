@@ -25,6 +25,7 @@ public class Player {
     public static boolean batterySound;
     public static boolean flashlightStolen;
     public static float flashlightTimer;
+    public static float flashlightTimerTarget;
     public static float flickerTimer;
     public static float flickerMultiplier;
     public static float flashlightAlpha;
@@ -79,9 +80,13 @@ public class Player {
         batteryAvailable = false;
         flashlightStolen = false;
         flashlightTimer = 0;
-        if (data.limitedBattery){
+
+        if (data.limitedBattery > 0){
             flashlightAlphaVisibility = 0;
             flickerTimer = 0;
+            if (data.limitedBattery == 1) flashlightTimerTarget = 50;
+            else flashlightTimerTarget = 30;
+            flashlightTimer = flashlightTimerTarget;
         } else {
             flashlightAlphaVisibility = 1;
             flashlightAlpha = 1;
@@ -195,7 +200,7 @@ public class Player {
                     (int) my) / 10_000;
 
             if (pixel == -1677) {
-                flashlightTimer = 50;
+                flashlightTimer = 0;
                 batteryAvailable = false;
                 batterySound = true;
             }
@@ -206,22 +211,22 @@ public class Player {
         if (flashlightStolen){
             flashlightAlphaVisibility = 0;
             flickerTimer = 0;
-            flashlightTimer = 0;
+            flashlightTimer = flashlightTimerTarget;
             batteryAvailable = false;
             flashlightAlpha = 0;
-        } else if (data.limitedBattery){
-            if (flashlightTimer > 0) {
-                flashlightTimer -= Gdx.graphics.getDeltaTime();
-                if (flashlightTimer < 0) {
-                    flashlightTimer = 0;
+        } else if (data.limitedBattery > 0){
+            if (flashlightTimer < flashlightTimerTarget) {
+                flashlightTimer += Gdx.graphics.getDeltaTime();
+                if (flashlightTimer > flashlightTimerTarget) {
+                    flashlightTimer = flashlightTimerTarget;
                 }
             }
 
-            if (flashlightTimer <= 40 && !batteryAvailable) {
+            if (flashlightTimer >= 10 && !batteryAvailable) {
                 batteryAvailable = true;
             }
 
-            if (flashlightTimer <= 10) {
+            if (flashlightTimer >= flashlightTimerTarget - 10) {
 
                 if (flashlightTimer > 0) {
                     if (flickerTimer == 0) {
@@ -235,7 +240,7 @@ public class Player {
                 }
             }
 
-            if (flashlightAlphaVisibility < 1 && flashlightTimer != 0) {
+            if (flashlightAlphaVisibility < 1 && flashlightTimer != flashlightTimerTarget) {
                 flashlightAlphaVisibility += Gdx.graphics.getDeltaTime() * 4f;
             }
 

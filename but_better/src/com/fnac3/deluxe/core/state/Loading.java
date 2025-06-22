@@ -61,7 +61,7 @@ public class Loading {
             Game.cat.setDifficulty(data.CatAI);
             Game.cat.setType(1);
 
-            Game.classicCat.setDifficulty(data.classicCat ? 1 : 0);
+            Game.classicCat.setDifficulty(data.classicCat);
             Game.classicCat.setType(1);
 
             ImageHandler.addImages(stateManager);

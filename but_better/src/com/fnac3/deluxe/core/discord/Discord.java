@@ -57,11 +57,11 @@ public class Discord {
             numberOfChallenges++;
         }
 
-        if (data.limitedBattery){
+        if (data.limitedBattery > 0){
             numberOfChallenges++;
         }
 
-        if (data.classicCat){
+        if (data.classicCat > 0){
             numberOfChallenges++;
         }
 

@@ -21,8 +21,8 @@ public class Data {
 
     public int pointer;
     public int cassette;
-    public boolean limitedBattery;
-    public boolean classicCat;
+    public int limitedBattery;
+    public int classicCat;
     public boolean shadowChallenge;
 
     public int options;
@@ -104,8 +104,8 @@ public class Data {
 
             pointer = readIntLineConfig(br);
             cassette = readIntLineConfig(br);
-            limitedBattery = readBooleanLineConfig(br);
-            classicCat = readBooleanLineConfig(br);
+            limitedBattery = readIntLineConfig(br);
+            classicCat = readIntLineConfig(br);
             shadowChallenge = readBooleanLineConfig(br);
         } catch (IOException e){
             throw new RuntimeException(e);
@@ -161,7 +161,7 @@ public class Data {
     }
 
     private void mode(int difficulty, int[] stars){
-        boolean[] arr = new boolean[]{true, pointer > 0, cassette > 0, limitedBattery, classicCat};
+        boolean[] arr = new boolean[]{true, pointer > 0, cassette > 0, limitedBattery > 0, classicCat > 0};
         int starIndex = 0;
         boolean allChallenges = true;
 
