@@ -228,7 +228,7 @@ public class Player {
 
             if (flashlightTimer >= flashlightTimerTarget - 10) {
 
-                if (flashlightTimer > 0) {
+                if (flashlightTimer < flashlightTimerTarget) {
                     if (flickerTimer == 0) {
                         flickerTimer = 0.45f;
                         flickerMultiplier = (1 + random.nextInt(5)) * 0.075f + 0.5f;
@@ -240,7 +240,7 @@ public class Player {
                 }
             }
 
-            if (flashlightAlphaVisibility < 1 && flashlightTimer != flashlightTimerTarget) {
+            if (flashlightAlphaVisibility < 1 && flashlightTimer < flashlightTimerTarget) {
                 flashlightAlphaVisibility += Gdx.graphics.getDeltaTime() * 4f;
             }
 
