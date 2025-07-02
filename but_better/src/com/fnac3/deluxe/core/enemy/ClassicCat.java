@@ -16,7 +16,7 @@ public class ClassicCat extends AbstractEnemy {
         super.reset(data, state, side, type, difficulty);
         interval1 = 0;
         frame = 0;
-        timer1 = 4;
+        timer1 = 3;
         timer2 = 1.15f;
         timer3 = 0;
         setHitbox(data);

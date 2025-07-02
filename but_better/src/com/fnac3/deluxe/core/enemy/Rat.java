@@ -130,18 +130,18 @@ public class Rat extends AbstractEnemy {
                     int chance = (int) (Math.random() * 2);
                     if (side == 0){
                         if (reservedSide == 2) side = 1;
-                        else if (reservedSide == 1) side = 2;
+                        else if (reservedSide == 1 || Game.classicCat.getSide() == 2) side = 2;
                         else side = 1 + chance;
                         audioClass.play("dodgeRight");
                     } else if (side == 1){
-                        if (reservedSide == 0) side = 2;
-                        else if (reservedSide == 2) side = 0;
+                        if (reservedSide == 0 || Game.classicCat.getSide() == 2) side = 2;
+                        else if (reservedSide == 2 || Game.classicCat.getSide() == 0) side = 0;
                         else side = 2 * chance;
                         if (side == 0) audioClass.play("dodgeLeft");
                         else audioClass.play("dodgeRight");
                     } else {
                         if (reservedSide == 0) side = 1;
-                        else if (reservedSide == 1) side = 0;
+                        else if (reservedSide == 1 || Game.classicCat.getSide() == 0) side = 0;
                         else side = chance;
                         audioClass.play("dodgeLeft");
                     }
@@ -176,7 +176,7 @@ public class Rat extends AbstractEnemy {
                 if (Game.cat.getSide() == 0) side = 2;
                 else side = 0;
             }
-            resetBed(1.5f,  9 - multiplier, 1.5f, 12);
+            resetBed(1.5f,  10 - multiplier, 1.5f, 12);
             setHitbox(data);
         } else if (state == 2) {
             logic = bedUpdate(data, audioClass);

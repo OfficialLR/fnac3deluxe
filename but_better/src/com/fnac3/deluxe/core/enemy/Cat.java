@@ -28,7 +28,7 @@ public class Cat extends AbstractEnemy {
         if (state == 1) {
             var time = Gdx.graphics.getDeltaTime();
             var speed = time * 16;
-            logic = attackUpdate(1.6f);
+            logic = attackUpdate(1.5f);
 
             var killTimer = timer1;
             var flashTimer = timer2;
@@ -163,7 +163,7 @@ public class Cat extends AbstractEnemy {
                 float multiple = 1.5f;
                 if (difficulty <= 2) multiple -= 0.25f;
                 if (difficulty <= 1) multiple -= 0.25f;
-                timer2 = 20 - multiplier * multiple;
+                timer2 = 21 - multiplier * multiple;
             }
             logic = bedUpdate(data, audioClass);
 
