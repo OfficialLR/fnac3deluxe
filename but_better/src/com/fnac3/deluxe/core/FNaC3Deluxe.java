@@ -210,7 +210,7 @@ public class FNaC3Deluxe extends ApplicationAdapter implements InputProcessor {
 		ImageHandler.load();
 
 		if (Discord.updateStatus) {
-			Discord.update(data, stateManager.getState().toString(), "Shadow Rat & Cat Remake", Game.hourOfGame,
+			Discord.update(data, stateManager.getState().toString(), Menu.mode, Game.hourOfGame,
 					data.flashDebug || data.hitboxDebug);
 		}
 

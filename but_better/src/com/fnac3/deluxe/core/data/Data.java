@@ -30,7 +30,7 @@ public class Data {
     public SaveData saveData;
 
     //file names
-    private static final String name = "Reimagined_Beta_1";
+    private static final String name = "Reimagined_Beta_2";
     private static final String externalName = "AppData/Roaming/Five Nights at Candy's 3 Deluxe/Save";
     static final String dirName = System.getProperty("user.home") + "/" + externalName;
     private static final String fileName = dirName + "/" + name + ".save";

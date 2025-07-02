@@ -64,7 +64,7 @@ public class Rat extends AbstractEnemy {
 
             var time = Gdx.graphics.getDeltaTime();
             var speed = time * 16;
-            logic = attackUpdate();
+            logic = attackUpdate(1);
 
             var killTimer = timer1;
             var flashTimer = timer2;
@@ -184,7 +184,7 @@ public class Rat extends AbstractEnemy {
             if (logic == 1) {
                 audioClass.play("peek");
                 boolean lookingAway = (Player.side == 0 && side == 2) || (Player.side == 2 && side == 0);
-                if (timer1 < 1.5f && lookingAway) {
+                if ((timer1 < 1.5f || (Game.cat.getState() == 2 && Game.cat.timer1 < 1.5f)) && lookingAway) {
                     state = 3;
                     float killTimer = 1.75f;
                     if (difficulty <= 2) killTimer += 0.75f;

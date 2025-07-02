@@ -16,7 +16,7 @@ public class ClassicCat extends AbstractEnemy {
         super.reset(data, state, side, type, difficulty);
         interval1 = 0;
         frame = 0;
-        timer1 = 5;
+        timer1 = 4;
         timer2 = 1.15f;
         timer3 = 0;
         setHitbox(data);
@@ -47,8 +47,7 @@ public class ClassicCat extends AbstractEnemy {
             hovered = Player.room == 0 && !Player.turningAround && hitboxCircleCollision();
 
             if (hovered) {
-                if (difficulty == 2) timer3 = 2.5f;
-                else timer3 = 5;
+                if (difficulty == 1) timer3 = 5;
                 timer2 -= Gdx.graphics.getDeltaTime();
                 if (timer2 <= 0) {
                     frame -= Gdx.graphics.getDeltaTime() * 90;
@@ -66,8 +65,12 @@ public class ClassicCat extends AbstractEnemy {
             } else if (!Player.freeze){
                 if (timer3 > 0) {
                     timer3 -= Gdx.graphics.getDeltaTime();
-                    if (timer3 <= 0) timer2 = 1.15f;
-                } else {
+                    if (timer3 < 0) timer3 = 0;
+                } else if (!hovered){
+                    if (timer2 < 1.15f) {
+                        timer2 += Gdx.graphics.getDeltaTime();
+                        if (timer2 > 1.15f) timer2 = 1.15f;
+                    }
                     timer1 -= Gdx.graphics.getDeltaTime();
                     if (timer1 <= 0) {
                         if (side == -1) {
@@ -99,8 +102,8 @@ public class ClassicCat extends AbstractEnemy {
                             setJumpscare();
                         }
                         setHitbox(data);
-                        if (type == 1) timer1 = 5;
-                        else timer1 = 6.5f;
+                        if (type == 1) timer1 = 6;
+                        else timer1 = 8;
                     }
                 }
             }
@@ -141,6 +144,8 @@ public class ClassicCat extends AbstractEnemy {
                 hitboxSize = 90;
             }
         }
+
+        hitboxSize = Utils.setHitboxDistance(data, hitboxSize);
     }
 
     @Override

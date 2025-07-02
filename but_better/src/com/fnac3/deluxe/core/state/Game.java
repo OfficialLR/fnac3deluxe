@@ -476,7 +476,19 @@ public class Game {
 
         if (hourOfGame == 6) {
             win = true;
-            data.writeWin(data, Math.min(rat.getDifficulty(), cat.getDifficulty()),
+
+            int difficulty = 0;
+            if (rat.isActive() && cat.isActive()) {
+                difficulty++;
+                if (rat.getDifficulty() == 4 && cat.getDifficulty() == 4) {
+                    difficulty++;
+                    if (Menu.hardcore){
+                        difficulty++;
+                    }
+                }
+            }
+
+            data.writeWin(data, difficulty,
                     rat.isActive() && cat.isActive() &&
                     !data.flashDebug && !data.hitboxDebug && !data.lightDebug);
             audioClass.stopAllSounds();

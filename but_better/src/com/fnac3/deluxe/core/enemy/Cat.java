@@ -28,12 +28,13 @@ public class Cat extends AbstractEnemy {
         if (state == 1) {
             var time = Gdx.graphics.getDeltaTime();
             var speed = time * 16;
-            logic = attackUpdate();
+            logic = attackUpdate(1.6f);
 
             var killTimer = timer1;
             var flashTimer = timer2;
             var healthBar = timer3;
 
+            if (Game.rat.getFrame() > 0 && flashTimer <= 0) flashTimer += Gdx.graphics.getDeltaTime();
             if (logic == 1){
                 if (frame == targetFrame) {
                     boolean clockwise = Math.random() < 0.5f;
@@ -71,13 +72,13 @@ public class Cat extends AbstractEnemy {
 
                     move = false;
                     setHitbox(data);
-                    if (interval1 == 0 || (interval5 < 7 - difficulty && Math.random() < 0.75f)) {
+                    if (interval1 == 0 || (interval5 < 7 - difficulty && Math.random() < 0.65f)) {
                         flashTimer = 0.2f + (int) (Math.random() * 3) * 0.08f;
                         interval1 = difficulty - 1;
                         interval5++;
                     } else {
-                        if (Math.random() < 0.05f) {
-                            flashTimer = 0.01f;
+                        if (Math.random() < 0.1f) {
+                            flashTimer = 0.05f;
                         }
                         interval5 = 0;
                         interval1--;
@@ -85,8 +86,61 @@ public class Cat extends AbstractEnemy {
                 }
             } else if (logic == 2){
                 audioClass.play("thunder");
-                blackout();
-                if (interval2 == 0) audioClass.stop("cat");
+
+                if (interval2 > 0) {
+                    interval2--;
+                    int chance = (int) (Math.random() * 2);
+                    if (side == 0) {
+                        side = 1 + chance;
+                        if (reservedSide == side) {
+                            if (interval4 == 0) interval4++;
+                            else {
+                                if (reservedSide == 2) side = 1;
+                                else side = 2;
+                                interval4 = 0;
+                            }
+                        } else interval4 = 0;
+                    } else {
+                        side = chance;
+                        if (reservedSide == side) {
+                            if (interval4 == 0) interval4++;
+                            else {
+                                if (reservedSide == 0) side = 1;
+                                else side = 0;
+                                interval4 = 0;
+                            }
+                        } else interval4 = 0;
+                    }
+                    reservedSide = side;
+                    float newKillTimer = 1.5f;
+                    if (difficulty <= 3) newKillTimer += 0.5f;
+                    if (difficulty <= 2) newKillTimer += 0.5f;
+                    if (difficulty <= 1) newKillTimer += 0.5f;
+
+                    resetAttack(newKillTimer, 0.4f, 4);
+                    killTimer = timer1;
+                    flashTimer = timer2;
+                    healthBar = timer3;
+                    if (interval3 == 0) {
+                        interval3++;
+                    } else {
+                        position = (int) (1 + (Math.random() * 2));
+                        if (position == 1) frame = 3;
+                        else if (position == 2) frame = 5;
+                        targetFrame = frame;
+                    }
+
+                    interval1 = difficulty - 1;
+                    interval5 = (int) (Math.random() * (7 - difficulty));
+                    setHitbox(data);
+
+                    lock = false;
+                    Player.snapPosition = false;
+                    Player.setBlackness(2, 6, 0);
+                } else {
+                    blackout();
+                    audioClass.stop("cat");
+                }
             } else if (logic == 3){
                 setJumpscare();
             } else if (logic == 4){
@@ -98,63 +152,18 @@ public class Cat extends AbstractEnemy {
             timer3 = healthBar;
 
             if (healthBar > 0 || lock || Player.blacknessTimes > 0) return;
-
-            if (interval2 == 0) {
-                state = 2;
-                Player.setBlackness(Player.blacknessTimes, 1, Player.blacknessDelay);
-                audioClass.play("crawl");
-                side = (int) (Math.random() * 2) * 2;
-                resetBed(1.5f, 20, -1, -1);
-                setHitbox(data);
-            } else {
-                interval2--;
-                int chance = (int) (Math.random() * 2);
-                if (side == 0){
-                    side = 1 + chance;
-                    if (reservedSide == side) {
-                        if (interval4 == 0) interval4++;
-                        else {
-                            if (reservedSide == 2) side = 1;
-                            else side = 2;
-                            interval4 = 0;
-                        }
-                    } else interval4 = 0;
-                } else {
-                    side = chance;
-                    if (reservedSide == side) {
-                        if (interval4 == 0) interval4++;
-                        else {
-                            if (reservedSide == 0) side = 1;
-                            else side = 0;
-                            interval4 = 0;
-                        }
-                    } else interval4 = 0;
-                }
-                reservedSide = side;
-                float newKillTimer = 1.75f;
-                if (difficulty <= 2) newKillTimer += 0.75f;
-                if (difficulty <= 1) newKillTimer += 0.5f;
-
-                resetAttack(newKillTimer, 0.4f, 4);
-                if (interval3 == 0){
-                    interval3++;
-                } else {
-                    position = (int) (1 + (Math.random() * 2));
-                    if (position == 1) frame = 3;
-                    else if (position == 2) frame = 5;
-                    targetFrame = frame;
-                }
-
-                interval1 = difficulty - 1;
-                interval5 = (int) (Math.random() * (7 - difficulty));
-                setHitbox(data);
-            }
+            state = 2;
+            Player.setBlackness(Player.blacknessTimes, 1, Player.blacknessDelay);
+            audioClass.play("crawl");
+            side = (int) (Math.random() * 2) * 2;
+            resetBed(1.5f, 22, -1, -1);
+            setHitbox(data);
         } else if (state == 2) {
             if (Game.rat.isAttack() && timer2 > 8) {
                 float multiple = 1.5f;
                 if (difficulty <= 2) multiple -= 0.25f;
                 if (difficulty <= 1) multiple -= 0.25f;
-                timer2 = 18 - multiplier * multiple;
+                timer2 = 20 - multiplier * multiple;
             }
             logic = bedUpdate(data, audioClass);
 

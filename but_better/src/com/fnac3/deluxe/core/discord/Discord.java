@@ -21,12 +21,7 @@ public class Discord {
         lib = DiscordRPC.INSTANCE;
         String appID = "1126361619094589491";
         DiscordEventHandlers handlers = new DiscordEventHandlers();
-        handlers.ready = new DiscordEventHandlers.OnReady(){
-            @Override
-            public void accept(DiscordUser user) {
-                System.out.println("Ready!");
-            }
-        };
+        handlers.ready = user -> System.out.println("Ready!");
         lib.Discord_Initialize(appID, handlers, true, null);
     }
 

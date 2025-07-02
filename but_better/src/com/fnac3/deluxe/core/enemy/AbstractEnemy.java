@@ -140,7 +140,7 @@ public abstract class AbstractEnemy {
         return returnValue;
 	}
 
-    protected int attackUpdate(){
+    protected int attackUpdate(float attackMultiplier){
         var killTimer = timer1;
         var flashTimer = timer2;
         var healthBar = timer3;
@@ -153,9 +153,9 @@ public abstract class AbstractEnemy {
 
         if (lock) {
             if (!Player.freeze && !move) {
-                if (!hovered) killTimer -= time / 1.3f;
+                if (!hovered) killTimer -= time / 1.4f;
                 else {
-                    killTimer += time;
+                    killTimer += time / attackMultiplier;
                     if (killTimer > 1) killTimer = 1;
                 }
             }
@@ -265,6 +265,10 @@ public abstract class AbstractEnemy {
         timer1 = killTimer;
         timer2 = healthBar;
         return returnValue;
+    }
+
+    public int getFrame() {
+        return (int) frame;
     }
 
 	public float getTimer1() {

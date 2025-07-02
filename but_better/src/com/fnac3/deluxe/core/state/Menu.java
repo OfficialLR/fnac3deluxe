@@ -108,6 +108,8 @@ public class Menu {
 
     private static boolean playDeluxe;
     private static float musicPitch;
+    public static boolean hardcore;
+    private static float extraMusicPitch;
 
     public static void input(float mx, float my, StateManager stateManager, Data data, AudioClass audioClass){
         if (!loaded) return;
@@ -121,7 +123,7 @@ public class Menu {
         button2.update(mx, my);
         button3.update(mx, my);
         button4.update(mx, my);
-//        shadowButton.update(mx, my);
+        shadowButton.update(mx, my);
         button5.update(mx, my);
         button6.update(mx, my);
         button7.update(mx, my);
@@ -247,7 +249,7 @@ public class Menu {
             textCase = 14;
         }
 
-        if (readyButton.isHovering()){
+        if (readyButton.isHovering() && shadowButton.getState() == 1){
             readyAlpha += Gdx.graphics.getDeltaTime() * 2;
             if (readyAlpha > 0.25f) readyAlpha = 0.25f;
         } else {
@@ -255,7 +257,7 @@ public class Menu {
             if (readyAlpha < 0) readyAlpha = 0;
         }
 
-        if (readyButton.isLeftPressed()){
+        if (readyButton.isLeftPressed() && shadowButton.getState() == 1){
             stateManager.setState(StateManager.State.LOADING);
             loaded = false;
         }
@@ -457,6 +459,8 @@ public class Menu {
                 if (whiteAlpha < 0 || whiteAlpha > 1) whiteAlpha = 0;
             }
 
+            hardcore = data.pointer > 1 && data.cassette > 1 && data.classicCat > 1 && data.limitedBattery > 1;
+
             if (ratBox.isStateChanged()){
                 ratAIText = enemyAIText(ratBox);
                 ratAITextAlign = enemyAITextAlign(ratBox, ratAIText);
@@ -469,11 +473,19 @@ public class Menu {
 
             if (playDeluxe && stateManager.getState() == StateManager.State.MENU){
                 audioClass.play(menuMusicName);
-                audioClass.setPitch(menuMusicName, musicPitch);
                 audioClass.loop(menuMusicName, true);
                 playDeluxe = false;
             }
 
+            if (hardcore && extraMusicPitch < 0.19f) {
+                extraMusicPitch += Gdx.graphics.getDeltaTime() / 3;
+                if (extraMusicPitch > 0.19f) extraMusicPitch = 0.19f;
+            } else if (!hardcore && extraMusicPitch > 0){
+                extraMusicPitch -= Gdx.graphics.getDeltaTime() / 3;
+                if (extraMusicPitch < 0) extraMusicPitch = 0;
+            }
+
+            audioClass.setPitch(menuMusicName, musicPitch - extraMusicPitch);
             audioClass.setVolume(menuMusicName, volume * 0.75f);
 
             if (staticScreen >= 0 && staticScreen < 8) {
@@ -920,15 +932,17 @@ public class Menu {
         int value = stars[starIndex];
         Texture texture = ImageHandler.images.get("menu/star" + (starIndex < 5 ? "Mini" : ""));
         if (value == 0) batch.setColor(0.5f, 0.5f, 0.5f, 0.5f);
-        else if (value == 1) batch.setColor(0.9f, 0, 0.1f, 1);
-        else if (value == 2) batch.setColor(0.75f, 0, 1, 1);
-        else if (value == 3) batch.setColor(1, 0.82f, 0, 1);
+        else if (value == 1) {
+            if (starIndex == 0) batch.setColor(0.9f, 0, 0.1f, 1);
+            else batch.setColor(0.7f, 0, 0.9f, 1);
+        }
+        else if (value == 2) batch.setColor(1, 0.82f, 0, 1);
         else batch.setColor(1, 1, 1, 1);
 
         int srcFunc = batch.getBlendSrcFunc();
         int dstFunc = batch.getBlendDstFunc();
 
-        if (value == 4) {
+        if (value == 3) {
             float multiplier = 1;
             if (starIndex < 5) multiplier = 0.525f;
             Texture rainbowTexture = ImageHandler.images.get("menu/rainbow" + (starIndex < 5 ? "Mini" : ""));
@@ -965,7 +979,7 @@ public class Menu {
         button2.setState(data.options == 0, data.cassette > 0 ? 1 : 0);
         button3.setState(data.options == 0, data.limitedBattery > 0 ? 1 : 0);
         button4.setState(data.options == 0, data.classicCat > 0 ? 1 : 0);
-        shadowButton.setState(true, 1);
+        shadowButton.setState(data.options == 0, data.shadowChallenge ? 1 : 0);
 
         button1.setState(data.options == 1, data.flashDebug ? 1 : 0);
         button2.setState(data.options == 1, data.hitboxDebug ? 1 : 0);
