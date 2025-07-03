@@ -222,14 +222,14 @@ public abstract class AbstractEnemy {
         if (Player.room == 2 && (int) Player.turningPosition == 0) {
             if (frame < targetFrame) frame += time * 30;
             if (frame > targetFrame) frame = targetFrame;
-        } else if (frame < targetFrame && (data.cassette > 0 || Player.tape.isPlaying())) {
-            if (tapeTimer > 0) {
-                tapeTimer -= time;
-                if (tapeTimer <= 0) {
-                    Player.tapeWeasel(audioClass);
-                }
+        } else if (frame > 0) frame = targetFrame;
+
+        if (frame < targetFrame && (data.cassette > 0 || Player.tape.isPlaying()) && tapeTimer > 0) {
+            tapeTimer -= time;
+            if (tapeTimer <= 0 && frame == 0) {
+                Player.tapeWeasel(audioClass);
+                tapeTimer = 0;
             }
-            if (frame > 0) frame = targetFrame;
         }
         bedTimer -= time;
 
@@ -274,6 +274,10 @@ public abstract class AbstractEnemy {
 	public float getTimer1() {
 		return timer1;
 	}
+
+    public float getTimer2() {
+        return timer2;
+    }
 
     public int getState() {
 		return state;

@@ -28,13 +28,14 @@ public class Cat extends AbstractEnemy {
         if (state == 1) {
             var time = Gdx.graphics.getDeltaTime();
             var speed = time * 16;
-            logic = attackUpdate(1.5f);
+            logic = attackUpdate(1.35f);
 
             var killTimer = timer1;
             var flashTimer = timer2;
             var healthBar = timer3;
 
-            if (Game.rat.getFrame() > 0 && flashTimer <= 0) flashTimer += Gdx.graphics.getDeltaTime();
+            if (Game.rat.getState() == 0 && Game.rat.getTimer1() <= 0.15f
+                    && healthBar <= 0.25f) healthBar += Gdx.graphics.getDeltaTime();
             if (logic == 1){
                 if (frame == targetFrame) {
                     boolean clockwise = Math.random() < 0.5f;
@@ -112,9 +113,9 @@ public class Cat extends AbstractEnemy {
                         } else interval4 = 0;
                     }
                     reservedSide = side;
-                    float newKillTimer = 1.5f;
+                    float newKillTimer = 1.75f;
                     if (difficulty <= 3) newKillTimer += 0.5f;
-                    if (difficulty <= 2) newKillTimer += 0.5f;
+                    if (difficulty <= 2) newKillTimer += 0.75f;
                     if (difficulty <= 1) newKillTimer += 0.5f;
 
                     resetAttack(newKillTimer, 0.4f, 4);
@@ -160,10 +161,7 @@ public class Cat extends AbstractEnemy {
             setHitbox(data);
         } else if (state == 2) {
             if (Game.rat.isAttack() && timer2 > 8) {
-                float multiple = 1.5f;
-                if (difficulty <= 2) multiple -= 0.25f;
-                if (difficulty <= 1) multiple -= 0.25f;
-                timer2 = 21 - multiplier * multiple;
+                timer2 = 21 - multiplier;
             }
             logic = bedUpdate(data, audioClass);
 
@@ -173,8 +171,8 @@ public class Cat extends AbstractEnemy {
                 if (timer1 < 1.5f && lookingAway) {
                     state = 3;
                     Player.lastCharacterAttack = "Shadow";
-                    float killTimer = 1.75f;
-                    if (difficulty <= 2) killTimer += 0.75f;
+                    float killTimer = 2;
+                    if (difficulty <= 2) killTimer += 0.5f;
                     if (difficulty <= 1) killTimer += 0.5f;
                     resetCrouch(killTimer, 1.5f);
                     setHitbox(data);
