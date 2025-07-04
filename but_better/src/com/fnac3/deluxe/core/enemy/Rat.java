@@ -211,7 +211,7 @@ public class Rat extends AbstractEnemy {
             state = 4;
             audioClass.play("leave");
             Player.setBlackness(Player.blacknessTimes, 1, Player.blacknessDelay);
-            resetDoor(6 - multiplier, 5, true);
+            resetDoor(6 - (float) multiplier / 2, 5, true);
             setHitbox(data);
         } else if (state == 4) {
             frame -= Gdx.graphics.getDeltaTime() * 25;
