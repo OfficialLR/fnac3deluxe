@@ -34,8 +34,9 @@ public class Cat extends AbstractEnemy {
             var flashTimer = timer2;
             var healthBar = timer3;
 
-            if (Game.rat.getState() == 0 && Game.rat.getTimer1() <= 0.15f
-                    && healthBar <= 0.25f) healthBar = 0.25f;
+            if (logic == 2 && interval2 > 0 && Game.rat.getTimer1() <= 0.25f) {
+                logic = 1;
+            }
             if (logic == 1){
                 if (frame == targetFrame) {
                     boolean clockwise = Math.random() < 0.5f;
