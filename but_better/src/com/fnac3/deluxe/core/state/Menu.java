@@ -66,6 +66,7 @@ public class Menu {
     private static int captionWidth;
     private static float textValue;
     private static int captionAlignment;
+    private static boolean captionTextCenter;
 
     private static String menuMusicName;
 
@@ -151,9 +152,11 @@ public class Menu {
             if (challenges){
                 textModifier(TextString.laserPointerText);
                 textCase = 1;
+                captionTextCenter = false;
             } else if (options){
                 textModifier(TextString.flashHPText);
                 textCase = 2;
+                captionTextCenter = false;
             }
             if (textCase != 0) {
                 captionAlignment = 2;
@@ -165,13 +168,16 @@ public class Menu {
                 if (data.cassette != 2) {
                     textModifier(TextString.hardCassetteText);
                     textCase = 3;
+                    captionTextCenter = false;
                 } else {
                     textModifier(TextString.hardcoreCassetteText);
                     textCase = 18;
+                    captionTextCenter = false;
                 }
             } else if (options){
                 textModifier(TextString.hitboxText);
                 textCase = 4;
+                captionTextCenter = false;
             }
             if (textCase != 0) {
                 captionAlignment = 2;
@@ -183,13 +189,16 @@ public class Menu {
                 if (data.limitedBattery != 2) {
                     textModifier(TextString.limitedBattery);
                     textCase = 5;
+                    captionTextCenter = false;
                 } else {
                     textModifier(TextString.deadlyBattery);
                     textCase = 19;
+                    captionTextCenter = false;
                 }
             } else if (options){
                 textModifier(TextString.timerText);
                 textCase = 6;
+                captionTextCenter = false;
             }
             if (textCase != 0) {
                 captionAlignment = 2;
@@ -201,13 +210,16 @@ public class Menu {
                 if (data.classicCat != 2) {
                     textModifier(TextString.classicCatText);
                     textCase = 7;
+                    captionTextCenter = false;
                 } else {
                     textModifier(TextString.hardClassicCatText);
                     textCase = 20;
+                    captionTextCenter = false;
                 }
             } else if (options) {
                 textModifier(TextString.freeScrollText);
                 textCase = 8;
+                captionTextCenter = false;
             }
             if (textCase != 0) {
                 captionAlignment = 2;
@@ -229,24 +241,37 @@ public class Menu {
             captionPosition[1] = allChallengesStar.y + allChallengesStar.height + 20;
         }
 
+        int[] stars;
+        if (mode.equals("Monster Rat & Cat")) {
+            stars = data.saveData.ratCatMonsterStars;
+        } else {
+            stars = data.saveData.ratCatShadowStars;
+        }
+
         if (normalStar.isHovering()){
-            textModifier(mode);
+            textModifier(mode + "\n" + extraText(stars[0]));
             textCase = 9;
+            captionTextCenter = true;
         } else if (laserStar.isHovering()){
-            textModifier(mode + " with Laser Pointer");
+            textModifier(mode + " with Laser Pointer\n" + extraText(stars[1]));
             textCase = 10;
+            captionTextCenter = true;
         } else if (cassetteStar.isHovering()){
-            textModifier(mode + " with Hard Cassette");
+            textModifier(mode + " with Hard Cassette\n" + extraText(stars[2]));
             textCase = 11;
+            captionTextCenter = true;
         } else if (batteryStar.isHovering()){
-            textModifier(mode + " with Limited Battery");
+            textModifier(mode + " with Limited Batteries\n" + extraText(stars[3]));
             textCase = 12;
+            captionTextCenter = true;
         } else if (catStar.isHovering()){
-            textModifier(mode + " with Classic Cat");
+            textModifier(mode + " with Classic Cat\n" + extraText(stars[4]));
             textCase = 13;
+            captionTextCenter = true;
         } else if (allChallengesStar.isHovering()){
-            textModifier(mode + " All Challenges");
+            textModifier(mode + " All Challenges\n" + extraText(stars[5]));
             textCase = 14;
+            captionTextCenter = true;
         }
 
         if (readyButton.isHovering() && shadowButton.getState() == 1){
@@ -262,15 +287,16 @@ public class Menu {
             loaded = false;
         }
 
-        data.RatAI = nightCustomNightAI(audioClass, ratBox, 1, TextString.ratText);
+        data.RatAI = nightCustomNightAI(ratBox, 1, TextString.ratText);
         ratAlpha = nightCharacterAlpha(ratBox.getState() > 0, ratAlpha);
 
-        data.CatAI = nightCustomNightAI(audioClass, catBox, 2, TextString.catText);
+        data.CatAI = nightCustomNightAI(catBox, 2, TextString.catText);
         catAlpha = nightCharacterAlpha(catBox.getState() > 0, catAlpha);
 
         if (infoBox.isHovering()){
             textModifier(TextString.infoText);
             textCase = 16;
+            captionTextCenter = false;
             captionAlignment = 0;
             captionPosition[0] = infoBox.x + infoBox.width;
             captionPosition[1] = infoBox.y - 8;
@@ -278,6 +304,7 @@ public class Menu {
         if (helpBox.isHovering()){
             textModifier(TextString.helpText);
             textCase = 17;
+            captionTextCenter = false;
             captionAlignment = 0;
             captionPosition[0] = helpBox.x + helpBox.width;
             captionPosition[1] = helpBox.y - 8;
@@ -715,7 +742,7 @@ public class Menu {
         menuFontHeading.draw(batch, text, button2.x + 40, button2.y + 26);
 
         text = data.options == 0 ?
-                (data.limitedBattery == 2 ? "Deadly" : "Limited") + " Battery" :
+                (data.limitedBattery == 2 ? "Knock-off" : "Limited") + " Batteries" :
                 data.options == 1 ? "Light Room Debug" : "Menu Music";
         menuFontHeading.draw(batch, text, button3.x + 40, button3.y + 26);
 
@@ -776,7 +803,13 @@ public class Menu {
 
             for (int i = 0; i < textRenderList.size(); i++) {
                 float y = captionPosition[1] - (distance * i) - 10;
-                menuFontCaption.draw(batch, textRenderList.get(i), tempX, y + height);
+                if (captionTextCenter){
+                    layoutModeTemp.reset();
+                    layoutModeTemp.setText(menuFontCaption, textRenderList.get(i));
+                    menuFontCaption.draw(batch, textRenderList.get(i), tempX + (captionWidth - layoutModeTemp.width) / 2, y + height);
+                } else {
+                    menuFontCaption.draw(batch, textRenderList.get(i), tempX, y + height);
+                }
             }
         }
 
@@ -876,7 +909,7 @@ public class Menu {
         return alpha;
     }
 
-    private static int nightCustomNightAI(AudioClass audioClass, Button enemyBox, int enemyCase, String text){
+    private static int nightCustomNightAI(Button enemyBox, int enemyCase, String text){
         if (enemyBox.isLeftPressed() || enemyBox.isRightPressed()){
             enemyBox.setState(enemyBox.isLeftPressed(), Math.min(enemyBox.getState() + 1, 4));
             enemyBox.setState(enemyBox.isRightPressed(), Math.max(enemyBox.getState() - 1, 0));
@@ -885,6 +918,7 @@ public class Menu {
         if (enemyBox.isHovering()) {
             textModifier(text);
             textCase = 15;
+            captionTextCenter = false;
             Menu.enemyCase = enemyCase;
             captionAlignment = 1;
             captionPosition[0] = enemyBox.x + (float) enemyBox.width / 2 + charactersX;
@@ -932,17 +966,18 @@ public class Menu {
         int value = stars[starIndex];
         Texture texture = ImageHandler.images.get("menu/star" + (starIndex < 5 ? "Mini" : ""));
         if (value == 0) batch.setColor(0.5f, 0.5f, 0.5f, 0.5f);
-        else if (value == 1) {
+        else if (value >= 1 && value <= 3) {
             if (starIndex == 0) batch.setColor(0.9f, 0, 0.1f, 1);
             else batch.setColor(0.7f, 0, 0.9f, 1);
         }
-        else if (value == 2) batch.setColor(1, 0.82f, 0, 1);
+        else if (value == 4) batch.setColor(1, 0.82f, 0, 1);
         else batch.setColor(1, 1, 1, 1);
 
         int srcFunc = batch.getBlendSrcFunc();
         int dstFunc = batch.getBlendDstFunc();
+        boolean rainbow = value == 5;
 
-        if (value == 3) {
+        if (rainbow) {
             float multiplier = 1;
             if (starIndex < 5) multiplier = 0.525f;
             Texture rainbowTexture = ImageHandler.images.get("menu/rainbow" + (starIndex < 5 ? "Mini" : ""));
@@ -954,7 +989,7 @@ public class Menu {
 
         batch.draw(texture, starButton.x, starButton.y);
 
-        if (value == 4){
+        if (rainbow){
             batch.flush();
             batch.setBlendFunction(srcFunc, dstFunc);
         }
@@ -997,5 +1032,18 @@ public class Menu {
 
         if (data.ogMusic) menuMusicName = "menu";
         else menuMusicName = "deluxeMenu";
+    }
+
+    private static String extraText(int value){
+        if (value == 0) return "Not Completed";
+        else if (value == 1) return "Easy Completed";
+        else if (value == 2) return "Medium Completed";
+        else if (value == 3) return "Hard Completed";
+        else if (value == 4) {
+            if (shadowButton.getState() == 1) return "Shadow Completed";
+            else return "Monster Completed";
+        } else {
+            return "Hardcore Completed";
+        }
     }
 }

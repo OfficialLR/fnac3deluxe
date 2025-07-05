@@ -477,16 +477,7 @@ public class Game {
         if (hourOfGame == 6) {
             win = true;
 
-            int difficulty = 0;
-            if (rat.isActive() && cat.isActive()) {
-                difficulty++;
-                if (rat.getDifficulty() == 4 && cat.getDifficulty() == 4) {
-                    difficulty++;
-                    if (Menu.hardcore){
-                        difficulty++;
-                    }
-                }
-            }
+            int difficulty = Math.min(Game.rat.getDifficulty(), Game.cat.getDifficulty());
 
             data.writeWin(data, difficulty,
                     rat.isActive() && cat.isActive() &&
@@ -995,7 +986,7 @@ public class Game {
                 batch.draw(texture, position + width, offsety + 110, width * 2 * rect_value, 20);
             }
 
-            if (data.hitboxDebug && !Player.turningAround && !Player.freeze) {
+            if (data.hitboxDebug && !Player.turningAround && Player.room == 0 && !Player.freeze) {
                 batch.setColor(1, 0, 1, 0.25f);
 
                 hitboxRender(batch, rat.getHitboxSize(), rat.getHitbox()[0], rat.getHitbox()[1]);

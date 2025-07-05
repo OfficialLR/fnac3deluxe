@@ -25,7 +25,7 @@ public class Rat extends AbstractEnemy {
 			logic = doorUpdate();
             if (logic == 1){
                 var peekTimer = timer2;
-                int mandatorySide = Game.cat.getState() == 3 || Game.cat.getState() == 1 ? Game.cat.side : -1;
+                int mandatorySide = Game.cat.getState() == 1 ? Game.cat.side : -1;
                 int knockType = peekTimer > 3 ? 1 : 2;
                 float knockTarget = 0.1f + (Math.max(0.065f, 0.05f * peekTimer));
                 if (mandatorySide != -1) side = mandatorySide;
@@ -34,7 +34,7 @@ public class Rat extends AbstractEnemy {
                 setHitbox(data);
                 if (peekTimer > 0.175f) Game.knock.set(side, 3, knockType, knockTarget);
             } else if (logic == 2){
-                timer1 = 6 - multiplier;
+                timer1 = 6 - (float) multiplier / 2;
                 if (Game.cat.isActive() && Game.cat.state == 1) {
                     if (difficulty == 2 && timer2 < 1.5f) timer2 = 1.5f;
                     if (difficulty == 1 && timer2 < 2) timer2 = 2;
@@ -130,19 +130,29 @@ public class Rat extends AbstractEnemy {
                     int chance = (int) (Math.random() * 2);
                     if (side == 0){
                         if (reservedSide == 2) side = 1;
-                        else if (reservedSide == 1 || Game.classicCat.getSide() == 2) side = 2;
-                        else side = 1 + chance;
+                        else if (reservedSide == 1) side = 2;
+                        else {
+                            if (Game.classicCat.getSide() == 2) side = 2;
+                            else side = 1 + chance;
+                        }
                         audioClass.play("dodgeRight");
                     } else if (side == 1){
-                        if (reservedSide == 0 || Game.classicCat.getSide() == 2) side = 2;
-                        else if (reservedSide == 2 || Game.classicCat.getSide() == 0) side = 0;
-                        else side = 2 * chance;
+                        if (reservedSide == 0) side = 2;
+                        else if (reservedSide == 2) side = 0;
+                        else {
+                            if (Game.classicCat.getSide() == 0) side = 0;
+                            else if (Game.classicCat.getSide() == 2) side = 2;
+                            else side = 2 * chance;
+                        }
                         if (side == 0) audioClass.play("dodgeLeft");
                         else audioClass.play("dodgeRight");
                     } else {
                         if (reservedSide == 0) side = 1;
-                        else if (reservedSide == 1 || Game.classicCat.getSide() == 0) side = 0;
-                        else side = chance;
+                        else if (reservedSide == 1) side = 0;
+                        else {
+                            if (Game.classicCat.getSide() == 0) side = 0;
+                            else side = chance;
+                        }
                         audioClass.play("dodgeLeft");
                     }
                     flashTimer = 0.65f - 0.05f * multiplier;

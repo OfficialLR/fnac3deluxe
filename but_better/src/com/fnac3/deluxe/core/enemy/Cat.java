@@ -35,7 +35,7 @@ public class Cat extends AbstractEnemy {
             var healthBar = timer3;
 
             if (Game.rat.getState() == 0 && Game.rat.getTimer1() <= 0.15f
-                    && healthBar <= 0.25f) healthBar += Gdx.graphics.getDeltaTime();
+                    && healthBar <= 0.25f) healthBar = 0.25f;
             if (logic == 1){
                 if (frame == targetFrame) {
                     boolean clockwise = Math.random() < 0.5f;
@@ -161,7 +161,7 @@ public class Cat extends AbstractEnemy {
             setHitbox(data);
         } else if (state == 2) {
             if (Game.rat.isAttack() && timer2 > 8) {
-                timer2 = 21 - multiplier;
+                timer2 = 22 - multiplier;
             }
             logic = bedUpdate(data, audioClass);
 

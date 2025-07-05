@@ -114,7 +114,7 @@ public abstract class AbstractEnemy {
         var speed = time * 25;
         int returnValue = 0;
 
-        if (hitboxCircleCollision() && (int) frame == 13) {
+        if (hitboxCircleCollision() && (int) frame == 13 && !Player.turningAround && Player.room == 0) {
             returnValue = 2;
         }
 
@@ -147,7 +147,7 @@ public abstract class AbstractEnemy {
         var time = Gdx.graphics.getDeltaTime();
         int returnValue = 0;
 
-        if (lock) hovered = hitboxCircleCollision();
+        if (lock) hovered = hitboxCircleCollision() && Player.room == 0 && !Player.turningAround;
 
         twitchUpdate();
 
@@ -249,7 +249,7 @@ public abstract class AbstractEnemy {
         int returnValue = 0;
 
         if (healthBar > 0) {
-            hovered = hitboxCircleCollision();
+            hovered = hitboxCircleCollision() && Player.room == 0 && !Player.turningAround;
 
             if (!hovered){
                 killTimer -= time;

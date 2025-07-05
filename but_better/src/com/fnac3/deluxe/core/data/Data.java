@@ -30,7 +30,7 @@ public class Data {
     public SaveData saveData;
 
     //file names
-    private static final String name = "Reimagined_Beta_2";
+    private static final String name = "Reimagined_Beta_3";
     private static final String externalName = "AppData/Roaming/Five Nights at Candy's 3 Deluxe/Save";
     static final String dirName = System.getProperty("user.home") + "/" + externalName;
     private static final String fileName = dirName + "/" + name + ".save";
@@ -161,16 +161,31 @@ public class Data {
     }
 
     private void mode(int difficulty, int[] stars){
-        boolean[] arr = new boolean[]{true, pointer > 0, cassette > 0, limitedBattery > 0, classicCat > 0};
-        int starIndex = 0;
-        boolean allChallenges = true;
+        boolean allChallenges = pointer > 0 && cassette > 0 && limitedBattery > 0 && classicCat > 0;
 
-        for (boolean b : arr) {
-            if (b) stars[starIndex] = Math.max(stars[starIndex], difficulty);
-            else allChallenges = false;
-            starIndex++;
-        }
-        if (allChallenges) stars[starIndex] = Math.max(stars[starIndex], difficulty);
+        int starValue = difficulty;
+        if (difficulty == 4 && (pointer >= 2 || cassette >= 2 || limitedBattery >= 2 || classicCat >= 2)) starValue++;
+        stars[0] = Math.max(stars[0], starValue);
+
+        starValue = pointer > 0 ? difficulty : 0;
+        if (difficulty == 4 && pointer >= 2) starValue++;
+        stars[1] = Math.max(stars[1], starValue);
+
+        starValue = cassette > 0 ? difficulty : 0;
+        if (difficulty == 4 && cassette >= 2) starValue++;
+        stars[2] = Math.max(stars[2], starValue);
+
+        starValue = limitedBattery > 0 ? difficulty : 0;
+        if (difficulty == 4 && limitedBattery >= 2) starValue++;
+        stars[3] = Math.max(stars[3], starValue);
+
+        starValue = classicCat > 0 ? difficulty : 0;
+        if (difficulty == 4 && classicCat >= 2) starValue++;
+        stars[4] = Math.max(stars[4], starValue);
+
+        starValue = allChallenges ? difficulty : 0;
+        if (difficulty == 4 && pointer >= 2 && cassette >= 2 && limitedBattery >= 2 && classicCat >= 2) starValue++;
+        stars[5] = Math.max(stars[5], starValue);
     }
 
     private void readModes(){
