@@ -36,6 +36,8 @@ public class Cat extends AbstractEnemy {
 
             if (logic == 2 && interval2 > 0 && Game.rat.getTimer1() <= 0.25f) {
                 logic = 1;
+                move = true;
+                hovered = false;
             }
             if (logic == 1){
                 if (frame == targetFrame) {

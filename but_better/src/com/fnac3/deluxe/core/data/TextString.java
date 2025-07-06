@@ -2,7 +2,7 @@ package com.fnac3.deluxe.core.data;
 
 public class TextString {
 
-    private static final String version = "Beta v1.0.12";
+    private static final String version = "Beta v1.0.13";
 
     public static String ratText = "Rat comes from the doors. Flashing him scares him away. Once he gets in, "
             + "he will wait to begin his attack. He also teleports while attacking. Afterwards, he will go "
